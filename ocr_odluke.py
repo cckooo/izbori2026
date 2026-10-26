@@ -236,9 +236,9 @@ def ocr_page(args):
     except Exception:
         pass
     out, score = ocr_oriented(img, rot, script)
-    if score < 0:
-        # tabela je nađena, a teksta skoro nema: OSD je verovatno pogrešio rotaciju, probaj ostale
-        for r2 in ((rot + 90) % 360, (rot + 270) % 360):
+    if score < 0 or out.get("pouzdanost", 100) < 60:
+        # malo teksta ili nečitljiv tekst: OSD je verovatno pogrešio rotaciju (i naopako), probaj ostale
+        for r2 in ((rot + 90) % 360, (rot + 180) % 360, (rot + 270) % 360):
             o2, s2 = ocr_oriented(img, r2, script)
             if s2 > score:
                 out, score = o2, s2
@@ -277,6 +277,7 @@ def ocr_oriented(img, rot, script):
             words, script, conf = w2, "Cyrillic", c2
     out = assemble(words, cells, clean, grid, pytesseract, rot, script)
     out["nagib"] = round(sk, 2)
+    out["pouzdanost"] = round(conf, 1)
     letters = sum(len(re.findall(r"[^\W\d_]", w[4])) for w in words)
     nrows = sum(1 for e in out["elementi"] if e[1] == "r")
     score = letters * conf / 100
