@@ -1,11 +1,11 @@
 IZVEŠTAJ O SPAJANJU ODLUKA O BIRAČKIM MESTIMA SA REZULTATIMA
 Ukupno biračkih mesta u CSV-u: 8392
-Spojeno (naselja upisana): 8078 (96.3%), od toga samo po broju uz potvrđenu numeraciju: 159, po nazivu između potvrđenih suseda (broj nije pročitan): 89
+Spojeno (naselja upisana): 8094 (96.4%), od toga samo po broju uz potvrđenu numeraciju: 160, po nazivu između potvrđenih suseda (broj nije pročitan): 90
 Opština bez odluke ili bez pročitanih redova: 0 mesta
-Mesto nije nađeno u odluci (OCR nije pročitao broj ili red): 263
+Mesto nije nađeno u odluci (OCR nije pročitao broj ili red): 247
 Odbijeno zbog nepoklapanja naziva: 51
-Provera položaja u odluci (red nije između susednih mesta): 4 slučajeva, od toga ostavljeno prazno: 4
-Naselje prema spisku RZS (Popis 2022): potvrđeno 6871, od toga OCR ispravki 78; gradsko naselje opštine 1015; nepotvrđeno 11; bez spiska (Kosovo, inostranstvo, zavodi) 181
+Provera položaja u odluci (red nije između susednih mesta): 5 slučajeva, od toga ostavljeno prazno: 4
+Naselje prema spisku RZS (Popis 2022): potvrđeno 6886, od toga OCR ispravki 78; gradsko naselje opštine 1016; nepotvrđeno 11; bez spiska (Kosovo, inostranstvo, zavodi) 181
 
 DOKUMENTI (način čitanja, opštine, broj pročitanih mesta):
   ocr  Ада / Odluka o određivanju biračkih mesta za izbor narodnih poslanika raspisanih za 25 oktobar 2026..pdf: Ада; zapisa 27, sa brojem 25
@@ -139,7 +139,7 @@ DOKUMENTI (način čitanja, opštine, broj pročitanih mesta):
   ocr  Мало Црниће / ОДЛУКА О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА НА ТЕРИТОРИЈИ ОПШТИНЕ МАЛО ЦРНИЋЕ.pdf: Мало Црниће; zapisa 29, sa brojem 29
   ocr  Мајданпек / Одлука о одређивању бирачких места на територији општине Мајданпек .pdf: Мајданпек; zapisa 41, sa brojem 41
   ocr  Медвеђа / Одлука о одређивању бирачких места на територији општине Медвеђа.pdf: Медвеђа; zapisa 49, sa brojem 48
-  ocr  Мерошина / Одлука о одређивању БМ на територији општине Мерошина.pdf: Мерошина; zapisa 7, sa brojem 7
+  ocr  Мерошина / Одлука о одређивању БМ на територији општине Мерошина.pdf: Мерошина; zapisa 24, sa brojem 24
   ocr  Мионица / Odluka o odredjivanju birackih mesta na teritoriji opstine Mionica.pdf: Мионица; zapisa 38, sa brojem 38
   ocr  Младеновац / Odluka o odredjivanju birackih mesta na teritoriji GO Mladenovac.pdf: Градска општина Младеновац; zapisa 40, sa brojem 38
   ocr  Неготин / Odluka biracka mesta.pdf: Неготин; zapisa 72, sa brojem 71
@@ -234,7 +234,7 @@ DOKUMENTI (način čitanja, opštine, broj pročitanih mesta):
   ocr  Трстеник / Odluka o odredjivanju birackih mesta 17 09 26.pdf: Трстеник; zapisa 52, sa brojem 50
   ocr  Тутин / doc00668620261007120148.pdf: Тутин; zapisa 2, sa brojem 2
   ocr  Тутин / ОДЛУКА О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА НА ТЕРИТОРИЈИ  ОПШТИНЕ ТУТИН.pdf: Тутин; zapisa 61, sa brojem 61
-  ocr  Уб / Уб Oдлука смањенpdf.pdf: Уб; zapisa 53, sa brojem 53
+  ocr  Уб / Уб Oдлука смањенpdf.pdf: Уб; zapisa 53, sa brojem 52
   ocr  Ужице / Odluka o izmenama BM.pdf: Град Ужице, Градска општина Севојно; zapisa 10, sa brojem 5
   ocr  Ужице / Odluka o izmeni Odluke o BM.pdf: Град Ужице, Градска општина Севојно; zapisa 1, sa brojem 1
   ocr  Ужице / Odluka.pdf: Град Ужице, Градска општина Севојно; zapisa 89, sa brojem 89
@@ -550,8 +550,9 @@ PO OPŠTINAMA:
 [21/21] Осечина
     BM 13: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „ЗГРАДА МАГАЦИНА "РОРОВОКМА ЕКШСНТ"“ / CSV „ЗГРАДА МАГАЦИНА "PODGORINA FRUCHT"“
 [51/52] Уб
-    BM 13: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „Ва аи“ / CSV „ОСНОВНА ШКОЛА“
-    BM 24 (ОСНОВНА ШКОЛА): odbijeno, naziv u odluci „УНА“ (sličnost 33, potvrda numeracije 94%)
+    BM 13: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „Ва аи“ / CSV „ОСНОВНА ШКОЛА“
+    BM 24: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „УНА“ / CSV „ОСНОВНА ШКОЛА“
+    BM 28 (ОСНОВНА ШКОЛА): nije nađeno u odluci
 [41/41] Аранђеловац
     BM 2: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „УШ Ш Ш“ / CSV „ОШ "СВЕТИ САВА"“
     BM 7: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „ПН АНА“ / CSV „ОШ "ИЛИЈА ГАРАШАНИН"“
@@ -690,7 +691,10 @@ PO OPŠTINAMA:
     BM 67 (ДОМ КУЛТУРЕ): nije nađeno u odluci
 [18/18] Ћићевац
     BM 1: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „“ / CSV „КЛУБ ПЕНЗИОНЕРА“
-[47/47] Велика Плана
+[44/47] Велика Плана
+    BM 3 (ОШ "ЦЕНТАР"): nije nađeno u odluci
+    BM 5 (ОШ "ЦЕНТАР"): nije nađeno u odluci
+    BM 6 (МЕСНА ЗАЈЕДНИЦА): odbijeno, naziv u odluci „зоо =гором—п»>ЕАМ 2олћ- ог т: о. оз по. ко= Ала И у => зе Рт о а ад У»тљ»фФољ»ог О 2 = «5 5 Р- 5: о О " ~ љ~ = 5 оз (о сл о - = 57>% а ~ •· Сви = у с“: њи 5: о-л»-" о ПАЗ тај ~: ПО РО О: Ке ле [о ДРУМ др 65“ ~ ~ од» о ~ со = то Р»> пгозљ ИЕ 0- ома ЈЕ а ~ јео — о 25597 РИМ И и ва ој = о ~ > 98 ОР љ гл >РЗа Ц 25 ма КО => = со сл ~ о ~ љоо ~ по = 9 шоља пе од = = Е — = Мо лло за: Ф ~ „ - – % о 5 о - =. = (> О др • =. ~ ДЕ ај ~ ~ ~ — о о ~ [ој Гоз Ро: ~ [7] а м~ ~ ~ с ~ = о том то - > ~ ~ о сло: лом сл — = сл. — ува ~ 5 2895 22: ~ ~ 895 828 о У = = У: ~ ~ су ~ 5 > У Си У ~ ~ осом со сл КЕ“ (sličnost 33, potvrda numeracije 96%)
 [77/78] Град Смедерево
     BM 4 (ПЛАНИНАРСКО ДРУШТВО "ЧЕЛИК"): odbijeno, naziv u odluci „и а“ (sličnost 33, potvrda numeracije 99%)
 [48/49] Смедеревска Паланка
@@ -774,28 +778,9 @@ PO OPŠTINAMA:
     BM 86 (ДОМ КУЛТУРЕ): nije nađeno u odluci
 [31/31] Гаџин Хан
 [37/37] Дољевац
-[4/26] Мерошина
-    BM 5 (ДОМ КУЛТУРЕ): nije nađeno u odluci
-    BM 6 (ОСНОВНА ШКОЛА): nije nađeno u odluci
-    BM 7 (ОСНОВНА ШКОЛА): nije nađeno u odluci
-    BM 8 (ДОМ КУЛТУРЕ): nije nađeno u odluci
-    BM 9 (СТАРА ШКОЛА): nije nađeno u odluci
-    BM 10 (МЕСНА ЗАЈЕДНИЦА): nije nađeno u odluci
-    BM 11 (ДОМ КУЛТУРЕ): nije nađeno u odluci
-    BM 12 (ОСНОВНА ШКОЛА): nije nađeno u odluci
-    BM 13 (ДОМ КУЛТУРЕ): nije nađeno u odluci
-    BM 14 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+[23/26] Мерошина
     BM 15 (ОСНОВНА ШКОЛА): nije nađeno u odluci
-    BM 16 (ДОМ КУЛТУРЕ): nije nađeno u odluci
-    BM 17 (ОСНОВНА ШКОЛА): nije nađeno u odluci
-    BM 18 (ДОМ КУЛТУРЕ): nije nađeno u odluci
-    BM 19 (ДОМ КУЛТУРЕ): nije nađeno u odluci
-    BM 20 (ОСНОВНА ШКОЛА): nije nađeno u odluci
-    BM 21 (ДОМ КУЛТУРЕ): nije nađeno u odluci
     BM 22 (ЗГРАДА МЕСНЕ ЗАЈЕДНИЦЕ): nije nađeno u odluci
-    BM 23 (ОСНОВНА ШКОЛА): nije nađeno u odluci
-    BM 24 (ОСНОВНА ШКОЛА): nije nađeno u odluci
-    BM 25 (ОСНОВНА ШКОЛА): nije nađeno u odluci
     BM 26 (МЕСНА ЗАЈЕДНИЦА): nije nađeno u odluci
 [21/21] Ражањ
 [42/42] Сврљиг
