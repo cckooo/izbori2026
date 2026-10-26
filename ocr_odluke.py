@@ -13,8 +13,9 @@ Izlaz: rik_ocr/<opstina>__<fajl>.json  ->
   {"izvor","nacin","strane":[{"rot","pismo","elementi":[[y,"t",linija] | [y,"r",[ćelije]]]}]}
 Već obrađeni fajlovi se preskaču (obriši JSON da se ponovo obradi).
 
-Pokretanje:  python ocr_odluke.py [broj_procesa] [--deo i n]
+Pokretanje:  python ocr_odluke.py [broj_procesa] [--deo i n] [--ponovi]
   --deo i n  obradi samo i-ti od n delova (0..n-1), podeljenih po broju strana (GitHub Actions matrica)
+  --ponovi   ponovo obradi samo sumnjive strane (tabela bez teksta) u već gotovim JSON fajlovima
 """
 import json
 import os
@@ -225,6 +226,21 @@ def ocr_page(args):
         script = re.search(r"Script: (\w+)", osd).group(1)
     except Exception:
         pass
+    out, score = ocr_oriented(img, rot, script)
+    if score < 0:
+        # tabela je nađena, a teksta skoro nema: OSD je verovatno pogrešio rotaciju, probaj ostale
+        for r2 in ((rot + 90) % 360, (rot + 270) % 360):
+            o2, s2 = ocr_oriented(img, r2, script)
+            if s2 > score:
+                out, score = o2, s2
+    return out
+
+
+def ocr_oriented(img, rot, script):
+    """OCR strane okrenute za `rot` stepeni. Vraća (izlaz, ocena); ocena < 0 = sumnjivo malo teksta."""
+    import numpy as np
+    import pytesseract
+    from PIL import Image
     if rot:
         img = img.rotate(-rot, expand=True)
     sk = skew_angle(np.array(img))
@@ -235,6 +251,7 @@ def ocr_page(args):
     cells, grid = find_cells(gray)
     clean = gray.copy()
     clean[grid > 0] = 255  # brišemo linije tabele pre OCR-a
+
     def read(lang):
         d = pytesseract.image_to_data(Image.fromarray(clean), lang=lang, config=f"{TD} --psm 4",
                                       output_type=pytesseract.Output.DICT)
@@ -248,10 +265,15 @@ def ocr_page(args):
         # OSD često proglasi ćirilicu latinicom (ОСНОВНА -> "OCHOBHA"): probaj i ćirilicu, uzmi pouzdanije
         w2, c2 = read("srp")
         if c2 > conf:
-            words, script = w2, "Cyrillic"
+            words, script, conf = w2, "Cyrillic", c2
     out = assemble(words, cells, clean, grid, pytesseract, rot, script)
     out["nagib"] = round(sk, 2)
-    return out
+    letters = sum(len(re.findall(r"[^\W\d_]", w[4])) for w in words)
+    nrows = sum(1 for e in out["elementi"] if e[1] == "r")
+    score = letters * conf / 100
+    if len(cells) >= 8 and letters < 25 * nrows + 100:
+        score -= 10 ** 6
+    return out, score
 
 
 def assemble(words, cells, clean, grid, pytesseract, rot, script):
@@ -291,9 +313,37 @@ def assemble(words, cells, clean, grid, pytesseract, rot, script):
     return {"rot": rot, "pismo": script, "elementi": items}
 
 
+def suspicious(page) -> bool:
+    """Strana sa tabelom, a skoro bez teksta (pogrešna rotacija)."""
+    rows = [e[2] for e in page["elementi"] if e[1] == "r"]
+    txt = " ".join(" ".join(e[2]) if e[1] == "r" else e[2] for e in page["elementi"])
+    return sum(len(r) for r in rows) >= 8 and len(re.findall(r"[^\W\d_]", txt)) < 25 * len(rows) + 100
+
+
+def redo(nproc):
+    """Ponovo obradi samo sumnjive strane u već gotovim JSON fajlovima."""
+    jobs = []
+    for jf in sorted(OUT.glob("*.json")):
+        d = json.loads(jf.read_text(encoding="utf-8"))
+        if d["nacin"] == "ocr":
+            jobs += [(jf, HERE / d["izvor"], i) for i, p in enumerate(d["strane"]) if suspicious(p)]
+    print(f"Sumnjivih strana: {len(jobs)}", flush=True)
+    with Pool(nproc) as pool:
+        res = pool.map(ocr_page, [(f, i, "ocr") for _, f, i in jobs], chunksize=1)
+    for (jf, _, i), r in zip(jobs, res):
+        d = json.loads(jf.read_text(encoding="utf-8"))
+        d["strane"][i] = r
+        jf.write_text(json.dumps(d, ensure_ascii=False), encoding="utf-8")
+        print("  ", jf.stem[:60], "str.", i + 1, "->", "i dalje sumnjiva" if suspicious(r) else "popravljena")
+
+
 def main():
     import pypdfium2 as pdfium
     args = sys.argv[1:]
+    if "--ponovi" in args:
+        args.remove("--ponovi")
+        redo(int(args[0]) if args else 2)
+        return
     part = None
     if "--deo" in args:
         k = args.index("--deo")

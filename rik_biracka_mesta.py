@@ -33,7 +33,10 @@ SKIP = re.compile(r"ЗАПИСНИК|РЕШЕЊЕ О ИСПРАВЦИ ТЕХНИ
 
 
 def safe(name: str) -> str:
-    return re.sub(r"[^\w\-. ()]+", "_", name).strip()[:100] or "x"
+    """Bezbedno ime fajla; skraćuje se osnova, ekstenzija ostaje."""
+    p = Path(name)
+    stem = re.sub(r"[^\w\-. ()]+", "_", p.stem).strip()[:100] or "x"
+    return stem + re.sub(r"[^\w.]+", "", p.suffix)
 
 
 def http(url: str, tries: int = 4) -> bytes:

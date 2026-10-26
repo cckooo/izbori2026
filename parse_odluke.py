@@ -106,16 +106,17 @@ def doc_targets(folder: str, fname: str, title: str, text: str, ops: dict) -> li
         return FAMILIES[fk]
     exact = [o for o in ops if op_key(o) == fk and "палилула" not in o.lower()]
     okrug = ops[exact[0]]["okrug"] if exact else ""
-    # dokument iz fascikle jedne opštine koji se odnosi na drugu (Kosovo: Gnjilane, K. Mitrovica, Priština, Peć, Gora)
-    if okrug.split("/")[0].startswith("Регион Косова") or fk in ("gora",):
-        cand = [o for o in ops if ops[o]["okrug"].split("/")[0].startswith("Регион Косова")]
-        hay = asc(fname + " " + title)
+    # dokument iz fascikle jedne opštine koji se odnosi na drugu (Kosovo: Gnjilane, K. Mitrovica, Priština, Peć, Gora):
+    # opština iz imena fajla ima prednost nad fasciklom
+    if okrug.split("/")[0].startswith("Регион Косово") or fk in ("gora",):
+        cand = [o for o in ops if ops[o]["okrug"].split("/")[0].startswith("Регион Косово")]
+        hay = asc(fname)
         best, score = None, 0
         for o in cand:
             k = op_key(o)
-            s = fuzz.partial_ratio(k, hay) if len(k) > 3 else (100 if re.search(rf"\b{k}\b", hay) else 0)
-            if s > score:
-                best, score = o, s
+            s = fuzz.partial_ratio(k, hay) if len(k) > 4 else (100 if re.search(rf"\b{k}\b", hay) else 0)
+            if s > score or (s == score and best and len(k) > len(op_key(best))):
+                best, score = o, s  # duže ime pobeđuje ("kosovska kamenica" pre "kosovo")
         if best and score >= 85:
             return [best]
         # naziv opštine u tekstu odluke ("на територији општине ...")
@@ -128,7 +129,7 @@ def doc_targets(folder: str, fname: str, title: str, text: str, ops: dict) -> li
 
 
 # ------------------------------------------------------------------ tabela -> zapisi
-HDR = {"br": r"^(р\.?\s*б|ред|бр|r\.?\s*b|red|br|број|broj)\b",
+HDR = {"br": r"^(р\.?\s*б|ред|бр|r\.?\s*b|red|br)",
        "naziv": r"назив|naziv",
        "adresa": r"адрес|adres",
        "podr": r"подручј|područ|podruc|обухват|obuhvat|бирачи из|birači iz|улиц|ulic|насељ|naselj|сел[оа]|sel[oa]"}
@@ -137,9 +138,13 @@ HDR = {"br": r"^(р\.?\s*б|ред|бр|r\.?\s*b|red|br|број|broj)\b",
 def header_roles(cells):
     """Ako je red zaglavlje tabele, vraća ulogu svake kolone; inače None."""
     low = [c.lower() for c in cells]
-    if any(len(c) > 120 for c in cells) or any(parse_num(c) is not None for c in cells if c):
-        return None  # zaglavlje nema dug tekst ni redni broj
+    if any(len(c) > 120 for c in cells):
+        return None  # zaglavlje nema dug tekst (a "Ред. бр." čitač cifara često pročita kao "6.")
     if not any(re.search(HDR["naziv"], c) for c in low) and not any(re.search(r"подручј|podru", c) for c in low):
+        return None
+    # bar dve kratke ćelije sa ključnim rečima (red podataka može slučajno da sadrži "назив" ili "подручју")
+    kw = r"назив|naziv|адрес|adres|подручј|područ|podruc|обухват|obuhvat"
+    if sum(1 for c in low if re.search(kw, c) and len(c) < 70) < 2:
         return None
     roles = []
     for i, c in enumerate(low):
@@ -155,9 +160,13 @@ def header_roles(cells):
             roles.append("podr")
         else:
             roles.append("?")
+    if roles[0] == "?" and "naziv" in roles[1:2]:
+        roles[0] = "br"  # prva kolona ispred naziva je redni broj
     # podeljeno zaglavlje ("НАЗИВ БИРАЧКОГ" / "МЕСТА"): neprepoznata kolona posle broja je naziv
     if "naziv" not in roles and "?" in roles[1:]:
         roles[roles.index("?", 1)] = "naziv"
+    if "podr" not in roles and roles[-1] == "?":
+        roles[-1] = "podr"  # nečitljiv naslov poslednje kolone: to je područje
     if "adresa" not in roles and "naziv" in roles and "?" in roles[roles.index("naziv"):]:
         roles[roles.index("?", roles.index("naziv"))] = "adresa"
     return roles if "podr" in roles or "naziv" in roles else None
@@ -200,6 +209,9 @@ def clean_naselja(s):
     s = re.sub(r",\s*[„“\"_–—|~]+\s*(?=\w)", ", ", s)  # ",„Војвођанска"  ", _ Рибарска"
     s = re.sub(r"\s+[_|~]+\s+", " ", s)
     s = re.sub(r"\s{2,}", " ", s)
+    # OCR čita ćirilično "бб" (bez broja) kao "66"; ispravljamo samo jednoznačne slučajeve
+    s = re.sub(r"(улице|ulice)\s*66\b", r"\1 бб", s, flags=re.I)
+    s = re.sub(r"(\d+\s*-\s*\d+\s+и)\s+66(?=\s*[,.;)]|\s*$)", r"\1 бб", s)
     return s[:1].upper() + s[1:] if s else s
 
 
@@ -207,14 +219,17 @@ def extract_records(doc, targets):
     """Iz elemenata dokumenta vadi zapise {br, naziv, adresa, naselja, cilj}."""
     recs, roles, cur_target = [], None, (targets[0] if len(targets) == 1 else None)
     target_keys = [(t, op_key(t)) for t in targets]
-    for pg in doc["strane"]:
+    for pno, pg in enumerate(doc["strane"], 1):
         for y, kind, val in pg["elementi"]:
+            filled = [c for c in val if c.strip()] if kind == "r" else [val]
+            if len(targets) > 1 and len(filled) == 1 and len(filled[0]) < 80:
+                # naslov odeljka ("1.2. ГРАДСКА ОПШТИНА ПАЛИЛУЛА"), kao linija teksta ili red sa jednom ćelijom
+                a = asc(filled[0])
+                hit = [t for t, k in target_keys if re.search(rf"\b{re.escape(k.split(' (')[0])}\b", a)]
+                if hit:
+                    cur_target = hit[0]
+                    continue
             if kind == "t":
-                if len(targets) > 1:  # naslov odeljka: "ГРАДСКА ОПШТИНА МЕДИЈАНА"
-                    a = asc(val)
-                    for t, k in target_keys:
-                        if re.search(rf"\b{re.escape(k.split(' (')[0])}\b", a) and len(a) < 80:
-                            cur_target = t
                 continue
             cells = [c.strip() for c in val]
             while len(cells) > 1 and not cells[-1] and (not roles or len(cells) > len(roles)):
@@ -253,9 +268,10 @@ def extract_records(doc, targets):
             if cont:
                 continue
             recs.append({"br": num, "naziv": clean(f["naziv"]), "adresa": clean(f["adresa"]),
-                         "naselja": f["podr"], "cilj": cur_target, "imaBr": "br" in r})
-    for r in recs:
+                         "naselja": f["podr"], "cilj": cur_target, "imaBr": "br" in r, "str": pno})
+    for i, r in enumerate(recs):
         r["naselja"] = clean_naselja(r["naselja"])
+        r["i"] = i  # redosled u odluci (za dodelu između potvrđenih suseda)
     # broj koji OCR nije pročitao ili je pročitao pogrešno: između k i k+2 je k+1
     for i, r in enumerate(recs):
         if r["imaBr"] and 0 < i < len(recs) - 1:
@@ -315,7 +331,7 @@ def main():
         w.writerows(out_rows)
 
     # ---- spajanje
-    naselja, rep = {}, []
+    naselja, rep, detalji = {}, [], []
     stats = defaultdict(int)
     for op, info in ops.items():
         cands = by_op.get(op, [])
@@ -338,25 +354,73 @@ def main():
             key = (s >= 70, t, s)
             if k not in best or key > best[k][0]:
                 best[k] = (key, s, src, r)
-        miss_reasons = []
+        miss_reasons, acc, why = [], {}, {}
         for k, nm in sorted(info["bm"].items()):
             if k not in best:
-                miss_reasons.append(f"BM {k} ({nm}): nije nađeno u odluci")
-                stats["nije_nadjeno"] += 1
+                why[k] = f"BM {k} ({nm}): nije nađeno u odluci"
                 continue
             _, s, src, r = best[k]
             blank = len(name_key(r["naziv"])) < 3 and not r.get("izveden")  # OCR nije pročitao naziv
             if s >= 70 or (ok_share >= 0.8 and (s >= 35 or blank)):
-                naselja.setdefault(op, {})[str(k)] = r["naselja"]
-                stats["spojeno"] += 1
-                if s < 70:
-                    stats["spojeno_po_broju"] += 1
-                    miss_reasons.append(f"BM {k}: spojeno po broju (numeracija potvrđena {ok_share:.0%}), "
-                                        f"naziv se razlikuje: odluka „{r['naziv']}“ / CSV „{nm}“")
+                acc[k] = (src, r, s, "broj")
             else:
-                stats["odbijeno"] += 1
-                miss_reasons.append(f"BM {k} ({nm}): odbijeno, naziv u odluci „{r['naziv']}“ "
-                                    f"(sličnost {s:.0f}, potvrda numeracije {ok_share:.0%})")
+                why[k] = (f"BM {k} ({nm}): odbijeno, naziv u odluci „{r['naziv']}“ "
+                          f"(sličnost {s:.0f}, potvrda numeracije {ok_share:.0%})")
+        # drugi prolaz: mesto bez pročitanog broja traži se po nazivu, samo među redovima odluke
+        # koji stoje između dva već potvrđena suseda (redosled u odluci prati redosled mesta)
+        used = {(src, r["i"]) for src, r, _, _ in acc.values()}
+        by_src = defaultdict(list)
+        for _, src, r in cands:
+            by_src[src].append(r)
+        for k in sorted(why):
+            nm = info["bm"][k]
+            lo = max((j for j in acc if j < k), default=None)
+            hi = min((j for j in acc if j > k), default=None)
+            srcs = {acc[j][0] for j in (lo, hi) if j is not None}
+            if len(srcs) != 1:
+                continue
+            src = srcs.pop()
+            if lo is not None and acc[lo][0] == src:
+                i0 = acc[lo][1]["i"]
+            else:
+                i0 = acc[hi][1]["i"] - (hi - k) - 2
+            if hi is not None and acc[hi][0] == src:
+                i1 = acc[hi][1]["i"]
+            else:
+                i1 = acc[lo][1]["i"] + (k - lo) + 2
+            win = sorted((r for r in by_src[src] if i0 < r["i"] < i1 and r["naselja"]), key=lambda r: r["i"])
+            pick, ps = None, 0
+            if lo is not None and hi is not None and acc[lo][0] == acc[hi][0] == src and len(win) == hi - lo - 1:
+                # u prozoru je tačno onoliko redova koliko mesta nedostaje: red po poziciji, naziv mora da se slaže
+                r = win[k - lo - 1]
+                if (src, r["i"]) not in used:
+                    pick, ps = r, name_sim(r["naziv"] + " " + r["adresa"], nm)
+            else:
+                sc = sorted(((name_sim(r["naziv"] + " " + r["adresa"], nm), r) for r in win
+                             if (src, r["i"]) not in used), key=lambda x: -x[0])
+                # samo nedvosmislen kandidat (npr. ne bira se jedna od više "ОСНОВНА ШКОЛА")
+                if sc and (len(sc) == 1 or sc[0][0] - sc[1][0] >= 10):
+                    ps, pick = sc[0]
+            if pick and ps >= 70:
+                acc[k] = (src, pick, ps, "redosled")
+                used.add((src, pick["i"]))
+                del why[k]
+        for k, nm in sorted(info["bm"].items()):
+            if k in why:
+                miss_reasons.append(why[k])
+                stats["odbijeno" if "odbijeno" in why[k] else "nije_nadjeno"] += 1
+                continue
+            src, r, s, how = acc[k]
+            naselja.setdefault(op, {})[str(k)] = r["naselja"]
+            detalji.append({"opstina": op, "bm": k, "csv_naziv": nm, "naziv": r["naziv"], "slicnost": round(s),
+                            "izvor": src.as_posix(), "strana": r["str"], "naselja": r["naselja"], "nacin": how})
+            stats["spojeno"] += 1
+            if how == "redosled":
+                stats["spojeno_po_redosledu"] += 1
+            elif s < 70:
+                stats["spojeno_po_broju"] += 1
+                miss_reasons.append(f"BM {k}: spojeno po broju (numeracija potvrđena {ok_share:.0%}), "
+                                    f"naziv se razlikuje: odluka „{r['naziv']}“ / CSV „{nm}“")
         n_ok = len(naselja.get(op, {}))
         rep.append(f"[{n_ok}/{len(info['bm'])}] {op}" + ("" if not miss_reasons else ""))
         rep += ["    " + x for x in miss_reasons]
@@ -366,7 +430,8 @@ def main():
         "IZVEŠTAJ O SPAJANJU ODLUKA O BIRAČKIM MESTIMA SA REZULTATIMA",
         f"Ukupno biračkih mesta u CSV-u: {total}",
         f"Spojeno (naselja upisana): {stats['spojeno']} ({stats['spojeno'] / total:.1%}), "
-        f"od toga samo po broju uz potvrđenu numeraciju: {stats['spojeno_po_broju']}",
+        f"od toga samo po broju uz potvrđenu numeraciju: {stats['spojeno_po_broju']}, "
+        f"po nazivu između potvrđenih suseda (broj nije pročitan): {stats['spojeno_po_redosledu']}",
         f"Opština bez odluke ili bez pročitanih redova: {stats['bez_odluke']} mesta",
         f"Mesto nije nađeno u odluci (OCR nije pročitao broj ili red): {stats['nije_nadjeno']}",
         f"Odbijeno zbog nepoklapanja naziva: {stats['odbijeno']}",
@@ -380,6 +445,7 @@ def main():
                     f"zapisa {len(recs)}, sa brojem {nb}{flag}")
     head += ["", "PO OPŠTINAMA:"]
     (HERE / "izvestaj_spajanja.txt").write_text("\n".join(head + rep) + "\n", encoding="utf-8")
+    (HERE / "spajanje_detalji.json").write_text(json.dumps(detalji, ensure_ascii=False, indent=0), encoding="utf-8")
     print("\n".join(head[:7]))
 
     if "--html" in sys.argv:
