@@ -10,3 +10,7 @@ ocr_log.txt
 # CSV rezultata sa RIK-a (update.py ga skida sam)
 *_26.10.2026.csv
 *_26_10_2026_*.csv
+ocr_*log.txt
+spajanje_detalji.json
+rik_ocr_lokalno_staro/
+G2023*.pdf

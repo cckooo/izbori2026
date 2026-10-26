@@ -215,6 +215,81 @@ def clean_naselja(s):
     return s[:1].upper() + s[1:] if s else s
 
 
+def load_rzs():
+    """Zvanična naselja (Popis 2022, naselja_rzs.csv): op_key(opština) -> [(ime, osnovno ime, gradsko, stan, pun)]."""
+    f = HERE / "naselja_rzs.csv"
+    ref = defaultdict(list)
+    if f.exists():
+        for r in csv.DictReader(open(f, encoding="utf-8")):
+            base = re.sub(r"\s*\(.*\)$", "", r["naselje"])  # "Београд (Врачар)" -> "Београд"
+            ref[op_key(r["opstina"])].append((r["naselje"], base, r["gradsko"] == "1",
+                                             int(r["stanovnika"] or 0) or None, int(r["punoletnih"] or 0) or None))
+    return ref
+
+
+def official(name, cands, cut=88):
+    """Zvanično ime naselja za dati tekst (tačno ili blisko, jednoznačno), inače None."""
+    k = asc(name)
+    for c in cands:
+        if asc(c[1]) == k:
+            return c[1]
+    sc = sorted(((fuzz.ratio(k, asc(c[1])), c) for c in cands), key=lambda x: -x[0])
+    if sc and sc[0][0] >= cut and (len(sc) == 1 or sc[0][0] - sc[1][0] >= 8):
+        return sc[0][1][1]
+    return None
+
+
+def canon_naselje(nas, op, ref, stats, area=""):
+    """Ime naselja iz odluke -> zvanično ime iz popisa (ili isto, ako se ne može potvrditi)."""
+    cands = ref.get(op_key(op))
+    if not cands or not nas:
+        stats["naselje_bez_spiska"] += 1
+        return nas
+    # područje koje počinje selima ("Набоје и Шипче", "Горња Бејашница, Горња Топоница, …") ima prednost
+    # nad mestom iz adrese biračkog mesta; bar pola prvih stavki mora biti zvanično naselje
+    t = re.sub(r"^(насељено место|насеље|мз|месна заједница|за насељено место)\s+", "", area.strip(), flags=re.I)
+    items = [re.sub(r"[\s\d\-–/.,:;()]+$", "", x).strip() for x in re.split(r",|;|:|\s+и\s+|\s+i\s+", t)][:6]
+    items = [x for x in items if x]
+    hits = [h for h in (official(x, cands) for x in items) if h]
+    if items and len(hits) * 2 >= len(items):
+        stats["naselje_potvrdjeno"] += 1
+        return " и ".join(dict.fromkeys(hits))
+    parts = [p.strip() for p in re.split(r",|\s+и\s+|\s+i\s+", nas) if p.strip()]
+    fixed = []
+    for p in parts:
+        k = asc(p)
+        exact = [c for c in cands if asc(c[1]) == k]
+        if exact:
+            fixed.append(exact[0][1])
+            continue
+        sc = sorted(((fuzz.ratio(k, asc(c[1])), c) for c in cands), key=lambda x: -x[0])
+        if sc and sc[0][0] >= 85 and (len(sc) == 1 or sc[0][0] - sc[1][0] >= 8):
+            fixed.append(sc[0][1][1])
+            stats["naselje_ispravljeno"] += 1
+            continue
+        fixed.append(None)
+    if all(fixed):
+        stats["naselje_potvrdjeno"] += 1
+        return " и ".join(dict.fromkeys(fixed))
+    if any(fixed):
+        stats["naselje_potvrdjeno"] += 1  # deo imena je potvrđen (ostalo su zaseoci, delovi naselja)
+        return " и ".join(dict.fromkeys(f for f in fixed if f))
+    # tekst sadrži ime zvaničnog naselja ("Сакуле Трг Маршала" -> Сакуле)
+    full = asc(nas)
+    inside = [c for c in cands if len(c[1]) > 3 and re.search(rf"\b{re.escape(asc(c[1]))}\b", full)]
+    if inside:
+        stats["naselje_potvrdjeno"] += 1
+        return max(inside, key=lambda c: len(c[1]))[1]
+    # nije zvanično naselje (ime opštine iz adrese, ulica): najveće gradsko naselje opštine
+    # (Vождовац -> Београд, Ада -> Ада); to su gradska biračka mesta čije područje odluka daje samo ulicama
+    urban = sorted((c for c in cands if c[2]), key=lambda c: -(c[3] or 0))
+    if urban:
+        stats["naselje_gradsko"] += 1
+        return urban[0][1]
+    stats["naselje_nepotvrdjeno"] += 1
+    return nas
+
+
 def nice(s):
     """"СТАРО ГЛОГОВЦЕ" -> "Старо Глоговце"; tekst koji nije sav velikim slovima ostaje."""
     s = s.strip(" .,;:-–")
@@ -375,6 +450,13 @@ def main():
 
     # ---- spajanje
     naselja, rep, detalji = {}, [], []
+    ref = load_rzs()
+    # broj stanovnika po naselju (Popis 2022) za opštine iz CSV-a: {opština: {naselje: [stanovnika, punoletnih]}}
+    stanovnici = {}
+    for op in ops:
+        for _, base, _, st, pun in ref.get(op_key(op), []):
+            if st:
+                stanovnici.setdefault(op, {})[base] = [st, pun]
     stats = defaultdict(int)
     for op, info in ops.items():
         cands = by_op.get(op, [])
@@ -471,6 +553,7 @@ def main():
                 continue
             src, r, s, how = acc[k]
             nas, ul = split_area(r["naselja"], r["adresa"], op)
+            nas = canon_naselje(nas, op, ref, stats, r["naselja"])
             naselja.setdefault(op, {})[str(k)] = [nas, ul]
             detalji.append({"opstina": op, "bm": k, "csv_naziv": nm, "naziv": r["naziv"], "slicnost": round(s),
                             "izvor": src.as_posix(), "strana": r["str"], "naselje": nas, "naselja": r["naselja"],
@@ -498,6 +581,10 @@ def main():
         f"Odbijeno zbog nepoklapanja naziva: {stats['odbijeno']}",
         f"Provera položaja u odluci (red nije između susednih mesta): {stats['popravljen_polozaj']} "
         f"slučajeva, od toga ostavljeno prazno: {stats['polozaj_prazno']}",
+        f"Naselje prema spisku RZS (Popis 2022): potvrđeno {stats['naselje_potvrdjeno']}, od toga OCR ispravki "
+        f"{stats['naselje_ispravljeno']}; gradsko naselje opštine {stats['naselje_gradsko']}; "
+        f"nepotvrđeno {stats['naselje_nepotvrdjeno']}; bez spiska (Kosovo, inostranstvo, zavodi) "
+        f"{stats['naselje_bez_spiska']}",
         "",
         "DOKUMENTI (način čitanja, opštine, broj pročitanih mesta):",
     ]
@@ -517,6 +604,11 @@ def main():
         html, n = re.subn(r"^const NASELJA=.*;(?=\r?$)", lambda _: line, html, count=1, flags=re.M)
         if n != 1:
             raise SystemExit("Nema linije `const NASELJA=...;` u HTML-u")
+        line2 = "const STANOVNICI=" + json.dumps(stanovnici, ensure_ascii=False, separators=(",", ":")) + ";"
+        html, n = re.subn(r"^const STANOVNICI=.*;(?=\r?$)", lambda _: line2, html, count=1, flags=re.M)
+        if n != 1:  # prvi put: nova linija odmah posle NASELJA
+            html = re.sub(r"^(const NASELJA=.*;)(\r?\n)", lambda m: m.group(1) + m.group(2) + line2 + m.group(2),
+                          html, count=1, flags=re.M)
         HTML.write_bytes(html.encode("utf-8"))
         print("NASELJA upisana u", HTML.name)
 

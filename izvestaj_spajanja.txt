@@ -1,0 +1,919 @@
+IZVEŠTAJ O SPAJANJU ODLUKA O BIRAČKIM MESTIMA SA REZULTATIMA
+Ukupno biračkih mesta u CSV-u: 8392
+Spojeno (naselja upisana): 8078 (96.3%), od toga samo po broju uz potvrđenu numeraciju: 159, po nazivu između potvrđenih suseda (broj nije pročitan): 89
+Opština bez odluke ili bez pročitanih redova: 0 mesta
+Mesto nije nađeno u odluci (OCR nije pročitao broj ili red): 263
+Odbijeno zbog nepoklapanja naziva: 51
+Provera položaja u odluci (red nije između susednih mesta): 4 slučajeva, od toga ostavljeno prazno: 4
+Naselje prema spisku RZS (Popis 2022): potvrđeno 6871, od toga OCR ispravki 78; gradsko naselje opštine 1015; nepotvrđeno 11; bez spiska (Kosovo, inostranstvo, zavodi) 181
+
+DOKUMENTI (način čitanja, opštine, broj pročitanih mesta):
+  ocr  Ада / Odluka o određivanju biračkih mesta za izbor narodnih poslanika raspisanih za 25 oktobar 2026..pdf: Ада; zapisa 27, sa brojem 25
+  ocr  Александровац / Одлука о одређивању бирачких места на територији општине Александровац.pdf: Александровац; zapisa 61, sa brojem 61
+  ocr  Алексинац / odluka o izmeni odluke o birackim metima.pdf: Алексинац; zapisa 5, sa brojem 4
+  ocr  Алексинац / Измена Одлуке за бирачка места.pdf: Алексинац; zapisa 1, sa brojem 1
+  ocr  Алексинац / Одлука о одређивању бирачких места.pdf: Алексинац; zapisa 88, sa brojem 88
+  ocr  Алибунар / Одлука о одређивању бирачких места на територији општине Алибунар за изборе 25.10.2026.pdf: Алибунар; zapisa 24, sa brojem 23
+  ocr  Апатин / Odluka o određivanju biračkih mesta.pdf: Апатин; zapisa 29, sa brojem 29
+  ocr  Аранђеловац / Одлука о бирачким местима на територији општине Аранђеловац.pdf: Аранђеловац; zapisa 41, sa brojem 41
+  ocr  Ариље / skenirana odluka o birackim mestima OIKA.pdf: Ариље; zapisa 28, sa brojem 28
+  ocr  Бабушница / Odluka o izmeni Odluke o odredjivanju birackih mesta.pdf: Бабушница; zapisa 1, sa brojem 1
+  ocr  Бабушница / Odluka o odredjivanju birackih mesta parlamentarni 2026 бабуш.pdf: Бабушница; zapisa 41, sa brojem 41
+  ocr  Барајево / ОДЛУКА О ИЗМЕНИ ОДЛУКЕ О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА НА ТЕРИТОРИЈИ ГО БАРАЈЕВО.pdf: Градска општина Барајево; zapisa 2, sa brojem 1
+  ocr  Барајево / ОДЛУКА О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА НА ТЕРИТОРИЈИ ГО БАРАЈЕВО.pdf: Градска општина Барајево; zapisa 30, sa brojem 28
+  ocr  Баточина / БАТОЧИНА - ОДЛУКА О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА.pdf: Баточина; zapisa 19, sa brojem 19
+  ocr  Бач / Odluka o određivanju BM - opština Bač.pdf: Бач; zapisa 25, sa brojem 25
+  ocr  Бачка Паланка / Одлука о одређивању бирачких места.pdf: Бачка Паланка; zapisa 43, sa brojem 43
+  ocr  Бачка Топола / odluka o odredj bir mesta u opstini backa topola.pdf: Бачка Топола; zapisa 51, sa brojem 51
+  ocr  Бачки Петровац / Одлука о одређивању бирачких места - коначно.pdf: Бачки Петровац; zapisa 11, sa brojem 11
+  ocr  Бајина Башта / бирачка места.pdf: Бајина Башта; zapisa 53, sa brojem 51
+  ocr  Бела Паланка / Odluka o odredjivanju birackih mesta.pdf: Бела Паланка; zapisa 36, sa brojem 34
+  ocr  Бела Паланка / ОДЛУКА О ИЗМЕНИ ОДЛУКЕ О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА.pdf: Бела Паланка; zapisa 1, sa brojem 1
+  ocr  Бела Црква / одлука о одређивању бирачких места БЦ.pdf: Бела Црква; zapisa 19, sa brojem 19
+  ocr  Беочин / Odluka  dopuna 2026.pdf: Беочин; zapisa 0, sa brojem 0  <-- ništa nije pročitano
+  ocr  Беочин / Odluka biracka mesta 2026.pdf: Беочин; zapisa 16, sa brojem 16
+  ocr  Беочин / Odluka o izmeni odluke za odredjivanje bm 2026.pdf: Беочин; zapisa 0, sa brojem 0  <-- ništa nije pročitano
+  ocr  Бечеј / Odluka o određivanju biračkih mesta na teritoriji opštine Bečej.pdf: Бечеј; zapisa 38, sa brojem 38
+  ocr  Блаце / Одлука о одређивању бирачких места на територији општине Блаце.pdf: Блаце; zapisa 28, sa brojem 12
+  ocr  Богатић / ОДЛУКА О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА ОПШТИНА БОГАТИЋ.PDF: Богатић; zapisa 31, sa brojem 30
+  ocr  Бор / Odluka o odredjivanju BM na teritoriji grada Bora za glasanje 25.10.2026..pdf: Град Бор; zapisa 48, sa brojem 48
+  ocr  Босилеград / Odluka o doređivanju biračkih mesta Bosilegrad 2026.pdf: Босилеград; zapisa 31, sa brojem 31
+  ocr  Бојник / Одлука о одређивању БМ на територији општине Бојник.pdf: Бојник; zapisa 24, sa brojem 24
+  ocr  Бољевац / Одлука о одређивању бирачких места на територији општине Бољевац.pdf: Бољевац; zapisa 37, sa brojem 37
+  ocr  Брус / ОДЛУКА о одређивању бирачких места на територији општине Брус 2.pdf: Брус; zapisa 28, sa brojem 28
+  ocr  Бујановац / CamScanner 18.09.2026. 12.05.pdf: Бујановац; zapisa 59, sa brojem 59
+  ocr  Варварин / Odluka o odredjivanju BM za Varvarin.pdf: Варварин; zapisa 40, sa brojem 40
+  ocr  Ваљево / Odluka.pdf: Град Ваљево; zapisa 104, sa brojem 103
+  ocr  Велика Плана / Одлука  о одређивању бирачких места на теритирији општине Велика Плана.pdf: Велика Плана; zapisa 49, sa brojem 48
+  ocr  Велико Градиште / Одлука о одређивању бирачких места.pdf: Велико Градиште; zapisa 31, sa brojem 31
+  ocr  Владимирци / ODLUKA O BIRACKIM ODBORIMA.pdf: Владимирци; zapisa 34, sa brojem 34
+  ocr  Владичин Хан / IMG_0001.pdf: Владичин Хан; zapisa 52, sa brojem 51
+  ocr  Власотинце / Odluka o izmeni Odluke o određivanju biračkih mesta na teritoriji opštine Vlasotince.pdf: Власотинце; zapisa 1, sa brojem 1
+  ocr  Власотинце / Odluka o određivanju biračkih mesta na teritoriji opštine Vlasotince.pdf: Власотинце; zapisa 58, sa brojem 58
+  ocr  Вождовац / odluka o birackum mestima 1.pdf: Градска општина Вождовац; zapisa 107, sa brojem 107
+  ocr  Вождовац / исправка одлуке.pdf: Градска општина Вождовац; zapisa 2, sa brojem 2
+  ocr  Врачар / Одлука о одређивању бирачких места на територији ГО Врачар за гласање на изборима за народне послани.pdf: Градска општина Врачар; zapisa 63, sa brojem 63
+  ocr  Врање / Одлука о одређивању БМ 2026.pdf: Град Врање; zapisa 113, sa brojem 112
+  ocr  Врбас / ODLUKA BIRAČKA MESTA VRBAS.pdf: Врбас; zapisa 36, sa brojem 36
+  ocr  Вршац / VRSAC - BIRACKA MESTA 2026_0001.pdf: Град Вршац; zapisa 55, sa brojem 54
+  ocr  Врњачка Бања / Одлука БМ.pdf: Врњачка Бања; zapisa 37, sa brojem 37
+  ocr  Гаџин Хан / Одлуку о одређивању бирчких места на територију општине Гаџин Хан.pdf: Гаџин Хан; zapisa 31, sa brojem 31
+  ocr  Голубац / Одлука о одређивању бирачких места 2026..pdf: Голубац; zapisa 30, sa brojem 30
+  ocr  Гора / BM Gora.pdf: Гора; zapisa 3, sa brojem 3
+  ocr  Гора / BM Orahovac.pdf: Ораховац; zapisa 1, sa brojem 1
+  ocr  Гора / BM Prizren.pdf: Призрен; zapisa 1, sa brojem 1
+  ocr  Гора / Odluka o odredjivanju BM na teritoriji opstine Gora.pdf: Гора; zapisa 0, sa brojem 0  <-- ništa nije pročitano
+  ocr  Горњи Милановац / Одлука о бирачким местима на територији општине гм.pdf: Горњи Милановац; zapisa 67, sa brojem 67
+  ocr  Гроцка / ОДЛУКА О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА НА ТЕРИТОРИЈИ ГРАДСКЕ ОПШТИНЕ ГРОЦКА ЗА ГЛАСАЊЕ НА ИЗБОРИМА 25.ОК.pdf: Градска општина Гроцка; zapisa 55, sa brojem 52
+  ocr  Гњилане / Gnjilane.pdf: Гњилане; zapisa 4, sa brojem 4
+  ocr  Гњилане / Kosovska Kamenica.pdf: Косовска Каменица; zapisa 4, sa brojem 4
+  ocr  Гњилане / Novo Brdo.pdf: Ново Брдо; zapisa 1, sa brojem 1
+  ocr  Гњилане / Odluka o odredjivanju BM na teritorije opptine Vitina.pdf: Витина; zapisa 1, sa brojem 1
+  ocr  Гњилане / Odluka o odredjivanju BM na teritoriji opstine Gnjilane.pdf: Гњилане; zapisa 9, sa brojem 9
+  ocr  Гњилане / Odluka o odredjivanju BM na teritoriji opstine Kosovska Kamenica.pdf: Косовска Каменица; zapisa 9, sa brojem 9
+  ocr  Гњилане / Odluka o odredjivanju BM na teritoriji opstine Novo Brdo.pdf: Ново Брдо; zapisa 1, sa brojem 1
+  ocr  Гњилане / Vitina.pdf: Витина; zapisa 1, sa brojem 1
+  ocr  Деспотовац / Odluka o dređivanju BM na teritoriji opštine Despotovac.pdf: Деспотовац; zapisa 44, sa brojem 44
+  ocr  Димитровград / Одлука о одређивању бирачких места Димитровград.pdf: Димитровград; zapisa 23, sa brojem 23
+  ocr  Дољевац / odluka o odredjivanju birackih mesta.pdf: Дољевац; zapisa 37, sa brojem 37
+  ocr  Жабари / SCAN0112.PDF: Жабари; zapisa 35, sa brojem 35
+  ocr  Жабаљ / Odluka o dopuni odluke-odredjivanje bm.pdf: Жабаљ; zapisa 1, sa brojem 1
+  ocr  Жабаљ / Одлука о одређивању бирачких места у општини Жабаљ.pdf: Жабаљ; zapisa 30, sa brojem 30
+  ocr  Жагубица / Одлука о одређивању бирачких места жагубица.pdf: Жагубица; zapisa 18, sa brojem 18
+  ocr  Житиште / ОДЛУКА О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА НА ТЕРИТОРИЈИ ОПШТИНЕ ЖИТИШТЕ НП.PDF: Житиште; zapisa 31, sa brojem 31
+  ocr  Житорађа / Odluka o određivanju biračkih mesta na teritoriji opštine Žitorađa.pdf: Житорађа; zapisa 27, sa brojem 27
+  ocr  Зајечар / Odluka зајечар.pdf: Град Зајечар; zapisa 49, sa brojem 49
+  ocr  Звездара / Odluka o ispravci odlukе o određivanju BM na teritoriji GO Zvezdara.pdf: Градска општина Звездара; zapisa 2, sa brojem 2
+  pdf  Звездара / БМ ОДЛУКА скен.pdf: Градска општина Звездара; zapisa 100, sa brojem 100
+  ocr  Земун / Одлука о другој измени Одлуке о одређивању БМ на територији ГО Земун.pdf: Градска општина Земун; zapisa 1, sa brojem 1
+  ocr  Земун / ОДЛУКА О ИЗМЕНИ ОДЛУКЕ О ОДРЕЂИВАЊУ БМ - ГО ЗЕМУН.pdf: Градска општина Земун; zapisa 1, sa brojem 1
+  ocr  Земун / Одлука о одређивању бирачких места на територији ГО Земун.pdf: Градска општина Земун; zapisa 115, sa brojem 115
+  ocr  Зрењанин / Odluka o izmeni odluke o odredjivanju birackih mesta za glasanje za narodne poslanike 2026.pdf: Град Зрењанин; zapisa 4, sa brojem 4
+  ocr  Зрењанин / Odluka o odredjivanju birackih mesta.pdf: Град Зрењанин; zapisa 74, sa brojem 74
+  ocr  Ивањица / Odluka o izmeni Odluke o dređivanju biračkih mesta.pdf: Ивањица; zapisa 1, sa brojem 1
+  ocr  Ивањица / Odluku u određivanju biračkih mesta na teritoriji opštine Ivanjica.pdf: Ивањица; zapisa 55, sa brojem 55
+  ocr  Инђија / Одлука о одређивању БМ.pdf: Инђија; zapisa 37, sa brojem 37
+  ocr  Ириг / Одлука о одређивању бм на територији општине Ириг за гласање на изборима .pdf: Ириг; zapisa 14, sa brojem 14
+  ocr  Кањижа / -RES O ODREDJ BIR MESTA.pdf: Кањижа; zapisa 34, sa brojem 32
+  ocr  Кикинда / 1 Odluka o određivanju biračkih mesta - Kikinda_ 2026..pdf: Град Кикинда; zapisa 60, sa brojem 60
+  ocr  Кладово / Одлука о одређивању бирачких места на територији општине Кладово за гласање на изборима за народне п.pdf: Кладово; zapisa 31, sa brojem 31
+  ocr  Кнић / Одлука о бирачким местима.pdf: Кнић; zapisa 36, sa brojem 36
+  ocr  Ковачица / Одлука о одређивању бирачких места - општина Ковачица.pdf: Ковачица; zapisa 21, sa brojem 21
+  ocr  Ковин / odluka.pdf: Ковин; zapisa 26, sa brojem 26
+  ocr  Косовска Митровица / Odluka o odredjivanju BM na teritoriji opstine Kosovska Mitorvica.pdf: Косовска Митровица; zapisa 22, sa brojem 22
+  ocr  Косовска Митровица / Odluka o odredjivanju BM na teritoriji opstine Leposvaic.pdf: Лепосавић; zapisa 16, sa brojem 16
+  ocr  Косовска Митровица / Odluka o odredjivanju BM na teritoriji opstine Vucitrn.pdf: Вучитрн; zapisa 10, sa brojem 10
+  ocr  Косовска Митровица / Odluka o odredjivanju BM na teritoriji opstine Zubin Potok.pdf: Зубин Поток; zapisa 7, sa brojem 6
+  ocr  Косовска Митровица / Odluka o odredjivanju BM na teritoriji opstine Zvecan.pdf: Звечан; zapisa 9, sa brojem 9
+  ocr  Косовска Митровица / Одлука о одређивању бирачких места - Вучитрн.pdf: Вучитрн; zapisa 1, sa brojem 1
+  ocr  Косовска Митровица / Одлука о одређивању бирачких места - Звечан.pdf: Звечан; zapisa 6, sa brojem 6
+  ocr  Косовска Митровица / Одлука о одређивању бирачких места - Зубин Поток.pdf: Зубин Поток; zapisa 3, sa brojem 3
+  ocr  Косовска Митровица / Одлука о одређивању бирачких места - Косовска Митровица.pdf: Косовска Митровица; zapisa 8, sa brojem 8
+  ocr  Косовска Митровица / Одлука о одређивању бирачких места - Лепосавић.pdf: Лепосавић; zapisa 6, sa brojem 6
+  ocr  Косовска Митровица / Одлука о одређивању бирачких места - Србица.pdf: Србица; zapisa 1, sa brojem 1
+  ocr  Косјерић / Одлука о одређивању бирачких места на територији општине Косјерић.pdf: Косјерић; zapisa 29, sa brojem 29
+  ocr  Коцељева / ОДЛУКА О УТВРЂИВАЊУ БИРАЧКИХ МЕСТА НА ТЕРИТОРИЈИ ОПШТИНЕ КОЦЕЉЕВА ЗА ГЛАСАЊЕ НА ИЗБОРИМА ЗА ..pdf: Коцељева; zapisa 33, sa brojem 32
+  ocr  Крагујевац / Odluka o određivanju biračkih mesta na teritoriji grada Kragujevca za glasanje na izborima za narodn.pdf: Град Крагујевац; zapisa 175, sa brojem 174
+  ocr  Краљево / Одлука о одређивању бирачких места1.pdf: Град Краљево; zapisa 104, sa brojem 103
+  ocr  Крупањ / odluka1.pdf: Крупањ; zapisa 33, sa brojem 32
+  ocr  Крушевац / Одлука о одређивању бирачких места за град Крушевац.pdf: Град Крушевац; zapisa 132, sa brojem 132
+  ocr  Кула / Одлука о одређивању бирачких места на територији Општине Кула за гласање на изборима за народне посл.pdf: Кула; zapisa 40, sa brojem 40
+  ocr  Куршумлија / Odluka o odredjivanju bm teritorija opstine Kursumlija 2026.pdf: Куршумлија; zapisa 48, sa brojem 48
+  ocr  Кучево / ОДЛУКА О ИЗМЕНИ И ДОПУНИ ОДЛУКЕ О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА_ 09.10.2026..pdf: Кучево; zapisa 3, sa brojem 3
+  ocr  Кучево / Одлука о одређивању бирачких места на територији општине Кучево.pdf: Кучево; zapisa 39, sa brojem 39
+  ocr  Књажевац / Odluka o izmeni odluke o određivanju BM.pdf: Књажевац; zapisa 2, sa brojem 0
+  ocr  Књажевац / Odluka o odredjivanju birackih mesta.pdf: Књажевац; zapisa 65, sa brojem 65
+  ocr  Лазаревац / Lazarevac.pdf: Градска општина Лазаревац; zapisa 66, sa brojem 64
+  ocr  Лапово / Одлука о одређивању бирачких места на територији општине .pdf: Лапово; zapisa 11, sa brojem 11
+  ocr  Лајковац / Одлука о одређивању БМ на територији општине Лајковац.pdf: Лајковац; zapisa 34, sa brojem 34
+  ocr  Лебане / Odluka o izmeni i dopuni odluke o odredjivanju BM za izbore narodnih poslanika 2026.pdf: Лебане; zapisa 2, sa brojem 2
+  ocr  Лебане / Odluka o odedjivanju BM Lebane 2026.pdf: Лебане; zapisa 42, sa brojem 42
+  ocr  Лесковац / Одлукa о одређивању бирачких места на територији града Лесковца.pdf: Град Лесковац; zapisa 187, sa brojem 187
+  pdf  Лесковац / Одлука о изменама и допунама Одлуке о одређивању бирачких места.pdf: Град Лесковац; zapisa 15, sa brojem 14
+  ocr  Лозница / img20260918_12184352.pdf: Град Лозница; zapisa 93, sa brojem 93
+  ocr  Лозница / img20261009_14525253.pdf: Град Лозница; zapisa 0, sa brojem 0  <-- ništa nije pročitano
+  ocr  Лучани / Odluka o odredjivanju BM_compressed.pdf: Лучани; zapisa 43, sa brojem 43
+  ocr  Мали Зворник / Odluka o BM Opština Mali Zvornik.pdf: Мали Зворник; zapisa 29, sa brojem 29
+  ocr  Мали Зворник / Odluka o izmeni odluke o određivanju BM.pdf: Мали Зворник; zapisa 0, sa brojem 0  <-- ništa nije pročitano
+  ocr  Мали Иђош / Odluka_о_odredjivanju_birackih_mesta_na_teritoriji_opstine_Mali_Idjos.pdf: Мали Иђош; zapisa 23, sa brojem 23
+  ocr  Мало Црниће / ОДЛУКА О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА НА ТЕРИТОРИЈИ ОПШТИНЕ МАЛО ЦРНИЋЕ.pdf: Мало Црниће; zapisa 29, sa brojem 29
+  ocr  Мајданпек / Одлука о одређивању бирачких места на територији општине Мајданпек .pdf: Мајданпек; zapisa 41, sa brojem 41
+  ocr  Медвеђа / Одлука о одређивању бирачких места на територији општине Медвеђа.pdf: Медвеђа; zapisa 49, sa brojem 48
+  ocr  Мерошина / Одлука о одређивању БМ на територији општине Мерошина.pdf: Мерошина; zapisa 7, sa brojem 7
+  ocr  Мионица / Odluka o odredjivanju birackih mesta na teritoriji opstine Mionica.pdf: Мионица; zapisa 38, sa brojem 38
+  ocr  Младеновац / Odluka o odredjivanju birackih mesta na teritoriji GO Mladenovac.pdf: Градска општина Младеновац; zapisa 40, sa brojem 38
+  ocr  Неготин / Odluka biracka mesta.pdf: Неготин; zapisa 72, sa brojem 71
+  ocr  Ниш / odluka o odredjivanju birackih mesta Grad Nis.pdf: Градска општина Медијана, Градска општина Палилула (Ниш), Градска општина Пантелеј, Градска општина Црвени крст, Градска општина Нишка Бања; zapisa 197, sa brojem 197
+  ocr  Ниш / Одлука о измени и допуни одлуке о одређивању бирачких места.pdf: Градска општина Медијана, Градска општина Палилула (Ниш), Градска општина Пантелеј, Градска општина Црвени крст, Градска општина Нишка Бања; zapisa 1, sa brojem 1
+  ocr  Нова Варош / Odluka o odredjivanju BM Nova Varoš-izbori za narodne poslanike 25.10.2026.pdf: Нова Варош; zapisa 39, sa brojem 39
+  ocr  Нова Црња / odluka o određivanju biračkih mesta.pdf: Нова Црња; zapisa 25, sa brojem 25
+  ocr  Нови Београд / Odluka o odredjivanju BM na teritoriji GO Novi Beograd.pdf: Градска општина Нови Београд; zapisa 149, sa brojem 149
+  ocr  Нови Бечеј / Odluka o odredjivanju birackih mesta na teritoriji opstine Novi Becej.pdf: Нови Бечеј; zapisa 31, sa brojem 31
+  ocr  Нови Кнежевац / Одлука о одређивању БМ.pdf: Нови Кнежевац; zapisa 21, sa brojem 19
+  ocr  Нови Пазар / Izmena Odluke o BM.pdf: Град Нови Пазар; zapisa 2, sa brojem 0
+  ocr  Нови Пазар / odluka o izmeni odluke o odredjivanju birackih mesta.pdf: Град Нови Пазар; zapisa 2, sa brojem 0
+  ocr  Нови Пазар / Odluka o određivanju biračkih mesta Novi Pazar.pdf: Град Нови Пазар; zapisa 89, sa brojem 87
+  pdf  Нови Сад / Odluka o izmenama Odluke  o BM.pdf: Град Нови Сад; zapisa 3, sa brojem 3
+  ocr  Нови Сад / Odluka o izmeni Odluke o BM.pdf: Град Нови Сад; zapisa 0, sa brojem 0  <-- ništa nije pročitano
+  ocr  Нови Сад / Odluka o izmeni odluke o odredjivanju birackih mesta na teritorijji GNS.pdf: Град Нови Сад; zapisa 0, sa brojem 0  <-- ništa nije pročitano
+  ocr  Нови Сад / Odluka o odredjivanju birackih mesta na teritoriji GNS - Parlamentarni izbori 2026.pdf: Град Нови Сад; zapisa 211, sa brojem 211
+  ocr  Нови Сад / odluka o odredjivanju birackih mesta na teritoriji grada novog sada - preciscen tekst.pdf: Град Нови Сад; zapisa 221, sa brojem 221
+  ocr  Нови Сад / Оdlukа o izmenama odluke o odredjivanju birackih mesta na teritroiji GNS.pdf: Град Нови Сад; zapisa 2, sa brojem 2
+  ocr  Обреновац / Odluka o odredjivanju birackih mesta GO Obrenovac.pdf: Градска општина Обреновац; zapisa 55, sa brojem 54
+  ocr  Опово / ОДЛУКА О ИЗМЕНИ ОДЛУКЕ О ОДРЕЂИВАЊУ БИР.МЕСТА НА ТЕРИТОРИЈИ ОПШТИНЕ ОПОВО.pdf: Опово; zapisa 1, sa brojem 1
+  ocr  Опово / ОДЛУКА О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА НА ТЕРИТОРИЈИ ОПШТИНЕ ОПОВО.pdf: Опово; zapisa 28, sa brojem 26
+  ocr  Осечина / odluka.PDF: Осечина; zapisa 21, sa brojem 21
+  ocr  Оџаци / Одлука о одређивању бирачких места избори 25.10.2026.pdf: Оџаци; zapisa 27, sa brojem 27
+  ocr  Палилула (Београд) / ОДЛУКА О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА НА ТЕРИТОРИЈИ ГО ПАЛИЛУЛА.pdf: Градска општина Палилула (Београд); zapisa 123, sa brojem 123
+  ocr  Панчево / Одлука о одређивању бирачких места на територији града Панчева.pdf: Град Панчево; zapisa 79, sa brojem 79
+  ocr  Параћин / Одлука о одређивању МБ-2026.pdf: Параћин; zapisa 55, sa brojem 55
+  ocr  Петровац на Млави / Одлука о одређивању бирачких места на територији општине Петровац на Млави.pdf: Петровац на Млави; zapisa 45, sa brojem 45
+  ocr  Пећ / Odluka o odredjivanju BM na teritoriji opstine Pec.pdf: Пећ; zapisa 6, sa brojem 6
+  ocr  Пећ / Одлука 013-6-26 ОИК ПЕЋ.pdf: Пећ; zapisa 2, sa brojem 2
+  ocr  Пећ / Одлука 013-7-26 ОИК КЛИНА.pdf: Клина; zapisa 1, sa brojem 1
+  ocr  Пећ / Одлука 013-8-26 ОИК ИСТОК.pdf: Исток; zapisa 1, sa brojem 1
+  ocr  Пећинци / Одлука о одређивању бирачких места.pdf: Пећинци; zapisa 30, sa brojem 30
+  ocr  Пирот / Odluka o izmeni odluke o oredjivanju birackih mesta na teritoriji grada Pirota.pdf: Град Пирот; zapisa 2, sa brojem 2
+  ocr  Пирот / Odluka o odredjivanju birackih mesta.pdf: Град Пирот; zapisa 84, sa brojem 84
+  ocr  Пландиште / Одлука о одређивању бирачких места на територији општине Пландиште.pdf: Пландиште; zapisa 23, sa brojem 23
+  ocr  Пожаревац / одлука бм.pdf: Град Пожаревац, Градска општина Костолац; zapisa 73, sa brojem 72
+  ocr  Пожега / ОДЛУКА О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА НА ТЕРИТОРИЈИ ОПШТИНЕ ПОЖЕГА.pdf: Пожега; zapisa 54, sa brojem 52
+  ocr  Прешево / Odluka o izmeni odluke o odredjiv. birackih mesta.pdf: Прешево; zapisa 25, sa brojem 25
+  ocr  Прешево / Odluka o odredjivanju birackih mesta.pdf: Прешево; zapisa 37, sa brojem 37
+  ocr  Прибој / ОдлукаБМ.pdf: Прибој; zapisa 38, sa brojem 38
+  ocr  Приштина / odluka o biračkim mestima kosovo polje.pdf: Косово Поље; zapisa 2, sa brojem 2
+  ocr  Приштина / odluka o biračkim mestima obilić.pdf: Обилић; zapisa 1, sa brojem 1
+  ocr  Приштина / odluka o biračkim mestima priština.pdf: Приштина; zapisa 7, sa brojem 7
+  ocr  Приштина / odluka o biračkim mestima za uroševac.pdf: Урошевац; zapisa 1, sa brojem 1
+  ocr  Приштина / odluka o biračkim mestima za štrpce.pdf: Штрпце; zapisa 3, sa brojem 3
+  ocr  Приштина / Odluka o odredjivanju BM na teritoriji grada Pristine.pdf: Приштина; zapisa 14, sa brojem 14
+  ocr  Приштина / Odluka o odredjivanju BM na teritoriji opstine Kosovo Polje.pdf: Косово Поље; zapisa 6, sa brojem 6
+  ocr  Приштина / Odluka o odredjivanju BM na teritoriji opstine Lipljan.pdf: Липљан; zapisa 9, sa brojem 9
+  ocr  Приштина / Odluka o odredjivanju BM na teritoriji opstine Strpce.pdf: Штрпце; zapisa 10, sa brojem 10
+  ocr  Приштина / odluka za biračka mesta lipljan.pdf: Липљан; zapisa 3, sa brojem 3
+  ocr  Пријепоље / ОДЛУКА О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА НА ТЕРИТОРИЈИ ОПШТИНЕ ПРИЈЕПОЉЕ.pdf: Пријепоље; zapisa 61, sa brojem 61
+  ocr  Прокупље / Odluka o izmeni Odluke o određivanje biračkih mesta na teritoriji Grada Prokuplja .pdf: Прокупље; zapisa 1, sa brojem 1
+  ocr  Прокупље / Одлука ГИК о одређивању бирачких места на територији Града Прокупља.pdf: Прокупље; zapisa 91, sa brojem 91
+  ocr  Ражањ / odluka biračka mesta.pdf: Ражањ; zapisa 21, sa brojem 21
+  ocr  Раковица / Odluka o bir mestima.pdf: Градска општина Раковица; zapisa 77, sa brojem 77
+  ocr  Рача / Одлука о бирачким местима - ОИК Рача.pdf: Рача; zapisa 28, sa brojem 27
+  ocr  Рашка / Odluka o određivanju BM.pdf: Рашка; zapisa 49, sa brojem 47
+  ocr  Рековац / Одлука о одређивању бирачких места натериторији општине Рековац.pdf: Рековац; zapisa 34, sa brojem 34
+  ocr  РИК / ОДЛУКА О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА У ЗАВОДИМА ЗА ИЗВРШЕЊЕ КРИВИЧНИХ САНКЦИЈА ЗА ГЛАСАЊЕ НА .pdf: Заводи за извршење кривичних санкција; zapisa 29, sa brojem 29
+  ocr  РИК / ОДЛУКА О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА У ИНОСТРАНСТВУ.pdf: Иностранство; zapisa 93, sa brojem 93
+  ocr  Рума / ODLUKA O ODREDJIVANJU BM 2026.pdf: Рума; zapisa 43, sa brojem 43
+  ocr  Савски венац / odluka o odredjivanju birackih mesta.pdf: Градска општина Савски Венац; zapisa 39, sa brojem 39
+  ocr  Свилајнац / Odluka o odredjivanju birackih mesta za izbore za narodne poslanike 2026.pdf: Свилајнац; zapisa 32, sa brojem 32
+  ocr  Сврљиг / Одлука о одређивању бирачких места на територији општине Сврљиг.pdf: Сврљиг; zapisa 42, sa brojem 42
+  ocr  Сента / 2026-09-17_001.pdf: Сента; zapisa 31, sa brojem 31
+  ocr  Сечањ / ОДЛУКА О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА НА ИЗБОРИМА ЗА НАРОДНЕ ПОСЛАНИКЕ НАРОДНЕ СКУПШТИНЕ 25.10.2026.pdf: Сечањ; zapisa 17, sa brojem 17
+  ocr  Смедерево / Odl. biračka mesta GIK Smederevo.pdf: Град Смедерево; zapisa 78, sa brojem 78
+  ocr  Смедеревска Паланка / ОДЛУКА О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА НА ТЕРИТОРИЈИ ОПШТИНЕ СМЕДЕРЕВСКА ПАЛАНКА_0001_compressed.pdf: Смедеревска Паланка; zapisa 49, sa brojem 49
+  pdf  Сокобања / Odluka o izmeni i dopuni odluke biračka mesta p.pdf: Сокобања; zapisa 32, sa brojem 32
+  pdf  Сокобања / Одлука о одређивању бирачких места за територију општине Сокобања_potpisano.pdf: Сокобања; zapisa 32, sa brojem 32
+  ocr  Сомбор / Odluka o određivanju biračkih mesta - teritorija grada Sombora.pdf: Град Сомбор; zapisa 76, sa brojem 76
+  ocr  Сопот / одлука о измени и допуни одлуке о одређивању бирачких места на територији го сопот.PDF: Градска општина Сопот; zapisa 10, sa brojem 9
+  ocr  Сопот / одука о одређивању бм го сопот.PDF: Градска општина Сопот; zapisa 33, sa brojem 33
+  ocr  Србобран / -846938388.pdf: Србобран; zapisa 28, sa brojem 28
+  ocr  Сремска Митровица / Odluka-Biracka_mesta.PDF: Град Сремска Митровица; zapisa 62, sa brojem 60
+  ocr  Сремски Карловци / Одлука о одређивању бирачких места.pdf: Сремски Карловци; zapisa 8, sa brojem 8
+  ocr  Стара Пазова / 1.Odluka o određivanju biračkih mesta.pdf: Стара Пазова; zapisa 53, sa brojem 53
+  ocr  Стари град / Odluka o dopunama i izmeni Odluke o odredjivanju BM.PDF: Градска општина Стари Град; zapisa 5, sa brojem 5
+  ocr  Стари град / Odluka o odredjivanju BM na teritoriji GO Stari grad.pdf: Градска општина Стари Град; zapisa 56, sa brojem 56
+  ocr  Суботица / odluka BM Subotica.pdf: Град Суботица; zapisa 102, sa brojem 102
+  ocr  Суботица / odluka o ispravci teh greske.pdf: Град Суботица; zapisa 0, sa brojem 0  <-- ništa nije pročitano
+  ocr  Сурдулица / Odluka o odredjivanju birackih mesta Surdulica 2026.pdf: Сурдулица; zapisa 44, sa brojem 44
+  ocr  Сурдулица / Одлука о измени одлуке о одређивању бирачких места на територији општине Сурдулица.pdf: Сурдулица; zapisa 0, sa brojem 0  <-- ništa nije pročitano
+  ocr  Сурчин / Одлука  - Бирачка места.pdf: Градска општина Сурчин; zapisa 32, sa brojem 29
+  ocr  Сјеница / Odluka o određivanju biračkih mesta na teritoriji opštine Sjenica_ PARLAMENTARNI 26.pdf: Сјеница; zapisa 70, sa brojem 57
+  ocr  Темерин / ОДЛУКА О ИЗМЕНАМА И ДОПУНАМА ОДЛУКЕ О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА НА ИЗБОРАМА 25.10.pdf: Темерин; zapisa 24, sa brojem 24
+  ocr  Темерин / ОДЛУКА О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА НА ТЕРИТОРИЈИ ОПШТИНЕ ТЕМЕРИН ЗА ГЛАСАЊЕ НА .pdf: Темерин; zapisa 31, sa brojem 29
+  ocr  Тител / Одлука о одређивању бирачких места на територији општине Тител за гласање на изборима за народне пос.pdf: Тител; zapisa 25, sa brojem 25
+  ocr  Топола / ОДЛУКА О УТВРЂИВАЊУ БИРАЧКИХ МЕСТА НА ТЕРИТОРИЈИ ОПШТИНЕ ТОПОЛА.pdf: Топола; zapisa 32, sa brojem 31
+  ocr  Трговиште / ОДЛУКА О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА НА ТЕРИТОРИЈЕ ОПШТИНЕ ТРГОВИШТЕ .pdf: Трговиште; zapisa 25, sa brojem 24
+  ocr  Трстеник / Odluka o odredjivanju birackih mesta 17 09 26.pdf: Трстеник; zapisa 52, sa brojem 50
+  ocr  Тутин / doc00668620261007120148.pdf: Тутин; zapisa 2, sa brojem 2
+  ocr  Тутин / ОДЛУКА О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА НА ТЕРИТОРИЈИ  ОПШТИНЕ ТУТИН.pdf: Тутин; zapisa 61, sa brojem 61
+  ocr  Уб / Уб Oдлука смањенpdf.pdf: Уб; zapisa 53, sa brojem 53
+  ocr  Ужице / Odluka o izmenama BM.pdf: Град Ужице, Градска општина Севојно; zapisa 10, sa brojem 5
+  ocr  Ужице / Odluka o izmeni Odluke o BM.pdf: Град Ужице, Градска општина Севојно; zapisa 1, sa brojem 1
+  ocr  Ужице / Odluka.pdf: Град Ужице, Градска општина Севојно; zapisa 89, sa brojem 89
+  ocr  Ужице / Resenje o ispravci greske u BM.pdf: Град Ужице, Градска општина Севојно; zapisa 0, sa brojem 0  <-- ništa nije pročitano
+  ocr  Црна Трава / Одлука о одређивању бирачких места црна трава.pdf: Црна Трава; zapisa 5, sa brojem 3
+  pdf  Чачак / BM-1 odluka.pdf: Град Чачак; zapisa 104, sa brojem 104
+  ocr  Чајетина / Odluka o određivanju biračkih mesta na teritoriji OČ.pdf: Чајетина; zapisa 32, sa brojem 32
+  ocr  Чока / Одлука о одређивању бирачких места на територији општине Чока.pdf: Чока; zapisa 22, sa brojem 22
+  ocr  Чукарица / Odluka o odredjivanju birackih mesta na teritoriji GO Cukarica18092026.pdf: Градска општина Чукарица; zapisa 114, sa brojem 111
+  ocr  Шабац / ODLUKA O ODREDJIVANJU BIRACKIH MESTA NA TERITORIJI GRADA SAPCA.pdf: Град Шабац; zapisa 110, sa brojem 110
+  ocr  Шид / ОДЛУКА О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА НА ТЕРИТОРИЈИ ОПШТИНЕ ШИД ЗА ГЛАСАЊЕ НА ИЗБОРИМА ЗА НАРОДНЕ.pdf: Шид; zapisa 39, sa brojem 39
+  ocr  Јагодина / Odluka o odredjivanju birackih mesta na teritoriji grada Jagodine.pdf: Град Јагодина; zapisa 91, sa brojem 91
+  ocr  Љиг / Одлука о одређивању бирачких места на територији општина Љиг.pdf: Љиг; zapisa 30, sa brojem 30
+  ocr  Љубовија / Одлука о одређивању бирачких места општина Љубовија.pdf: Љубовија; zapisa 34, sa brojem 34
+  ocr  Ћићевац / ОДЛУКА О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА НА ТЕРИТОРИЈИ ОПШТИНЕ ЋИЋЕВАЦ ЗА ГЛАСАЊЕ НА ИЗБОРИМА ЗА НАРОДНЕ П.pdf: Ћићевац; zapisa 18, sa brojem 18
+  ocr  Ћуприја / Одлука о одређивању бирачких места.pdf: Ћуприја; zapisa 31, sa brojem 31
+
+PO OPŠTINAMA:
+[23/28] Градска општина Барајево
+    BM 2 (ОШ "КНЕЗ СИМА МАРКОВИЋ"): odbijeno, naziv u odluci „OLI „KHE3 CMMA“ (sličnost 47, potvrda numeracije 72%)
+    BM 3 (ЛОВАЧКИ ДОМ): odbijeno, naziv u odluci „JIOBAUKM BOM“ (sličnost 52, potvrda numeracije 72%)
+    BM 6 (ОШ "ГЛУМЧЕВО БРДО"): odbijeno, naziv u odluci „957 '49 О049 "оазгуауч“ (sličnost 33, potvrda numeracije 72%)
+    BM 13 (ЛОКАЛ - БИВШИ ФРИЗЕРСКИ САЛОН): odbijeno, naziv u odluci „TIOKAJI - bMBUIM OPM3EPCKM | CAnOH“ (sličnost 42, potvrda numeracije 72%)
+    BM 20 (ОСНОВНА ШКОЛА): odbijeno, naziv u odluci „Т '49 хиџми ИЈУПНАЈ“ (sličnost 19, potvrda numeracije 72%)
+[107/107] Градска општина Вождовац
+    BM 3: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „“ / CSV „ОШ "БОРА СТАНКОВИЋ"“
+    BM 58: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „“ / CSV „ДВ "НЕВЕН"“
+    BM 68: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „Ноле. а.“ / CSV „ОШ "ВАСА ЧАРАПИЋ" - ИСТУРЕНО ОДЕЉЕЊЕ ЗУЦЕ“
+    BM 92: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „“ / CSV „ОШ "ЈАЈИНЦИ"“
+[63/63] Градска општина Врачар
+[51/52] Градска општина Гроцка
+    BM 1: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „БЕГАЉИЦА, БОРИСА КИДРИЧА ББ.“ / CSV „ЛОВАЧКИ ДОМ“
+    BM 11: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „МЕ И САВА“ / CSV „ОШ "СВЕТИ САВА" (ЦЕНТАР)“
+    BM 40 (ОШ "АЛЕКСА ШАНТИЋ"): nije nađeno u odluci
+    BM 42: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „“ / CSV „ОШ "НИКОЛА ТЕСЛА"“
+[115/115] Градска општина Земун
+    BM 50: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „“ / CSV „ОШ "СУТЈЕСКА"“
+    BM 51: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „“ / CSV „ОШ "СУТЈЕСКА"“
+    BM 61: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „OHLI"CABA“ / CSV „ОШ "САВА ШУМАНОВИЋ"“
+[100/100] Градска општина Звездара
+[62/65] Градска општина Лазаревац
+    BM 6: spojeno po broju (numeracija potvrđena 85%), naziv se razlikuje: odluka „ош "ВОЈИСЛАВ ВОКА САВИЋ"“ / CSV „РЕСТОРАН КОД ГРАДИЋА“
+    BM 21: spojeno po broju (numeracija potvrđena 85%), naziv se razlikuje: odluka „ДОМ КУЛТУРЕ - ГОРЊА САЛА“ / CSV „ОШ ШКОЛА ПЕТАР КОЦИЋ“
+    BM 22: spojeno po broju (numeracija potvrđena 85%), naziv se razlikuje: odluka „ДОМ КУЛТУРЕ - ДОЊА САЛА“ / CSV „ОШ ШКОЛА ПЕТАР КОЦИЋ“
+    BM 29: spojeno po broju (numeracija potvrđena 85%), naziv se razlikuje: odluka „КОЛА“ / CSV „ОСНОВНА ШКОЛА“
+    BM 62 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 64 (ДОМ КУЛТУРЕ МЗ НОВИ МЕДОШЕВАЦ): nije nađeno u odluci
+    BM 65 (ОШ "КНЕЗ ЛАЗАР"-ХОЛ): nije nađeno u odluci
+[38/59] Градска општина Младеновац
+    BM 2: spojeno po broju (numeracija potvrđena 89%), naziv se razlikuje: odluka „“ / CSV „ЕЛЕКТРОДИСТРИБУЦИЈА“
+    BM 5: spojeno po broju (numeracija potvrđena 89%), naziv se razlikuje: odluka „“ / CSV „ЗГРАДА БИВШЕГ СОЦИЈАЛНОГ“
+    BM 6 (КАФЕ "СМОКИ"): nije nađeno u odluci
+    BM 7 (ГРАДСКИ СТАДИОН "СЕЛТЕРС"): nije nađeno u odluci
+    BM 8 (ОШ "КОСТА ЂУКИЋ"): nije nađeno u odluci
+    BM 9 (ОШ "КОСТА ЂУКИЋ"): nije nađeno u odluci
+    BM 10 (ПОЉОПРИВРЕДНА СТАНИЦА МЛАДЕНОВАЦ): nije nađeno u odluci
+    BM 11 (ОБДАНИШТЕ): nije nađeno u odluci
+    BM 22 (ЛОКАЛ СЛАВОЉУБА ВАСИЛИЋА): nije nađeno u odluci
+    BM 23 (ЛОКАЛ ДЕСКЕ ЛУКИЋ): nije nađeno u odluci
+    BM 24 (ОДЕЉЕЊЕ ОШ 'СВЕТИ САВА'): nije nađeno u odluci
+    BM 25 (ОДЕЉЕЊЕ ОШ 'СВЕТИ САВА'): nije nađeno u odluci
+    BM 26 (ОДЕЉЕЊЕ ОШ 'СВЕТИ САВА'): nije nađeno u odluci
+    BM 27 (МЕСНА ЗАЈЕДНИЦА): nije nađeno u odluci
+    BM 36: spojeno po broju (numeracija potvrđena 89%), naziv se razlikuje: odluka „“ / CSV „ОШ "РУДНИК"“
+    BM 49 (ЛОКАЛ ДРАГАНА ЈАНКОВИЋА): nije nađeno u odluci
+    BM 50 (ЛОВАЧКИ ДОМ - СТЕПАЊЕ): nije nađeno u odluci
+    BM 51 (ОШ "БЕЛУЋА"): nije nađeno u odluci
+    BM 52 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 53 (ОСНОВНА ШКОЛА У ГОРЊОЈ ДУБОНИ): nije nađeno u odluci
+    BM 54 (ОСНОВНА ШКОЛА У ГОРЊОЈ ДУБОНИ): nije nađeno u odluci
+    BM 55 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 56 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 57 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 58: spojeno po broju (numeracija potvrđena 89%), naziv se razlikuje: odluka „[О“ / CSV „ОСНОВНА ШКОЛА“
+[139/149] Градска општина Нови Београд
+    BM 27: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „МТЕКМАПОМАГ“ / CSV „ZEPTER INTERNATIONAL“
+    BM 28: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „ТЕРТЕК“ / CSV „ZEPTER INTERNATIONAL“
+    BM 89: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „3, 'а9 УнИаУЈМЈ УГИаАГ“ / CSV „МЗ "САВА" - ВЕЛИКА САЛА“
+    BM 90: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „81 'а9 УГИЗАГ“ / CSV „МЗ "САВА" - ВЕЛИКА САЛА“
+    BM 91 (ОШ "БРАНКО РАДИЧЕВИЋ"): odbijeno, naziv u odluci „31 МУНИЗУЈУЈ МГИЗАГ“ (sličnost 24, potvrda numeracije 86%)
+    BM 92: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „31 '49 МНИаУЈМУЈ МГИЗАГ“ / CSV „КЛУБ ЗА СТАРА ЛИЦА "ДР МИХАЈЛО СТУПАР II"“
+    BM 93 (КЛУБ ЗА СТАРА ЛИЦА "ДР МИХАЈЛО СТУПАР II"): odbijeno, naziv u odluci „81 '49 МГИЗАГ“ (sličnost 33, potvrda numeracije 86%)
+    BM 94: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „бе '49 УМОНУШУГ“ / CSV „ИНСТИТУТ ЗА СТРАНЕ ЈЕЗИКЕ“
+    BM 95 (ИНСТИТУТ ЗА СТРАНЕ ЈЕЗИКЕ): nije nađeno u odluci
+    BM 96 (МЗ "БЕЖАНИЈСКИ БЛОКОВИ"): odbijeno, naziv u odluci „891 '49 УНИаУЈУЈ УГИЗАГ“ (sličnost 28, potvrda numeracije 86%)
+    BM 97 (МЗ "БЕЖАНИЈСКИ БЛОКОВИ"): odbijeno, naziv u odluci „'а9 униауЈуЈ угиалг“ (sličnost 34, potvrda numeracije 86%)
+    BM 98 (ДВ "ИСТОК" - ХОЛ): odbijeno, naziv u odluci „16 '89 уаучиа мнузи 47“ (sličnost 18, potvrda numeracije 86%)
+    BM 99 (ДВ "ИСТОК" - САЛА): odbijeno, naziv u odluci „16 '89 маучиа“ (sličnost 32, potvrda numeracije 86%)
+    BM 100: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „ад маучиа унуди“ / CSV „ОШ "КНЕГИЊА МИЛИЦА"“
+    BM 101: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „ад маучиа унуди ап“ / CSV „ЗАВОД ЗА ЗАШТИТУ ПРИРОДЕ СРБИЈЕ“
+    BM 102 (ОШ "КНЕГИЊА МИЛИЦА"): odbijeno, naziv u odluci „8 '49 мамчиа Уунуди“ (sličnost 33, potvrda numeracije 86%)
+    BM 103 (ОШ "КНЕГИЊА МИЛИЦА"): odbijeno, naziv u odluci „8 '49 мамчиа мнузи“ (sličnost 34, potvrda numeracije 86%)
+    BM 104: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „461 '49 УНИаУЈУЈ МГИЧАГ“ / CSV „ОШ "КНЕГИЊА МИЛИЦА"“
+    BM 105 (ОШ "КНЕГИЊА МИЛИЦА"): odbijeno, naziv u odluci „122 '49 УНИаУЈМЈ“ (sličnost 35, potvrda numeracije 86%)
+    BM 106: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „'49 мгиалг“ / CSV „ОШ "КНЕГИЊА МИЛИЦА"“
+    BM 113: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „“ / CSV „МЗ "МЛАДОСТ"“
+    BM 132: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „“ / CSV „ДВ "БАМБИ"“
+[26/57] Градска општина Обреновац
+    BM 7 (ГИМНАЗИЈА): nije nađeno u odluci
+    BM 8 (ЦРВЕНИ КРСТ ОБРЕНОВАЦ): nije nađeno u odluci
+    BM 14 (ДОМ КУЛТУРЕ И СПОРТОВА "ОБРЕНОВАЦ"): nije nađeno u odluci
+    BM 15 (ОШ "ЈЕФИМИЈА" У РОЈКОВЦУ): nije nađeno u odluci
+    BM 16 (ОШ "ПОСАВСКИ ПАРТИЗАНИ"): nije nađeno u odluci
+    BM 17 (ОШ "ЈЕФИМИЈА" У РОЈКОВЦУ): nije nađeno u odluci
+    BM 18 (ДОМ МЗ РВАТИ): nije nađeno u odluci
+    BM 21 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 23 (ЛОКАЛ ЖЕЉКА САВЧИЋА): nije nađeno u odluci
+    BM 24 (КАФИЋ "ДЕСЕТКА"): nije nađeno u odluci
+    BM 25 (ЛОКАЛ АНТИЋ МИРЈАНЕ): nije nađeno u odluci
+    BM 26 (ДОМ МЕСНЕ ЗАЈЕДНИЦЕ): nije nađeno u odluci
+    BM 27 (ЛОКАЛ "КОД МИШЕ"): nije nađeno u odluci
+    BM 28 (НОВА ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 29 (ДЕЧИЈЕ ОБДНИШТЕ "КОЛИБРИ"): nije nađeno u odluci
+    BM 31 (НОВА ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 32 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 34 (СТР "ФАВОРИТ" - СТАРИ ГРАБОВАЦ): nije nađeno u odluci
+    BM 35 (ЦЕНТРАЛНА ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 36 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 37 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 38 (ДОМ МЕСНЕ ЗАЈЕДНИЦЕ): nije nađeno u odluci
+    BM 39 (ДОМ МЕСНЕ ЗАЈЕДНИЦЕ): nije nađeno u odluci
+    BM 42 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 43 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 44 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 45 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 47 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 52 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 53 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 56: spojeno po broju (numeracija potvrđena 96%), naziv se razlikuje: odluka „ПРВАШЕРОНОВО | се >“ / CSV „ПРВА ОБРЕНОВАЧКА ШКОЛА“
+    BM 57 (ФК "СТРЕЛАЦ"): nije nađeno u odluci
+[123/123] Градска општина Палилула (Београд)
+[76/76] Градска општина Раковица
+    BM 49: spojeno po broju (numeracija potvrđena 99%), naziv se razlikuje: odluka „Д == ја" и ј ви“ / CSV „ГИМНАЗИЈА "ПАТРИЈАРХ ПАВЛЕ"“
+[39/39] Градска општина Савски Венац
+[33/33] Градска општина Сопот
+[56/56] Градска општина Стари Град
+[23/31] Градска општина Сурчин
+    BM 2 (ОШ "СТЕВАН СРЕМАЦ"): nije nađeno u odluci
+    BM 3 (ДОМ КУЛТУРЕ - КУД): nije nađeno u odluci
+    BM 4 (ОШ "СТЕВАН СРЕМАЦ"): nije nađeno u odluci
+    BM 9 (ОШ "ВУК КАРАЏИЋ"): nije nađeno u odluci
+    BM 10: spojeno po broju (numeracija potvrđena 85%), naziv se razlikuje: odluka „каз малониџаг и Ннићало“ / CSV „ОШ "ВУК КАРАЏИЋ"“
+    BM 17 (ОШ "ВОЖД КАРАЂОРЂЕ"): nije nađeno u odluci
+    BM 18 (ОШ "ВОЖД КАРАЂОРЂЕ"): odbijeno, naziv u odluci „2:89“ (sličnost 32, potvrda numeracije 85%)
+    BM 22 (ОШ "БРАНКО РАДИЧЕВИЋ"): odbijeno, naziv u odluci „Пув:а8 з8у2 Ј013820 НИЋаАО“ (sličnost 27, potvrda numeracije 85%)
+    BM 23 ("АУТОКОМЕРЦ"): odbijeno, naziv u odluci „Каз узилном амлоаџ“ (sličnost 34, potvrda numeracije 85%)
+[106/113] Градска општина Чукарица
+    BM 8 (ОШ "ЈОСИФ ПАНЧИЋ"): nije nađeno u odluci
+    BM 9 (ОШ "ЈОСИФ ПАНЧИЋ"): nije nađeno u odluci
+    BM 10 (ХЕМИЈСКА ШКОЛА - УЧИОНИЦА 1): odbijeno, naziv u odluci „“ (sličnost 40, potvrda numeracije 74%)
+    BM 11 (ХЕМИЈСКА ШКОЛА - УЧИОНИЦА 2): odbijeno, naziv u odluci „“ (sličnost 40, potvrda numeracije 74%)
+    BM 27 (ОШ "МИЛОШ ЦРЊАНСКИ"): nije nađeno u odluci
+    BM 31 (ОШ "МИЛОШ ЦРЊАНСКИ"): odbijeno, naziv u odluci „“ (sličnost 41, potvrda numeracije 74%)
+    BM 94 (МЗ "ОМЛАДИНСКИХ АКЦИЈА!" - ВЕЛИКА САЛА): odbijeno, naziv u odluci „Пе "ОМЛАДИНСК С.“ (sličnost 68, potvrda numeracije 74%)
+[50/50] Бачка Топола
+    BM 1: spojeno po broju (numeracija potvrđena 96%), naziv se razlikuje: odluka „“иу“ / CSV „ЗГРАДА "НОВИ БАМБИ"“
+[22/23] Мали Иђош
+    BM 4 (ОШ "АДИ ЕНДРЕ"): nije nađeno u odluci
+[102/102] Град Суботица
+[31/31] Житиште
+[72/74] Град Зрењанин
+    BM 5: spojeno po broju (numeracija potvrđena 90%), naziv se razlikuje: odluka „“ / CSV „ОШ "1.ОКТОБАР"“
+    BM 9: spojeno po broju (numeracija potvrđena 90%), naziv se razlikuje: odluka „РА = " А РЕДА =“ / CSV „МЗ "ЕЧКА" - "ЛОВАЧКА САЛА"“
+    BM 10: spojeno po broju (numeracija potvrđena 90%), naziv se razlikuje: odluka „Е "“ / CSV „ОШ "ЂУРА ЈАКШИЋ"“
+    BM 13: spojeno po broju (numeracija potvrđena 90%), naziv se razlikuje: odluka „" _ ПИ СРИ“ / CSV „ОШ "СТЕВАН КНИЋАНИН"“
+    BM 20: spojeno po broju (numeracija potvrđena 90%), naziv se razlikuje: odluka „"“ / CSV „ОШ "ДР БОШКО ВРЕБАЛОВ"“
+    BM 29 (ОШ "ДОСИТЕЈ ОБРАДОВИЋ"): odbijeno, naziv u odluci „ан А“ (sličnost 28, potvrda numeracije 90%)
+    BM 47: spojeno po broju (numeracija potvrđena 90%), naziv se razlikuje: odluka „А " ИУ "“ / CSV „ДОМ МЗ "ШУМИЦА"“
+    BM 70 (КЛУБ МУЖЉАНАЦА): odbijeno, naziv u odluci „ПАЛА“ (sličnost 33, potvrda numeracije 90%)
+[25/25] Нова Црња
+[31/31] Нови Бечеј
+    BM 3: spojeno po broju (numeracija potvrđena 87%), naziv se razlikuje: odluka „У 8 Чиплил 4“ / CSV „ОШ "МИЛОЈЕ ЧИПЛИЋ"“
+    BM 28: spojeno po broju (numeracija potvrđena 87%), naziv se razlikuje: odluka „НАТО АН ДОМ)“ / CSV „МЕСНА ЗАЈЕДНИЦА (ВАТРОГАСНИ ДОМ)“
+    BM 29: spojeno po broju (numeracija potvrđena 87%), naziv se razlikuje: odluka „м а Г“ / CSV „ОШ "МИЛАН СТАНЧИЋ - УЧА" - 4. УЧИОНИЦА“
+[16/17] Сечањ
+    BM 13 (ОШ "АЛЕКСА ШАНТИЋ"): red sa tim brojem nije između susednih mesta (sumnjiv broj)
+[25/29] Ада
+    BM 2 (ЗГРАДА I МЗ (ВЕЛИКА САЛА)): nije nađeno u odluci
+    BM 3 (ЗГРАДА I МЗ (МАЛА САЛА)): nije nađeno u odluci
+    BM 4 (ПОСЛАНИЧКИ КЛУБ (ЗГРАДА У ДВОРИШТУ СО)): nije nađeno u odluci
+    BM 22 (ЗАБАВИШТЕ): nije nađeno u odluci
+[33/33] Кањижа
+    BM 13: spojeno po broju (numeracija potvrđena 97%), naziv se razlikuje: odluka „ОКУ „СКЕБА““ / CSV „ОКY "CNESA"“
+[60/60] Град Кикинда
+    BM 48: spojeno po broju (numeracija potvrđena 98%), naziv se razlikuje: odluka „“ / CSV „ОШ "1.ОКТОБАР"“
+[20/22] Нови Кнежевац
+    BM 4 (САЛА СКУПШТИНЕ ОПШТИНЕ - ЗГРАДА ВОЈВОЂАНСКЕ БАНКЕ): nije nađeno u odluci
+    BM 9: spojeno po broju (numeracija potvrđena 84%), naziv se razlikuje: odluka „ЈКП Нови Кнежевац“ / CSV „ЈКП "7.ОКТОБАР"“
+    BM 10: spojeno po broju (numeracija potvrđena 84%), naziv se razlikuje: odluka „ЈКП Нови Кнежевац“ / CSV „ЈКП "7.ОКТОБАР"“
+    BM 11 (ДВД НОВИ КНЕЖЕВАЦ): nije nađeno u odluci
+[31/31] Сента
+[22/22] Чока
+    BM 10: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „Месна заједница“ / CSV „МЕСНА КАНЦЕЛАРИЈА“
+[24/24] Алибунар
+[19/19] Бела Црква
+[53/56] Град Вршац
+    BM 3: spojeno po broju (numeracija potvrđena 87%), naziv se razlikuje: odluka „“ / CSV „ДЕЧИЈИ ВРТИЋ“
+    BM 4 (ГИМНАЗИЈА): nije nađeno u odluci
+    BM 7: spojeno po broju (numeracija potvrđena 87%), naziv se razlikuje: odluka „МУЕ5Т роо ВРШАЦ“ / CSV „MIDALA INVEST GROUP DOO“
+    BM 8: spojeno po broju (numeracija potvrđena 87%), naziv se razlikuje: odluka „НИЦА ц – ша УСР 5“ / CSV „МЕСНА ЗАЈЕДНИЦА - УСР "ШАРАН" ВРШАЦ“
+    BM 22 (МЕСНА ЗАЈЕДНИЦА): nije nađeno u odluci
+    BM 24 (ХЕМИЈСКО-МЕДИЦИНСКА ШКОЛА): odbijeno, naziv u odluci „И И“ (sličnost 32, potvrda numeracije 87%)
+    BM 54: spojeno po broju (numeracija potvrđena 87%), naziv se razlikuje: odluka „МЕ а НИЦА“ / CSV „МЕСНА ЗАЈЕДНИЦА“
+[21/21] Ковачица
+[26/26] Ковин
+    BM 1: spojeno po broju (numeracija potvrđena 96%), naziv se razlikuje: odluka „КОВИН“ / CSV „ОШ "ЈОВАН ЈОВАНОВИЋ ЗМАЈ"“
+[25/25] Опово
+[78/79] Град Панчево
+    BM 5: spojeno po broju (numeracija potvrđena 97%), naziv se razlikuje: odluka „О МАРКО НРЕ“ / CSV „ОШ "ЖАРКО ЗРЕЊАНИН"“
+    BM 6 (ОШ "ЖАРКО ЗРЕЊАНИН"): odbijeno, naziv u odluci „пој“ (sličnost 32, potvrda numeracije 97%)
+[23/23] Пландиште
+[29/29] Апатин
+[40/40] Кула
+[27/27] Оџаци
+    BM 4: spojeno po broju (numeracija potvrđena 96%), naziv se razlikuje: odluka „ОСНОВНА КОЛА »МАРКО“ / CSV „ОШ "МАРКО ОРЕШКОВИЋ"“
+[70/76] Град Сомбор
+    BM 10 (ОСНОВНА ШКОЛА): odbijeno, naziv u odluci „РАНЧЕВУ“ (sličnost 32, potvrda numeracije 84%)
+    BM 21: spojeno po broju (numeracija potvrđena 84%), naziv se razlikuje: odluka „о | ЛУГОВУ“ / CSV „ОСНОВНА ШКОЛА“
+    BM 31 (БИВША ПРОДАВНИЦА "ПЕР СУ"): odbijeno, naziv u odluci „= и 2.“ (sličnost 21, potvrda numeracije 84%)
+    BM 41 (ЈКП "ЧИСТОЋА" - БИВША СИНАГОГА): odbijeno, naziv u odluci „ВИВЕЈА“ (sličnost 30, potvrda numeracije 84%)
+    BM 42: spojeno po broju (numeracija potvrđena 84%), naziv se razlikuje: odluka „5 ИВОДВЛАЉИВАЕ "“ / CSV „ОСНОВНА ШКОЛА "ИВО ЛОЛА РИБАР"“
+    BM 54 (ОШ "БРАТСТВО-ЈЕДИНСТВО"): odbijeno, naziv u odluci „ст Д Д УЧИОНИЦА ЗА 1 РАЗРЕД“ (sličnost 35, potvrda numeracije 84%)
+    BM 59 (ЗГРАДА УДРУЖЕЊА БОРАЦА): odbijeno, naziv u odluci „ни Ц“ (sličnost 33, potvrda numeracije 84%)
+    BM 60 (ОШ "НИКОЛА ТЕСЛА"): odbijeno, naziv u odluci „ЗА | " _ Ц Д“ (sličnost 29, potvrda numeracije 84%)
+    BM 61: spojeno po broju (numeracija potvrđena 84%), naziv se razlikuje: odluka „тил И 153 53“ / CSV „ДОМ КУЛТУРЕ - УЛАЗ ИЗ УЛИЦЕ КРАЉА ПЕТРА I“
+    BM 62: spojeno po broju (numeracija potvrđena 84%), naziv se razlikuje: odluka „“ / CSV „ДОМ КУЛТУРЕ“
+    BM 65: spojeno po broju (numeracija potvrđena 84%), naziv se razlikuje: odluka „у“ / CSV „ДОМ КУЛТУРЕ - ЛАЗАРЕВ КОНАК“
+    BM 69: spojeno po broju (numeracija potvrđena 84%), naziv se razlikuje: odluka „тата ЗЕЦ ПИ Д“ / CSV „ЗГРАДА МКУД "АДИ ЕНДРЕ"“
+[25/25] Бач
+    BM 2: spojeno po broju (numeracija potvrđena 84%), naziv se razlikuje: odluka „АИ МАН“ / CSV „НАРОДНА БИБЛИОТЕКА "ВУК КАРАЏИЋ" - УЛАЗ У БИОСКОП“
+    BM 5: spojeno po broju (numeracija potvrđena 84%), naziv se razlikuje: odluka „..“ / CSV „КУД "МЛАДОСТ"“
+    BM 18: spojeno po broju (numeracija potvrđena 84%), naziv se razlikuje: odluka „“ / CSV „ОШ "АЛЕКСА ШАНТИЋ"“
+    BM 19: spojeno po broju (numeracija potvrđena 84%), naziv se razlikuje: odluka „..“ / CSV „ОШ "СВЕТИ САВА"“
+[40/43] Бачка Паланка
+    BM 11 (ОШ "СВЕТИ САВА"): nije nađeno u odluci
+    BM 13 (ОШ "СВЕТИ САВА"): nije nađeno u odluci
+    BM 41 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+[11/11] Бачки Петровац
+[16/16] Беочин
+[38/38] Бечеј
+    BM 2: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „ш И БРЕДЕНЕ " “"“ / CSV „ШКОЛА ЗА ОСНОВНО И СРЕДЊЕ ОБРАЗОВАЊЕ "БРАТСТВО"“
+    BM 38: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „МОМ НУПТАНЕ РАДИЧЕВИЋ“ / CSV „ЦДОМ КУЛТУРЕ“
+[35/36] Врбас
+    BM 2: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „"ОВА = БДАРЕ“ / CSV „НОВА АМБУЛАНТА "СТАРИ ВРБАС"“
+    BM 3 (ПУ "БОШКО БУХА"): odbijeno, naziv u odluci „ВЕЛИ на“ (sličnost 27, potvrda numeracije 94%)
+[28/31] Жабаљ
+    BM 1 (ОШ "ЖАРКО ЗРЕЊАНИН"): odbijeno, naziv u odluci „95 учинаћитуа УМНУ44“ (sličnost 34, potvrda numeracije 90%)
+    BM 2 (ОШ "ЖАРКО ЗРЕЊАНИН"): odbijeno, naziv u odluci „9С УмнУа4 ТИПНИЧОПОЈОЛ“ (sličnost 31, potvrda numeracije 90%)
+    BM 17: spojeno po broju (numeracija potvrđena 90%), naziv se razlikuje: odluka „“ / CSV „СШ "22.ОКТОБАР"“
+    BM 21 (ОШ "ЂУРА ЈАКШИЋ" - СТАРА ЗГРАДА): nije nađeno u odluci
+[220/221] Град Нови Сад
+    BM 35 (МЗ "ЈУЖНИ ТЕЛЕП"): odbijeno, naziv u odluci „АТИЛА"“ (sličnost 24, potvrda numeracije 94%)
+    BM 111: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „ОШВУВАЈАЛИЋ“ / CSV „ОШ "ЂУРА ЈАКШИЋ"“
+    BM 177: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „“ / CSV „СРЕДЊА ШКОЛА "СВЕТОЗАР МИЛЕТИЋ"“
+[28/28] Србобран
+    BM 1: spojeno po broju (numeracija potvrđena 93%), naziv se razlikuje: odluka „“ / CSV „УГОСТИТЕЉСКИ ОБЈЕКАТ“
+    BM 3: spojeno po broju (numeracija potvrđena 93%), naziv se razlikuje: odluka „“ / CSV „ДОМ ЗДРАВЉА“
+[8/8] Сремски Карловци
+[29/31] Темерин
+    BM 7 (ПУ "ВЕЉКО ВЛАХОВИЋ" ОБЈЕКАТ "БАМБИ"): nije nađeno u odluci
+    BM 23 (ЕПС ЕЛЕКТРОВОЈВОДИНА): nije nađeno u odluci
+[25/25] Тител
+[36/37] Инђија
+    BM 6 (ОБЈЕКАТ БИВШE ПИЦЕРИЈЕ "АСТОР"): odbijeno, naziv u odluci „РЕСТОРАН „КОД ГРАДИЋА““ (sličnost 34, potvrda numeracije 92%)
+    BM 21: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „ОШ “ПЕТАР КОЧИЋ"“ / CSV „ПУ "БОШКО БУХА"“
+    BM 22: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „ОШ “ПЕТАР КОЧИЋ"“ / CSV „ПУ "БОШКО БУХА"“
+[14/14] Ириг
+[30/30] Пећинци
+    BM 19: spojeno po broju (numeracija potvrđena 97%), naziv se razlikuje: odluka „СРЕДЊА ШКОЛА“ / CSV „ОСНОВНА ШКОЛА“
+[42/43] Рума
+    BM 39 (ОШ "ВЕЉКО ДУГОШЕВИЋ"): odbijeno, naziv u odluci „АРЛ БИМ“ (sličnost 23, potvrda numeracije 98%)
+[60/60] Град Сремска Митровица
+    BM 37: spojeno po broju (numeracija potvrđena 98%), naziv se razlikuje: odluka „ОШ "СЛОБОДАН БАЈИЋ - ПАЈА"“ / CSV „ОШ "ЈОВАН ПОПОВИЋ"“
+[53/53] Стара Пазова
+    BM 42: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „ОД "СВЕТИ САВА"“ / CSV „OШ "БОШКО ПАЛКОВЉЕВИЋ ПИНКИ"“
+    BM 43: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „ОД "СВЕТИ САВА"“ / CSV „OШ "БОШКО ПАЛКОВЉЕВИЋ ПИНКИ"“
+    BM 44: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „ОД"СВЕТИ САВА"“ / CSV „OШ "БОШКО ПАЛКОВЉЕВИЋ ПИНКИ"“
+[39/39] Шид
+    BM 1: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „“ / CSV „ОШ "ВУК КАРАЏИЋ"“
+    BM 38: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „ЛЕ“ / CSV „ДОМ ПЕНЗИОНЕРА“
+[27/31] Богатић
+    BM 27 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 28 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 29 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 30 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+[34/34] Владимирци
+    BM 1: spojeno po broju (numeracija potvrđena 97%), naziv se razlikuje: odluka „“ / CSV „О.Ф.К. "БЕЛПОС"“
+[33/33] Коцељева
+[32/32] Крупањ
+[84/96] Град Лозница
+    BM 1 (ОШ "ВЕРА БЛАГОЈЕВИЋ" - УЧИОНИЦА БР. 1): nije nađeno u odluci
+    BM 3 (ОШ "ВЕРА БЛАГОЈЕВИЋ" - УЧИОНИЦА БР. 3): nije nađeno u odluci
+    BM 9 (ОШ "МИКА МИТРОВИЋ" - УЧИОНИЦА БР. 2): nije nađeno u odluci
+    BM 18 (ОБЈЕКАТ ДРАГАНА МАРКОВИЋА): nije nađeno u odluci
+    BM 28 (КУЋА ПАНТИЋ МИЛОРАДА): nije nađeno u odluci
+    BM 36 (ОШ "КРАЉ АЛЕКСАНДАР ПРВИ КАРАЂОРЂЕВИЋ" - УЧИОНИЦА БР. 2): nije nađeno u odluci
+    BM 40: spojeno po broju (numeracija potvrđena 99%), naziv se razlikuje: odluka „КУЋА СЛАВУЈЕВИЋ МИЛОРАДА“ / CSV „КУЋА СТЕФАНОВИЋ ВОЈИСЛАВА – ЛИПОВАЦ“
+    BM 46 (ОШ "ДОСИТЕЈ ОБРАДОВИЋ" - УЧИОНИЦА БР. 3): nije nađeno u odluci
+    BM 53 (ГИМНАЗИЈА "ВУК КАРАЏИЋ" - УЧИОНИЦА БР. 2): nije nađeno u odluci
+    BM 70 (ОШ "ВУК КАРАЏИЋ"): nije nađeno u odluci
+    BM 78 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 88 (ОШ "ПЕТАР ТАСИЋ"): nije nađeno u odluci
+    BM 96 (ДОМ КУЛТРУР): nije nađeno u odluci
+[34/34] Љубовија
+[29/29] Мали Зворник
+[100/100] Град Шабац
+[102/103] Град Ваљево
+    BM 4: spojeno po broju (numeracija potvrđena 99%), naziv se razlikuje: odluka „“ / CSV „ОШ "СЕСТРЕ ИЛИЋ"“
+    BM 31 (ОШ "ЗДРАВКО ЈОВАНОВИЋ"): nije nađeno u odluci
+[34/34] Лајковац
+[30/30] Љиг
+[38/38] Мионица
+[21/21] Осечина
+    BM 13: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „ЗГРАДА МАГАЦИНА "РОРОВОКМА ЕКШСНТ"“ / CSV „ЗГРАДА МАГАЦИНА "PODGORINA FRUCHT"“
+[51/52] Уб
+    BM 13: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „Ва аи“ / CSV „ОСНОВНА ШКОЛА“
+    BM 24 (ОСНОВНА ШКОЛА): odbijeno, naziv u odluci „УНА“ (sličnost 33, potvrda numeracije 94%)
+[41/41] Аранђеловац
+    BM 2: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „УШ Ш Ш“ / CSV „ОШ "СВЕТИ САВА"“
+    BM 7: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „ПН АНА“ / CSV „ОШ "ИЛИЈА ГАРАШАНИН"“
+[18/22] Баточина
+    BM 1 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 2 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 3 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 4 (ОСНОВНА ШКОЛА): odbijeno, naziv u odluci „4.“ (sličnost 0, potvrda numeracije 95%)
+[36/36] Кнић
+[174/174] Град Крагујевац
+[11/11] Лапово
+[27/27] Рача
+    BM 2: spojeno po broju (numeracija potvrđena 93%), naziv se razlikuje: odluka „4 _ пеларија крша“ / CSV „МЕСНА КАНЦЕЛАРИЈА“
+[31/31] Топола
+[44/44] Деспотовац
+[91/91] Град Јагодина
+    BM 8: spojeno po broju (numeracija potvrđena 99%), naziv se razlikuje: odluka „ДОМ КУЛТУРЕ“ / CSV „ОСНОВНА ШКОЛА“
+[55/55] Параћин
+[34/36] Рековац
+    BM 1 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 2 (МЕСНА ЗАЈЕДНИЦА): nije nađeno u odluci
+[30/30] Свилајнац
+[31/31] Ћуприја
+[84/84] Град Ужице
+    BM 6: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „“ / CSV „ОСНОВНА ШКОЛА“
+    BM 22: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „“ / CSV „ОСНОВНА ШКОЛА“
+    BM 25: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „“ / CSV „ОСНОВНА ШКОЛА“
+    BM 42: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „“ / CSV „ОСНОВНА ШКОЛА“
+    BM 65: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „“ / CSV „МЕДИЦИНСКА ШКОЛА“
+[1/5] Градска општина Севојно
+    BM 1 (ГРАДСКА ОПШТИНА СЕВОЈНО): odbijeno, naziv u odluci „“ (sličnost 32, potvrda numeracije 33%)
+    BM 2 (СОЛИТЕР "Б" 54): nije nađeno u odluci
+    BM 3 (ОШ "АЛЕКСА ДЕЈОВИЋ"): nije nađeno u odluci
+    BM 5 (БИВШИ МОТЕЛ ПОРЕД ВАТРОГАСНОГ ДОМА): nije nađeno u odluci
+[26/28] Ариље
+    BM 1: spojeno po broju (numeracija potvrđena 85%), naziv se razlikuje: odluka „“ / CSV „СПОРТСКА ХАЛА“
+    BM 2: spojeno po broju (numeracija potvrđena 85%), naziv se razlikuje: odluka „ЗАНАТСКИ ДОМ“ / CSV „СОКОЛСКИ ДОМ“
+    BM 3 (ЗАНАТСКИ ДОМ): nije nađeno u odluci
+    BM 12 (ПОСЛОВНИ ОБЈЕКАТ СЛОБОДАНА НЕДЕЉКОВИЋА): nije nađeno u odluci
+[50/52] Бајина Башта
+    BM 1 (ЈП НАЦИОНАЛНИ ПАРК "ТАРА" - САЛА): nije nađeno u odluci
+    BM 19 (НОВА ШКОЛА): odbijeno, naziv u odluci „АМБУЛАНТА-ВЕЖАЊА“ (sličnost 32, potvrda numeracije 98%)
+[29/29] Косјерић
+    BM 22: spojeno po broju (numeracija potvrđena 93%), naziv se razlikuje: odluka „“ / CSV „КУЋА РАДОВАНОВИЋ ДРАГИШЕ“
+    BM 25: spojeno po broju (numeracija potvrđena 93%), naziv se razlikuje: odluka „КЈП ходник и канцеларија“ / CSV „ПРОСТОРИЈЕ КЈП "ЕЛАН"“
+[39/39] Нова Варош
+[53/53] Пожега
+    BM 1: spojeno po broju (numeracija potvrđena 96%), naziv se razlikuje: odluka „“ / CSV „СКУПШТИНА ОПШТИНЕ ПОЖЕГА“
+[38/48] Прибој
+    BM 6: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „“ / CSV „ЈКП "УСЛУГА" - САЛА“
+    BM 7 (СПОРТСКА ДВОРАНА - ШАХ САЛА): nije nađeno u odluci
+    BM 8 (ГИМНАЗИЈА): nije nađeno u odluci
+    BM 9 (ДЕЧИЈИ ВРТИЋ "НЕВЕН" (ВОДОВОД)): nije nađeno u odluci
+    BM 10 (ОШ "ДЕСАНКА МАКСИМОВИЋ"): nije nađeno u odluci
+    BM 11 (ЕЛЕКТРОДИСТРИБУЦИЈА): nije nađeno u odluci
+    BM 13 (ОШ "ДЕСАНКА МАКСИМОВИЋ" (САЛА)): nije nađeno u odluci
+    BM 14 (МАШИНСКО-ЕЛЕКТРОТЕХНИЧКА ШКОЛА): nije nađeno u odluci
+    BM 15 (ШУМСКА СЕКЦИЈА): nije nađeno u odluci
+    BM 16 (ОШ "ВУК КАРАЏИЋ"): nije nađeno u odluci
+    BM 17 (ОШ "ВУК КАРАЏИЋ"): nije nađeno u odluci
+[60/61] Пријепоље
+    BM 1 (ОСНОВНА ШКОЛА): odbijeno, naziv u odluci „Реч“ (sličnost 30, potvrda numeracije 97%)
+    BM 2: spojeno po broju (numeracija potvrđena 97%), naziv se razlikuje: odluka „до“ ШКОЛА МИЛОШЕВ“ / CSV „ОСНОВНА ШКОЛА“
+[54/68] Сјеница
+    BM 2 (ОСНОВНА ШКОЛА): odbijeno, naziv u odluci „Приватна кућа Ремза Машовића Рима па Киса Кетха Мазомтса“ (sličnost 32, potvrda numeracije 91%)
+    BM 5 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 6 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 7 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 8 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 9 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 10 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 11 (АМБУЛАНТА): nije nađeno u odluci
+    BM 12: spojeno po broju (numeracija potvrđena 91%), naziv se razlikuje: odluka „Основна школа Овзпоупа зкоја“ / CSV „ПРИВАТНА КУЋА РЕМЗА МАШОВИЋА“
+    BM 13 (ОСНОВНА ШКОЛА): red sa tim brojem nije između susednih mesta (sumnjiv broj)
+    BM 39 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 41 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 42 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 67 (ОШ "СВЕТОЗАР МАРКОВИЋ"): nije nađeno u odluci
+    BM 68 (ОШ "СВЕТОЗАР МАРКОВИЋ"): nije nađeno u odluci
+[32/32] Чајетина
+[66/66] Горњи Милановац
+    BM 38: spojeno po broju (numeracija potvrđena 97%), naziv se razlikuje: odluka „ОСНОВНА ШКОЛА“ / CSV „ДОМ“
+[55/55] Ивањица
+[43/43] Лучани
+[104/104] Град Чачак
+[37/37] Врњачка Бања
+[103/103] Град Краљево
+    BM 99: spojeno po broju (numeracija potvrđena 98%), naziv se razlikuje: odluka „“ / CSV „ОСНОВНА ШКОЛА“
+[89/103] Град Нови Пазар
+    BM 11 (КУЋА ЛУКОВИЋ ВУКОЈА): nije nađeno u odluci
+    BM 12 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 13 (КУЋА МУТАВЏИЋ МИЛУТИНА): nije nađeno u odluci
+    BM 14 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 15 (КУЋА МИЈИЛОВИЋ МИЉАНА): nije nađeno u odluci
+    BM 16 (КУЋА ВИДОЈЕВИЋ МИЛОДАРА): nije nađeno u odluci
+    BM 17 (КУЋА ЦРНОВРШАНИН АДЕМА): nije nađeno u odluci
+    BM 18 (ОБЈЕКАТ ТИОСАВЉЕВИЋ ЗОРАНА): nije nađeno u odluci
+    BM 19 (ОШ "РАСТКО НЕМАЊИЋ" ДЕЖЕВА): nije nađeno u odluci
+    BM 20 (ЛОКАЛ ПЕТРОВИЋ ГОРДАНЕ): nije nađeno u odluci
+    BM 21 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 22 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 23 (КАФЕЧАЈНИЦА ДЕРВИШЕВИЋ СЕНИЈЕ): nije nađeno u odluci
+    BM 24 (ОШ "ЈОШАНИЦА" ЛУКАРЕ): nije nađeno u odluci
+    BM 48: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „ОСНОВНА ШКОЛА“ / CSV „КУЋА АЛИЋ БАЈРАМА“
+    BM 52: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „КУЋА КАРИШИК ХАСИБА“ / CSV „КУЋА ОМЕРОВИЋ ИСМАЈИЛА“
+    BM 89: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „ЗАВОД ЗА ЈАВНО ЗДРАВЉЕ“ / CSV „ДОМ ЗДРАВЉА - ХОЛ ОПШТЕ ПРАКСЕ“
+    BM 93: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „СПОРТСКА ХАЛА "20605 МОМ РААВ ЗРОВТ5 АСАРЕМУ“"“ / CSV „СПОРТСКА ХАЛА "DOGUŠ NOVI PAZAR SPORTS ACADEMY"“
+[46/47] Рашка
+    BM 41 (КУЋА ЈОВАНА МАРИЧИЋА): nije nađeno u odluci
+[61/61] Тутин
+[61/61] Александровац
+    BM 59: spojeno po broju (numeracija potvrđena 98%), naziv se razlikuje: odluka „Пи“ / CSV „СШ "СВЕТИ ТРИФУН"“
+[28/28] Брус
+    BM 26: spojeno po broju (numeracija potvrđena 93%), naziv se razlikuje: odluka „та“ / CSV „ОСНОВНА ШКОЛА“
+    BM 28: spojeno po broju (numeracija potvrđena 93%), naziv se razlikuje: odluka „на“ / CSV „СЕОСКИ ДОМ“
+[40/40] Варварин
+[132/132] Град Крушевац
+[49/67] Трстеник
+    BM 1 (ОШ "МИОДРАГ ЧАЈЕТИНАЦ-ЧАЈКА"): nije nađeno u odluci
+    BM 2 (ЛИКОВНИ САЛОН У НАРОДНОМ УНИВЕРЗИТЕТУ): odbijeno, naziv u odluci „Ред. бр.“ (sličnost 19, potvrda numeracije 98%)
+    BM 52 (ОШ "ЉУБИВОЈЕ БАЈИЋ"): nije nađeno u odluci
+    BM 53 (ОШ "ЉУБИВОЈЕ БАЈИЋ"): nije nađeno u odluci
+    BM 54 (ОШ "ЉУБИВОЈЕ БАЈИЋ"): nije nađeno u odluci
+    BM 55 (ОШ "ЉУБИВОЈЕ БАЈИЋ"): nije nađeno u odluci
+    BM 56 (ОШ "ДОБРИЦА ЋОСИЋ"): nije nađeno u odluci
+    BM 57 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 58 (МЕСНА ЗАЈЕДНИЦА): nije nađeno u odluci
+    BM 59 (ОШ "ДОБРИЦА ЋОСИЋ"): nije nađeno u odluci
+    BM 60 (ОШ "ДОБРИЦА ЋОСИЋ"): nije nađeno u odluci
+    BM 61 (ОШ "РАДЕ ДОДИЋ" МИЛУТОВАЦ): nije nađeno u odluci
+    BM 62 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 63 (ОШ "РАДЕ ДОДИЋ" МИЛУТОВАЦ): nije nađeno u odluci
+    BM 64 (ЛОВАЧКО ДРУШТВО): nije nađeno u odluci
+    BM 65 (ОШ "РАДЕ ДОДИЋ" МИЛУТОВАЦ): nije nađeno u odluci
+    BM 66 (ОШ "РАДЕ ДОДИЋ" МИЛУТОВАЦ): nije nađeno u odluci
+    BM 67 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+[18/18] Ћићевац
+    BM 1: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „“ / CSV „КЛУБ ПЕНЗИОНЕРА“
+[47/47] Велика Плана
+[77/78] Град Смедерево
+    BM 4 (ПЛАНИНАРСКО ДРУШТВО "ЧЕЛИК"): odbijeno, naziv u odluci „и а“ (sličnost 33, potvrda numeracije 99%)
+[48/49] Смедеревска Паланка
+    BM 29 (МЕСНА ЗАЈЕДНИЦА): nije nađeno u odluci
+[61/61] Град Пожаревац
+    BM 18: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „“ / CSV „ОСНОВНА ШКОЛА“
+    BM 20: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „к___- "“ / CSV „МЗ "БРАЋА ВУЈОВИЋ"“
+    BM 23: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „“ / CSV „МЗ "БУЛЕВАР"“
+    BM 32: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „“ / CSV „МЕДИЦИНСКА ШКОЛА“
+    BM 34: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „“ / CSV „МЗ "ВАСА ПЕЛАГИЋ"“
+[10/12] Градска општина Костолац
+    BM 5 (ЈП "СРБИЈАШУМЕ"): odbijeno, naziv u odluci „ДАМЕ СР СЕВЕРНИ КУЧАЈ, _ СУ ПОЖАРЕВАЦ МАШИНСКИ ПАРК КОСТОЛАЦ“ (sličnost 32, potvrda numeracije 82%)
+    BM 9 (ВАТРОГАСНИ ДОМ): odbijeno, naziv u odluci „о ~ бо.“ (sličnost 33, potvrda numeracije 82%)
+[30/32] Велико Градиште
+    BM 30 (МЕСНА КАНЦЕЛАРИЈА): nije nađeno u odluci
+    BM 31 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+[30/30] Голубац
+[30/37] Жабари
+    BM 7 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 11 (ОШ "ХЕРОЈ РОСА ТРИФУНОВИЋ" - УЧИОНИЦА БР. 2): nije nađeno u odluci
+    BM 16 (ОШ "ДУДЕ ЈОВИЋ"): nije nađeno u odluci
+    BM 21 (ОШ "ХЕРОЈ РОСА ТРИФУНОВИЋ" - ЂАЧКА КУХИЊА): nije nađeno u odluci
+    BM 26 (ОШ "ДУДЕ ЈОВИЋ"): nije nađeno u odluci
+    BM 29 (ОШ "ХЕРОЈ РОСА ТРИФУНОВИЋ"): nije nađeno u odluci
+    BM 34 (КУЋА ЈАНКОВИЋ РАКИЦЕ): nije nađeno u odluci
+[17/17] Жагубица
+[37/39] Кучево
+    BM 2 (ДОМ КУЛТУРЕ): red sa tim brojem nije između susednih mesta (sumnjiv broj)
+    BM 6: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „МЕСНА ЗАЈЕДНИЦА“ / CSV „ДОМ КУЛТУРЕ“
+    BM 12 (МЕСНА ЗАЈЕДНИЦА): nije nađeno u odluci
+[29/29] Мало Црниће
+    BM 2: spojeno po broju (numeracija potvrđena 97%), naziv se razlikuje: odluka „“ / CSV „МЕСНА ЗАЈЕДНИЦА“
+[45/45] Петровац на Млави
+[48/48] Град Бор
+    BM 16: spojeno po broju (numeracija potvrđena 98%), naziv se razlikuje: odluka „“ / CSV „МЗ "БАКАР"“
+[30/31] Кладово
+    BM 6 (ДОМ ОМЛАДИНЕ): nije nađeno u odluci
+[41/41] Мајданпек
+[70/72] Неготин
+    BM 71 (ДОМ КУЛТУРЕ - ЧИТАОНИЦА): nije nađeno u odluci
+    BM 72 (ДОМ КУЛТУРЕ - ЧИТАОНИЦА): nije nađeno u odluci
+[37/37] Бољевац
+[49/69] Град Зајечар
+    BM 3 (ОШ "ЉУБИЦА РАДОСАВЉЕВИЋ НАДА"): nije nađeno u odluci
+    BM 4 (МЗ "ТИМОК"): nije nađeno u odluci
+    BM 5 (ЗГРАДА СКУПШТИНЕ ГРАДА - МАЛА САЛА): nije nađeno u odluci
+    BM 6 (ПРОСТОРИЈЕ ГРАДСКОГ ИНФОРМАТИВНО-УСЛУЖНОГ ЦЕНТРА): nije nađeno u odluci
+    BM 7 (ВРТИЋ "ЗДРАВАЦ"): nije nađeno u odluci
+    BM 8 (ВРТИЋ "ЂУРЂЕВАК"): nije nađeno u odluci
+    BM 9 (ЦРВЕНИ КРСТ ЗАЈЕЧАР - ИГРАОНИЦА ЗА ДЕЦУ): nije nađeno u odluci
+    BM 17 (МЗ "НИКОЛА ПАШИЋ"): nije nađeno u odluci
+    BM 18 (УДРУЖЕЊЕ ПЕНЗИОНЕРА ГРАДА ЗАЈЕЧАРА): nije nađeno u odluci
+    BM 19 (ЈКСП РАДНА ЈЕДИНИЦА МЕХАНИЗАЦИЈА): nije nađeno u odluci
+    BM 24 (ВРТИЋ "МАСЛАЧАК"): nije nađeno u odluci
+    BM 25 (ПРОДАВНИЦА "ЗАЈЕЧАР ПРОМЕТ" - ПРЕКО ПУТА СТАРОГ МЛИНА): nije nađeno u odluci
+    BM 26 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 27 (ДОМ КУЛТУРЕ - ВЕЛИКА САЛА): nije nađeno u odluci
+    BM 28 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 29 (ОШ "15. МАЈ"): nije nađeno u odluci
+    BM 30 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 31 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 32 (ОШ "ДОСИТЕЈ ОБРАДОВИЋ"): nije nađeno u odluci
+    BM 33 (ОШ "ДОСИТЕЈ ОБРАДОВИЋ"): nije nađeno u odluci
+[65/65] Књажевац
+[32/32] Сокобања
+[52/52] Градска општина Медијана
+[53/53] Градска општина Палилула (Ниш)
+[36/36] Градска општина Црвени крст
+    BM 1: spojeno po broju (numeracija potvrđena 97%), naziv se razlikuje: odluka „ОШ"ВУК КАРАЏИЋ"“ / CSV „ЗАВОД ЗА ЗДРАВСТВЕНУ ЗАШТИТУ РАДНИКА "ЖЕЛЕЗНИЦА СРБИЈЕ" ОГРАНАК НИШ - АМБУЛАНТА ЦРВЕНИ КРСТ“
+[40/40] Градска општина Пантелеј
+    BM 5: spojeno po broju (numeracija potvrđena 88%), naziv se razlikuje: odluka „“ / CSV „ОШ "ЧЕГАР"“
+    BM 7: spojeno po broju (numeracija potvrđena 88%), naziv se razlikuje: odluka „“ / CSV „ОШ "ЧЕГАР"“
+    BM 8: spojeno po broju (numeracija potvrđena 88%), naziv se razlikuje: odluka „“ / CSV „ОШ "ЧЕГАР"“
+    BM 9: spojeno po broju (numeracija potvrđena 88%), naziv se razlikuje: odluka „“ / CSV „ОШ "ЧЕГАР"“
+    BM 10: spojeno po broju (numeracija potvrđena 88%), naziv se razlikuje: odluka „“ / CSV „ОШ "ЧЕГАР"“
+[16/16] Градска општина Нишка Бања
+[85/88] Алексинац
+    BM 9 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 10 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 38: spojeno po broju (numeracija potvrđena 93%), naziv se razlikuje: odluka „ЦРКВЕНА КУЋА“ / CSV „ПРИВАТНА КУЋА МИЛОША ЂОРИЋА“
+    BM 86 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+[31/31] Гаџин Хан
+[37/37] Дољевац
+[4/26] Мерошина
+    BM 5 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 6 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 7 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 8 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 9 (СТАРА ШКОЛА): nije nađeno u odluci
+    BM 10 (МЕСНА ЗАЈЕДНИЦА): nije nađeno u odluci
+    BM 11 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 12 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 13 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 14 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 15 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 16 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 17 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 18 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 19 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 20 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 21 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 22 (ЗГРАДА МЕСНЕ ЗАЈЕДНИЦЕ): nije nađeno u odluci
+    BM 23 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 24 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 25 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 26 (МЕСНА ЗАЈЕДНИЦА): nije nađeno u odluci
+[21/21] Ражањ
+[42/42] Сврљиг
+[12/31] Блаце
+    BM 3 (КУЛТУРНИ ЦЕНТАР "ДРАИНАЦ"): nije nađeno u odluci
+    BM 4 (ЦЕНТАР ЗА СОЦИЈАЛНИ РАД): nije nađeno u odluci
+    BM 5 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 6 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 7 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 8 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 9 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 10 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 21 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 22 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 23 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 24 (ЗГРАДА ДОМА): nije nađeno u odluci
+    BM 25 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 26 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 27 (ЗГРАДА МИЛЕНКОВИЋ МИЛУТИНА): nije nađeno u odluci
+    BM 28 (ЗГРАДА ПАВЛОВИЋ АНДРЕЈЕ): nije nađeno u odluci
+    BM 29 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 30 (МЕСНА ЗАЈЕДНИЦА): nije nađeno u odluci
+    BM 31 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+[26/27] Житорађа
+    BM 21 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+[48/48] Куршумлија
+[91/91] Прокупље
+    BM 55: spojeno po broju (numeracija potvrđena 98%), naziv se razlikuje: odluka „ОСНОВНА ШКОЛА“ / CSV „ШУМСКА КУЋА“
+[41/41] Бабушница
+[35/36] Бела Паланка
+    BM 35 (МЕСНА ЗАЈЕДНИЦА): nije nađeno u odluci
+[23/23] Димитровград
+    BM 3: spojeno po broju (numeracija potvrđena 96%), naziv se razlikuje: odluka „св. КАРИЦА И МЕТОДИЈА““ / CSV „ГИМНАЗИЈА „СВ. КИРИЛО И МЕТОДИЈЕ““
+[84/84] Град Пирот
+    BM 5: spojeno po broju (numeracija potvrđena 99%), naziv se razlikuje: odluka „ЧЕЈРРИСКАРАЏИР.“ / CSV „ОШ "ВУК КАРАЏИЋ"“
+[24/24] Бојник
+[58/58] Власотинце
+[39/42] Лебане
+    BM 1: spojeno po broju (numeracija potvrđena 91%), naziv se razlikuje: odluka „основни СУД“ / CSV „ОПШТИНСКИ СУД“
+    BM 23 (ДРУШТВЕНА ЗГРАДА): odbijeno, naziv u odluci „23.“ (sličnost 0, potvrda numeracije 91%)
+    BM 31 (МЕСНА ЗАЈЕДНИЦА ПЕРТАТЕ): nije nađeno u odluci
+    BM 39 (ДРУШТВЕНА ЗГРАДА): odbijeno, naziv u odluci „39.“ (sličnost 0, potvrda numeracije 91%)
+[185/186] Град Лесковац
+    BM 4: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „пи ДУ ЦА“ / CSV „МЗ "ДУБОЧИЦА"“
+    BM 82: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „ОСНОВНА ШКОЛА УЂУРА ЈАКШИЋ" ТУРЕКОВАЦ“ / CSV „ОШ "ЂУРА ЈАКШИЋ" - ИЗДВОЈЕНО ОДЕЉЕЊЕ“
+    BM 83: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „ОСНОВНА ШКОЛА УЂУРА ЈАКШИЋ" ТУРЕКОВАЦ“ / CSV „ОШ "ЂУРА ЈАКШИЋ" - ИЗДВОЈЕНО ОДЕЉЕЊЕ“
+    BM 105: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „“ / CSV „МЕСНА ЗАЈЕДНИЦА“
+    BM 111: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „“ / CSV „МЕСНА ЗАЈЕДНИЦА“
+    BM 123: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „АКИЋ ит | ГРАЈЕВЦЕ“ / CSV „ПРИВАТНЕ ПРОСТОРИЈЕ ЦАКИЋ СЛАВИШЕ“
+    BM 124: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „ОСНОВНА ШКОЛА ИЗДВОЈЕНО О ДЕЉЕЊЕ У КУМАРЕВУ“ / CSV „ОШ "РАДОЈЕ ДОМАНОВИЋ" - ИЗДВОЈЕНО ОДЕЉЕЊЕ“
+    BM 150: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „“ / CSV „СЕОСКА ЗГРАДА“
+    BM 153 (МЕСНА ЗАЈЕДНИЦА): odbijeno, naziv u odluci „ГУБЕРЕВАЦ“ (sličnost 29, potvrda numeracije 92%)
+    BM 160: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „ДОЛИ СЛАТИНА“ / CSV „ДОМ КУЛТУРЕ“
+    BM 161: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „КАРАЏИЋ" ВЕЛИКА ГРАБОВНИЦА“ / CSV „ОШ "ВУК КАРАЏИЋ" - ИЗДВОЈЕНО ОДЕЉЕЊЕ“
+    BM 166: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „де СЕ па““ / CSV „ДОМ ПАЛИХ БОРАЦА“
+[24/24] Медвеђа
+[3/12] Црна Трава
+    BM 3 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 4 (МЕСНА КАНЦЕЛАРИЈА): nije nađeno u odluci
+    BM 5 (МЕСНА КАНЦЕЛАРИЈА): nije nađeno u odluci
+    BM 6 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 7 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 9 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+    BM 10 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+    BM 11 (АМБУЛАНТА): nije nađeno u odluci
+    BM 12 (ОМЛАДИНСКИ КЛУБ): nije nađeno u odluci
+[110/113] Град Врање
+    BM 1 (ОШ "РАДОЈЕ ДОМАНОВИЋ"): nije nađeno u odluci
+    BM 2 (ОШ "РАДОЈЕ ДОМАНОВИЋ"): nije nađeno u odluci
+    BM 4 (ОШ "СВЕТОЗАР МАРКОВИЋ"): red sa tim brojem nije između susednih mesta (sumnjiv broj)
+    BM 10: spojeno po broju (numeracija potvrđena 98%), naziv se razlikuje: odluka „“ / CSV „ЈП ВОДОВОД“
+    BM 77: spojeno po broju (numeracija potvrđena 98%), naziv se razlikuje: odluka „ЛОВА РАТКЕ“ / CSV „ЛОКАЛ СИМОНОВИЋ РАТКЕ“
+[30/31] Босилеград
+    BM 19: spojeno po broju (numeracija potvrđena 87%), naziv se razlikuje: odluka „МЕСНА ЗАЈЕДНИЦА“ / CSV „ОСНОВНА ШКОЛА“
+    BM 28: spojeno po broju (numeracija potvrđena 87%), naziv se razlikuje: odluka „“ / CSV „ОСНОВНА ШКОЛА“
+    BM 29: spojeno po broju (numeracija potvrđena 87%), naziv se razlikuje: odluka „“ / CSV „ОСНОВНА ШКОЛА“
+    BM 30 (ОСНОВНА ШКОЛА): odbijeno, naziv u odluci „пета“ (sličnost 31, potvrda numeracije 87%)
+[57/59] Бујановац
+    BM 6 (ОШ "МУХАРЕМ КАДРИУ" - УЧИОНИЦА): nije nađeno u odluci
+    BM 16: spojeno po broju (numeracija potvrđena 88%), naziv se razlikuje: odluka „ФРАТЕРИ"“ / CSV „ОШ "САМИ ФРАШЕРИ"“
+    BM 58 (СШ "СЕЗАИ СУРОИ"): nije nađeno u odluci
+[51/51] Владичин Хан
+[37/37] Прешево
+[44/44] Сурдулица
+    BM 2: spojeno po broju (numeracija potvrđena 91%), naziv se razlikuje: odluka „РОМАНОМ“ / CSV „ОСНОВНИ СУД“
+    BM 5: spojeno po broju (numeracija potvrđena 91%), naziv se razlikuje: odluka „БАЛОН ХАЛА СУРДУЛИЦА“ / CSV „ПРЕДШКОЛСКА УСТАНОВА-НОВИ ОБЈЕКАТ“
+    BM 6: spojeno po broju (numeracija potvrđena 91%), naziv se razlikuje: odluka „ПОСЛОВНИ ПРОСТОР „ЗВЕЗДА“ СУРДУЛИЦА“ / CSV „СУРДУЛИЧКИ КУЛТУРНИ ЦЕНТАР“
+    BM 35: spojeno po broju (numeracija potvrđena 91%), naziv se razlikuje: odluka „МЕСНА КАНЦЕЛАРИЈА“ / CSV „МЕСНА ЗАЈЕДНИЦА“
+[25/25] Трговиште
+    BM 3: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „“ / CSV „ОСНОВНА ШКОЛА“
+[2/2] Косово Поље
+[3/3] Липљан
+[7/7] Приштина
+[3/3] Штрпце
+[0/1] Обилић
+    BM 1 (ОСНОВНА ШКОЛА „ДРИНКА ПАВЛОВИЋ“): nije nađeno u odluci
+[1/1] Урошевац
+[1/1] Вучитрн
+[6/6] Звечан
+[3/3] Зубин Поток
+[8/8] Косовска Митровица
+[6/6] Лепосавић
+[1/1] Србица
+[1/1] Витина
+[4/4] Гњилане
+[4/4] Косовска Каменица
+[1/1] Ново Брдо
+[1/1] Пећ
+[0/1] Клина
+    BM 1 (ОСНОВНА ШКОЛА „МЕША СЕЛИМОВИЋ“): nije nađeno u odluci
+[1/1] Исток
+[3/3] Гора
+[1/1] Призрен
+[1/1] Ораховац
+[29/29] Заводи за извршење кривичних санкција
+[92/93] Иностранство
+    BM 2: spojeno po broju (numeracija potvrđena 96%), naziv se razlikuje: odluka „АУСТРАЛИЈА ил КОНЗУЛАТРС“ / CSV „ГЕНЕРАЛНИ КОНЗУЛАТ РС СИДНЕЈ“
+    BM 7 (ГЕНЕРАЛНИ КОНЗУЛАТ РС САЛЦБУРГ): nije nađeno u odluci
+    BM 42: spojeno po broju (numeracija potvrđena 96%), naziv se razlikuje: odluka „ИРСКА САК|ТОМ НОТЕ. ВЦАМСНАКОЗТОМУМ“ / CSV „CARLTON HOTEL BLANCHARDSTOWN“
+    BM 54: spojeno po broju (numeracija potvrđena 96%), naziv se razlikuje: odluka „МАЂАРСКА МЕША“ / CSV „АМБАСАДА РС БУДИМПЕШТА“
+    BM 63: spojeno po broju (numeracija potvrđena 96%), naziv se razlikuje: odluka „НОВИ ЗЕЛАНД МУН'ТЕСЦЕРЕ КОЛЕЏ“ / CSV „WHITECLIFFE КОЛЕЏ“
