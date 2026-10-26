@@ -1,0 +1,56 @@
+# OCR odluka o biračkim mestima, paralelno na 20 mašina. Pokreće se ručno (Actions -> OCR odluka -> Run).
+# Rezultat: artefakt "rik_ocr" sa JSON fajlovima za parse_odluke.py.
+name: OCR odluka
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  skidanje:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Skini odluke sa RIK-a
+        run: python rik_biracka_mesta.py download
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rik_fajlovi
+          path: |
+            rik_fajlovi
+            rik_dokumenti.json
+          retention-days: 3
+
+  ocr:
+    needs: skidanje
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        deo: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Tesseract i Python paketi
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq tesseract-ocr
+          pip install -q -r requirements.txt
+          mkdir -p tessdata_fast
+          for m in srp srp_latn osd eng; do
+            curl -sSL -o tessdata_fast/$m.traineddata https://github.com/tesseract-ocr/tessdata_fast/raw/main/$m.traineddata
+          done
+      - uses: actions/download-artifact@v4
+        with:
+          name: rik_fajlovi
+      - name: OCR (deo ${{ matrix.deo }})
+        run: python ocr_odluke.py $(nproc) --deo ${{ matrix.deo }} 20
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rik_ocr-${{ matrix.deo }}
+          path: rik_ocr
+          retention-days: 7

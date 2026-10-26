@@ -1,0 +1,12 @@
+# veliki ili lokalni fajlovi (skidaju se/prave skriptama)
+rik_fajlovi/
+rik_ocr/
+tessdata/
+tessdata_fast/
+debug/
+*.tmp
+__pycache__/
+ocr_log.txt
+# CSV rezultata sa RIK-a (update.py ga skida sam)
+*_26.10.2026.csv
+*_26_10_2026_*.csv

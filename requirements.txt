@@ -1,0 +1,7 @@
+pdfplumber
+pypdfium2
+pytesseract
+pillow
+opencv-python-headless
+numpy
+rapidfuzz

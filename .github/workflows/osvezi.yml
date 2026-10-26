@@ -1,0 +1,45 @@
+# Osvežava izbori2026.html iz CSV-a RIK-a i objavljuje sajt na GitHub Pages.
+# Zakazano na svakih 10 minuta (GitHub ne garantuje tačno vreme; kašnjenje od par minuta je uobičajeno).
+name: Osveži rezultate
+
+on:
+  # raspored se uključuje kad sajt bude spreman (skloni # sa sledeća dva reda)
+  # schedule:
+  #   - cron: "*/10 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: osvezi
+  cancel-in-progress: false
+
+jobs:
+  osvezi:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Skini CSV i ažuriraj HTML
+        run: python update.py
+      - name: Sačuvaj promenu u repozitorijumu
+        run: |
+          if git diff --quiet izbori2026.html; then echo "Nema promena"; exit 0; fi
+          git config user.name "izbori-bot"
+          git config user.email "izbori-bot@users.noreply.github.com"
+          git add izbori2026.html
+          git commit -m "Rezultati: $(grep -o '"snapshot":"[^"]*"' izbori2026.html | cut -d'"' -f4)"
+          git push
+      - name: Pripremi sajt
+        run: mkdir -p _site && cp izbori2026.html _site/index.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - uses: actions/deploy-pages@v4
