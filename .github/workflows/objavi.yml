@@ -1,0 +1,31 @@
+# Objavljuje izbori2026.html na GitHub Pages bez menjanja repozitorijuma (posle izmena koda ili naselja).
+# Pokreće se sam pri svakom push-u na main koji menja sajt, ili ručno.
+name: Objavi sajt
+
+on:
+  push:
+    branches: [main]
+    paths: ["izbori2026.html"]
+  workflow_dispatch: {}
+
+permissions:
+  pages: write
+  id-token: write
+
+concurrency:
+  group: osvezi
+  cancel-in-progress: false
+
+jobs:
+  objavi:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pripremi sajt
+        run: mkdir -p _site && cp izbori2026.html _site/index.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - uses: actions/deploy-pages@v4

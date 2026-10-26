@@ -1,11 +1,11 @@
 # Osvežava izbori2026.html iz CSV-a RIK-a i objavljuje sajt na GitHub Pages.
-# Zakazano na svakih 10 minuta (GitHub ne garantuje tačno vreme; kašnjenje od par minuta je uobičajeno).
+# Zakazano na svakih 30 minuta (GitHub ne garantuje tačno vreme; kašnjenje od par minuta je uobičajeno).
+# Za objavu izmena koda/naselja bez povlačenja rezultata koristi objavi.yml.
 name: Osveži rezultate
 
 on:
-  # raspored se uključuje kad sajt bude spreman (skloni # sa sledeća dva reda)
-  # schedule:
-  #   - cron: "*/10 * * * *"
+  schedule:
+    - cron: "*/30 * * * *"
   workflow_dispatch: {}
 
 permissions:
