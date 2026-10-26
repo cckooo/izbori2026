@@ -1,11 +1,11 @@
 IZVEŠTAJ O SPAJANJU ODLUKA O BIRAČKIM MESTIMA SA REZULTATIMA
 Ukupno biračkih mesta u CSV-u: 8392
-Spojeno (naselja upisana): 8317 (99.1%), od toga samo po broju uz potvrđenu numeraciju: 154, po nazivu između potvrđenih suseda (broj nije pročitan): 92, ručno prepisano sa strane odluke (rucno_naselja.csv): 133
+Spojeno (naselja upisana): 8324 (99.2%), od toga samo po broju uz potvrđenu numeraciju: 154, po nazivu između potvrđenih suseda (broj nije pročitan): 92, ručno prepisano sa strane odluke (rucno_naselja.csv): 140
 Opština bez odluke ili bez pročitanih redova: 0 mesta
-Mesto nije nađeno u odluci (OCR nije pročitao broj ili red): 54
-Odbijeno zbog nepoklapanja naziva: 21
+Mesto nije nađeno u odluci (OCR nije pročitao broj ili red): 51
+Odbijeno zbog nepoklapanja naziva: 17
 Provera položaja u odluci (red nije između susednih mesta): 5 slučajeva, od toga ostavljeno prazno: 4
-Naselje prema spisku RZS (Popis 2022): potvrđeno 7108, od toga OCR ispravki 77; gradsko naselje opštine 1017; nepotvrđeno 11; bez spiska (Kosovo, inostranstvo, zavodi) 181
+Naselje prema spisku RZS (Popis 2022): potvrđeno 7115, od toga OCR ispravki 77; gradsko naselje opštine 1017; nepotvrđeno 11; bez spiska (Kosovo, inostranstvo, zavodi) 181
 
 DOKUMENTI (način čitanja, opštine, broj pročitanih mesta):
   ocr  Ада / Odluka o određivanju biračkih mesta za izbor narodnih poslanika raspisanih za 25 oktobar 2026..pdf: Ада; zapisa 29, sa brojem 29
@@ -302,8 +302,7 @@ PO OPŠTINAMA:
 [113/113] Градска општина Чукарица
 [50/50] Бачка Топола
     BM 1: spojeno po broju (numeracija potvrđena 96%), naziv se razlikuje: odluka „“иу“ / CSV „ЗГРАДА "НОВИ БАМБИ"“
-[22/23] Мали Иђош
-    BM 4 (ОШ "АДИ ЕНДРЕ"): nije nađeno u odluci
+[23/23] Мали Иђош
 [102/102] Град Суботица
 [31/31] Житиште
 [72/74] Град Зрењанин
@@ -322,8 +321,7 @@ PO OPŠTINAMA:
     BM 29: spojeno po broju (numeracija potvrđena 87%), naziv se razlikuje: odluka „м а Г“ / CSV „ОШ "МИЛАН СТАНЧИЋ - УЧА" - 4. УЧИОНИЦА“
 [16/17] Сечањ
     BM 13 (ОШ "АЛЕКСА ШАНТИЋ"): red sa tim brojem nije između susednih mesta (sumnjiv broj)
-[28/29] Ада
-    BM 22 (ЗАБАВИШТЕ): nije nađeno u odluci
+[29/29] Ада
 [33/33] Кањижа
     BM 13: spojeno po broju (numeracija potvrđena 97%), naziv se razlikuje: odluka „ОКУ „СКЕБА““ / CSV „ОКY "CNESA"“
 [60/60] Град Кикинда
@@ -350,9 +348,8 @@ PO OPŠTINAMA:
 [26/26] Ковин
     BM 1: spojeno po broju (numeracija potvrđena 96%), naziv se razlikuje: odluka „КОВИН“ / CSV „ОШ "ЈОВАН ЈОВАНОВИЋ ЗМАЈ"“
 [25/25] Опово
-[78/79] Град Панчево
+[79/79] Град Панчево
     BM 5: spojeno po broju (numeracija potvrđena 97%), naziv se razlikuje: odluka „О МАРКО НРЕ“ / CSV „ОШ "ЖАРКО ЗРЕЊАНИН"“
-    BM 6 (ОШ "ЖАРКО ЗРЕЊАНИН"): odbijeno, naziv u odluci „пој“ (sličnost 32, potvrda numeracije 97%)
 [23/23] Пландиште
 [29/29] Апатин
 [40/40] Кула
@@ -379,9 +376,8 @@ PO OPŠTINAMA:
 [38/38] Бечеј
     BM 2: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „ш И БРЕДЕНЕ " “"“ / CSV „ШКОЛА ЗА ОСНОВНО И СРЕДЊЕ ОБРАЗОВАЊЕ "БРАТСТВО"“
     BM 38: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „МОМ НУПТАНЕ РАДИЧЕВИЋ“ / CSV „ЦДОМ КУЛТУРЕ“
-[35/36] Врбас
+[36/36] Врбас
     BM 2: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „"ОВА = БДАРЕ“ / CSV „НОВА АМБУЛАНТА "СТАРИ ВРБАС"“
-    BM 3 (ПУ "БОШКО БУХА"): odbijeno, naziv u odluci „ВЕЛИ на“ (sličnost 27, potvrda numeracije 94%)
 [30/31] Жабаљ
     BM 17: spojeno po broju (numeracija potvrđena 97%), naziv se razlikuje: odluka „“ / CSV „СШ "22.ОКТОБАР"“
     BM 21 (ОШ "ЂУРА ЈАКШИЋ" - СТАРА ЗГРАДА): nije nađeno u odluci
@@ -404,8 +400,7 @@ PO OPŠTINAMA:
 [14/14] Ириг
 [30/30] Пећинци
     BM 19: spojeno po broju (numeracija potvrđena 97%), naziv se razlikuje: odluka „СРЕДЊА ШКОЛА“ / CSV „ОСНОВНА ШКОЛА“
-[42/43] Рума
-    BM 39 (ОШ "ВЕЉКО ДУГОШЕВИЋ"): odbijeno, naziv u odluci „АРЛ БИМ“ (sličnost 23, potvrda numeracije 98%)
+[43/43] Рума
 [60/60] Град Сремска Митровица
     BM 37: spojeno po broju (numeracija potvrđena 98%), naziv se razlikuje: odluka „ОШ "СЛОБОДАН БАЈИЋ - ПАЈА"“ / CSV „ОШ "ЈОВАН ПОПОВИЋ"“
 [53/53] Стара Пазова
@@ -425,9 +420,8 @@ PO OPŠTINAMA:
 [34/34] Љубовија
 [29/29] Мали Зворник
 [100/100] Град Шабац
-[102/103] Град Ваљево
+[103/103] Град Ваљево
     BM 4: spojeno po broju (numeracija potvrđena 99%), naziv se razlikuje: odluka „“ / CSV „ОШ "СЕСТРЕ ИЛИЋ"“
-    BM 31 (ОШ "ЗДРАВКО ЈОВАНОВИЋ"): nije nađeno u odluci
 [34/34] Лајковац
 [30/30] Љиг
 [38/38] Мионица
@@ -478,8 +472,7 @@ PO OPŠTINAMA:
 [53/53] Пожега
     BM 1: spojeno po broju (numeracija potvrđena 96%), naziv se razlikuje: odluka „“ / CSV „СКУПШТИНА ОПШТИНЕ ПОЖЕГА“
 [48/48] Прибој
-[60/61] Пријепоље
-    BM 1 (ОСНОВНА ШКОЛА): odbijeno, naziv u odluci „Реч“ (sličnost 30, potvrda numeracije 97%)
+[61/61] Пријепоље
     BM 2: spojeno po broju (numeracija potvrđena 97%), naziv se razlikuje: odluka „до“ ШКОЛА МИЛОШЕВ“ / CSV „ОСНОВНА ШКОЛА“
 [68/68] Сјеница
     BM 12: spojeno po broju (numeracija potvrđena 91%), naziv se razlikuje: odluka „Основна школа Овзпоупа зкоја“ / CSV „ПРИВАТНА КУЋА РЕМЗА МАШОВИЋА“
