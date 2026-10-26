@@ -14,8 +14,11 @@ Izlaz: rik_ocr/<opstina>__<fajl>.json  ->
 Već obrađeni fajlovi se preskaču (obriši JSON da se ponovo obradi).
 
 Pokretanje:  python ocr_odluke.py [broj_procesa] [--deo i n] [--ponovi]
-  --deo i n  obradi samo i-ti od n delova (0..n-1), podeljenih po broju strana (GitHub Actions matrica)
-  --ponovi   ponovo obradi samo sumnjive strane (tabela bez teksta) u već gotovim JSON fajlovima
+  --deo i n          obradi samo i-ti od n delova (0..n-1), podeljenih po broju strana (GitHub Actions matrica)
+  --ponovi           ponovo obradi samo sumnjive strane (tabela bez teksta) u već gotovim JSON fajlovima
+  --spisak F         upiši spisak sumnjivih strana u F (JSON)
+  --strane F         obradi samo strane sa spiska F (uz --deo i n) -> rik_ocr_strane/
+  --spoji D          ubaci strane iz foldera D u rik_ocr/
 """
 import json
 import os
@@ -329,12 +332,54 @@ def redo(nproc):
             jobs += [(jf, HERE / d["izvor"], i) for i, p in enumerate(d["strane"]) if suspicious(p)]
     print(f"Sumnjivih strana: {len(jobs)}", flush=True)
     with Pool(nproc) as pool:
-        res = pool.map(ocr_page, [(f, i, "ocr") for _, f, i in jobs], chunksize=1)
-    for (jf, _, i), r in zip(jobs, res):
+        # svaka strana se upisuje čim je gotova, da se rad ne izgubi ako se proces prekine
+        for k, r in enumerate(pool.imap(ocr_page, [(f, i, "ocr") for _, f, i in jobs], chunksize=1)):
+            jf, _, i = jobs[k]
+            d = json.loads(jf.read_text(encoding="utf-8"))
+            d["strane"][i] = r
+            jf.write_text(json.dumps(d, ensure_ascii=False), encoding="utf-8")
+            print(f"  {k + 1}/{len(jobs)}", jf.stem[:60], "str.", i + 1, "->",
+                  "i dalje sumnjiva" if suspicious(r) else "popravljena", flush=True)
+
+
+def list_suspicious(path):
+    """Upiše spisak sumnjivih strana [[izvor, strana], ...] (za obradu na GitHub Actions)."""
+    jobs = []
+    for jf in sorted(OUT.glob("*.json")):
         d = json.loads(jf.read_text(encoding="utf-8"))
-        d["strane"][i] = r
+        if d["nacin"] == "ocr":
+            jobs += [[d["izvor"], i] for i, p in enumerate(d["strane"]) if suspicious(p)]
+    Path(path).write_text(json.dumps(jobs, ensure_ascii=False, indent=0), encoding="utf-8")
+    print(f"Sumnjivih strana: {len(jobs)} -> {path}")
+
+
+def pages_from_list(path, part, nproc):
+    """Obradi strane sa spiska (deo part=(i, n)); izlaz: rik_ocr_strane/<izvor>__<strana>.json."""
+    jobs = json.loads(Path(path).read_text(encoding="utf-8"))
+    if part:
+        jobs = jobs[part[0]::part[1]]
+    out = HERE / "rik_ocr_strane"
+    out.mkdir(exist_ok=True)
+    with Pool(nproc) as pool:
+        for (izvor, i), r in zip(jobs, pool.imap(ocr_page, [(HERE / s, i, "ocr") for s, i in jobs], chunksize=1)):
+            name = Path(izvor).parent.name + "__" + Path(izvor).stem + f"__{i}.json"
+            (out / name).write_text(json.dumps({"izvor": izvor, "strana": i, "rezultat": r}, ensure_ascii=False),
+                                    encoding="utf-8")
+            print(izvor, "str.", i + 1, "->", "i dalje sumnjiva" if suspicious(r) else "popravljena", flush=True)
+
+
+def merge_pages(folder):
+    """Ubaci strane obrađene posebno (rik_ocr_strane/*.json) u rik_ocr/."""
+    n = 0
+    for f in sorted(Path(folder).rglob("*.json")):
+        p = json.loads(f.read_text(encoding="utf-8"))
+        src = Path(p["izvor"])
+        jf = OUT / (src.parent.name + "__" + src.stem + ".json")
+        d = json.loads(jf.read_text(encoding="utf-8"))
+        d["strane"][p["strana"]] = p["rezultat"]
         jf.write_text(json.dumps(d, ensure_ascii=False), encoding="utf-8")
-        print("  ", jf.stem[:60], "str.", i + 1, "->", "i dalje sumnjiva" if suspicious(r) else "popravljena")
+        n += 1
+    print(f"Ubačeno strana: {n}")
 
 
 def main():
@@ -344,12 +389,21 @@ def main():
         args.remove("--ponovi")
         redo(int(args[0]) if args else 2)
         return
+    if "--spisak" in args:          # --spisak fajl.json : upiši spisak sumnjivih strana
+        list_suspicious(args[args.index("--spisak") + 1])
+        return
+    if "--spoji" in args:           # --spoji folder : ubaci posebno obrađene strane
+        merge_pages(args[args.index("--spoji") + 1])
+        return
     part = None
     if "--deo" in args:
         k = args.index("--deo")
         part = (int(args[k + 1]), int(args[k + 2]))
         del args[k:k + 3]
     nproc = int(args[0]) if args else max(1, (os.cpu_count() or 2))
+    if "--strane" in args:          # --strane fajl.json [--deo i n] : obradi samo strane sa spiska
+        pages_from_list(args[args.index("--strane") + 1], part, nproc)
+        return
     OUT.mkdir(exist_ok=True)
     todo = []
     for f in sorted(SRC.rglob("*")):

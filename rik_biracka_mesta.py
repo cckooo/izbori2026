@@ -8,6 +8,7 @@ JSON API-ja `get-additional-documents`, pa skripta ide direktno na njega
 
 Pokretanje:
     python rik_biracka_mesta.py download   # spisak u rik_dokumenti.json + PDF-ovi u rik_fajlovi/
+    python rik_biracka_mesta.py download --samo ponovi_strane.json   # samo fajlovi sa spiska
 
 Dalje: ocr_odluke.py (tabele i tekst iz PDF-ova), pa parse_odluke.py (spajanje sa rezultatima).
 """
@@ -80,6 +81,10 @@ def list_documents() -> list:
 
 
 def download():
+    # --samo spisak.json: skini samo fajlove sa spiska [[izvor, strana], ...] (ocr_odluke.py --spisak)
+    only = None
+    if "--samo" in sys.argv:
+        only = {s for s, _ in json.loads(Path(sys.argv[sys.argv.index("--samo") + 1]).read_text(encoding="utf-8"))}
     OUT.mkdir(exist_ok=True)
     recs = list_documents()
     saved = skipped = 0
@@ -93,6 +98,8 @@ def download():
         d.mkdir(exist_ok=True)
         for href in r["linkovi"]:
             f = d / safe(Path(urllib.parse.unquote(href.split("?")[0])).name)
+            if only is not None and f.relative_to(HERE).as_posix() not in only:
+                continue
             if not f.exists():
                 f.write_bytes(http(href))
                 saved += 1

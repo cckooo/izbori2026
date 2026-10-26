@@ -1,0 +1,56 @@
+# Ponovni OCR samo za strane sa spiska ponovi_strane.json (npr. pogrešno rotirane), na 6 mašina.
+# Spisak se pravi lokalno: python ocr_odluke.py --spisak ponovi_strane.json
+# Rezultat: artefakti "rik_ocr_strane-*"; lokalno: python ocr_odluke.py --spoji <folder>
+name: OCR strana
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  skidanje:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Skini samo potrebne odluke sa RIK-a
+        run: python rik_biracka_mesta.py download --samo ponovi_strane.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rik_fajlovi_strane
+          path: rik_fajlovi
+          retention-days: 3
+
+  ocr:
+    needs: skidanje
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        deo: [0, 1, 2, 3, 4, 5]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Tesseract i Python paketi
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq tesseract-ocr
+          pip install -q -r requirements.txt
+          mkdir -p tessdata_fast
+          for m in srp srp_latn osd eng; do
+            curl -sSL -o tessdata_fast/$m.traineddata https://github.com/tesseract-ocr/tessdata_fast/raw/main/$m.traineddata
+          done
+      - uses: actions/download-artifact@v4
+        with:
+          name: rik_fajlovi_strane
+          path: rik_fajlovi
+      - name: OCR strana (deo ${{ matrix.deo }})
+        run: python ocr_odluke.py $(nproc) --strane ponovi_strane.json --deo ${{ matrix.deo }} 6
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rik_ocr_strane-${{ matrix.deo }}
+          path: rik_ocr_strane
+          retention-days: 7
