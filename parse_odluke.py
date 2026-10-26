@@ -215,6 +215,44 @@ def clean_naselja(s):
     return s[:1].upper() + s[1:] if s else s
 
 
+def nice(s):
+    """"СТАРО ГЛОГОВЦЕ" -> "Старо Глоговце"; tekst koji nije sav velikim slovima ostaje."""
+    s = s.strip(" .,;:-–")
+    return s.title() if s.isupper() else s
+
+
+def split_area(area, adresa, opstina):
+    """Područje iz odluke -> (naselje, ulice). Naselje je kratko ime mesta, ulice ostatak (ili prazno)."""
+    t = re.sub(r"^(улице|ulice)\s*:\s*", "", area.strip(), flags=re.I)
+    m = re.match(r"^(?:насеље|naselje)\s+([^:,]{2,40}):\s*(.+)$", t, re.I | re.S) or \
+        re.match(r"^(?:насеље|naselje)\s*:\s*(.{2,40}?)\s+(?:улице|ulice)\s*[;:]\s*(.+)$", t, re.I | re.S)
+    if m:
+        return nice(m.group(1)), m.group(2)
+    m = re.match(r"^([^,(:\d]{3,40}?)\s*(?:\(\s*нема улице\s*\)|[-–]\s*нема улице|\(\s*nema ulice\s*\)|[-–]\s*nema ulice)",
+                 t, re.I)
+    if m:
+        return nice(m.group(1)), t
+    a = adresa.strip()
+    first = a.split(",")[0].strip() if "," in a else (a if not re.search(r"\d", a) else "")
+    first = re.split(r"\s+(?:трг|ул\.?|улица|бр\.?|trg|ul\.?|ulica|br\.?)(?:\s|$)", first, flags=re.I)[0].strip()
+    items = [x.strip(" .") for x in re.split(r",|;|\s+и\s+|\s+i\s+", t) if x.strip(" .")]
+    street = re.compile(r"(ска|чка|шка|цка|ића|ина|ова|ева|ског|ских|ата|ника|ska|čka|ića|ina|ova|eva)$"
+                        r"|улиц|ulic|трг|trg|пут|put|булевар|bulevar|\d", re.I)
+    if t and items and len(items) <= 4 and all(len(x.split()) <= 3 for x in items) \
+            and not any(street.search(x) for x in items) \
+            and (not a or any(fuzz.ratio(asc(x), asc(first or a)) >= 85 for x in items)):
+        return nice(t), ""  # samo sela, a jedno je mesto biračkog mesta: "Папратиште и Табановићи"
+    if items and not street.search(items[0]) and len(items[0].split()) <= 3 \
+            and first and fuzz.ratio(asc(items[0]), asc(first)) >= 85:
+        return nice(items[0]), t  # selo pa ulice: "Пауне, Виноградарска, Солунских ратника"
+    m = re.match(r"^([^,(:\d]{3,30}?)\s+[–-]\s+\S", t)
+    if m:
+        return nice(m.group(1)), t[m.end(1):].strip(" –-")
+    if first and not re.search(r"\d|^ул\b|^ul\b|улиц|ulic", first, re.I) and len(first.split()) <= 4:
+        return nice(first), t
+    return re.sub(r"^(Градска општина|Општина|Град)\s+|\s*\(.*\)$", "", opstina), t
+
+
 def extract_records(doc, targets):
     """Iz elemenata dokumenta vadi zapise {br, naziv, adresa, naselja, cilj}."""
     recs, roles, cur_target = [], None, (targets[0] if len(targets) == 1 else None)
@@ -411,9 +449,11 @@ def main():
                 stats["odbijeno" if "odbijeno" in why[k] else "nije_nadjeno"] += 1
                 continue
             src, r, s, how = acc[k]
-            naselja.setdefault(op, {})[str(k)] = r["naselja"]
+            nas, ul = split_area(r["naselja"], r["adresa"], op)
+            naselja.setdefault(op, {})[str(k)] = [nas, ul]
             detalji.append({"opstina": op, "bm": k, "csv_naziv": nm, "naziv": r["naziv"], "slicnost": round(s),
-                            "izvor": src.as_posix(), "strana": r["str"], "naselja": r["naselja"], "nacin": how})
+                            "izvor": src.as_posix(), "strana": r["str"], "naselje": nas, "naselja": r["naselja"],
+                            "nacin": how})
             stats["spojeno"] += 1
             if how == "redosled":
                 stats["spojeno_po_redosledu"] += 1

@@ -34,18 +34,18 @@ def run(p, width, height, mobile):
     if op >= 0:
         pg.select_option("#fOp", str(op))
         pg.wait_for_timeout(500)
-        info["nas_cells"] = pg.locator("#opSt2 td.nas").count()
-        info["nas_filled"] = pg.evaluate("[...document.querySelectorAll('#opSt2 td.nas')].filter(td => !td.querySelector('.muted')).length")
+        info["nas_cells"] = pg.locator("#opSt2 td.nsl").count()
+        info["nas_filled"] = pg.evaluate("[...document.querySelectorAll('#opSt2 td.nsl')].filter(td => !td.querySelector('.muted')).length")
         info["overflow_op"] = pg.evaluate("document.documentElement.scrollWidth - window.innerWidth")
         if SHOTS:
             pg.locator("#opSt2").screenshot(path=str(SHOTS / f"opst2_{width}.png"))
         # Lat/Ćir prekidač
         pg.click("#sCyr")
         pg.wait_for_timeout(300)
-        info["cyr_has_cyr"] = pg.evaluate("/[а-шА-Ш]/.test(document.querySelector('#opSt2 td.nas').textContent)")
+        info["cyr_has_cyr"] = pg.evaluate("/[а-шА-Ш]/.test(document.querySelector('#opSt2 td.nsl').textContent)")
         pg.click("#sLat")
-        # pretraga po naselju: uzmi reč iz prvog spiska naselja
-        word = pg.evaluate("""() => { const v = Object.values(Object.values(NASELJA)[0])[0] || "";
+        # pretraga po ulici: uzmi reč iz prvog spiska ulica
+        word = pg.evaluate("""() => { const v = Object.values(Object.values(NASELJA)[0]).map(x => x[1]).find(x => x) || "";
                               const w = lat(v).split(/[ ,]+/).filter(x => x.length > 5)[0]; return w || "" }""")
         pg.click('nav button[data-tab="mesta"]')
         pg.fill("#mQ", word)
