@@ -134,6 +134,12 @@ def skew_angle(gray):
 
 
 def group_rows(cells):
+    # ćelija preko velikog dela tabele (npr. između veštačke bočne linije i ivice) bi "progutala" sve redove
+    if len(cells) > 4:
+        hs = sorted(c[3] for c in cells)
+        med = hs[len(hs) // 2]
+        top, bot = min(c[1] for c in cells), max(c[1] + c[3] for c in cells)
+        cells = [c for c in cells if not (c[3] > 4 * med and c[3] > 0.5 * (bot - top))]
     rows = []
     for c in sorted(cells, key=lambda c: (c[1], c[0])):
         for r in rows:
