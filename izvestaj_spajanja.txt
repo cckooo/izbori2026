@@ -1,11 +1,11 @@
 IZVEŠTAJ O SPAJANJU ODLUKA O BIRAČKIM MESTIMA SA REZULTATIMA
 Ukupno biračkih mesta u CSV-u: 8392
-Spojeno (naselja upisana): 8334 (99.3%), od toga samo po broju uz potvrđenu numeraciju: 154, po nazivu između potvrđenih suseda (broj nije pročitan): 92, ručno prepisano sa strane odluke (rucno_naselja.csv): 150
+Spojeno (naselja upisana): 8361 (99.6%), od toga samo po broju uz potvrđenu numeraciju: 154, po nazivu između potvrđenih suseda (broj nije pročitan): 92, ručno prepisano sa strane odluke (rucno_naselja.csv): 177
 Opština bez odluke ili bez pročitanih redova: 0 mesta
-Mesto nije nađeno u odluci (OCR nije pročitao broj ili red): 46
-Odbijeno zbog nepoklapanja naziva: 12
+Mesto nije nađeno u odluci (OCR nije pročitao broj ili red): 24
+Odbijeno zbog nepoklapanja naziva: 7
 Provera položaja u odluci (red nije između susednih mesta): 5 slučajeva, od toga ostavljeno prazno: 4
-Naselje prema spisku RZS (Popis 2022): potvrđeno 7125, od toga OCR ispravki 77; gradsko naselje opštine 1017; nepotvrđeno 11; bez spiska (Kosovo, inostranstvo, zavodi) 181
+Naselje prema spisku RZS (Popis 2022): potvrđeno 7152, od toga OCR ispravki 77; gradsko naselje opštine 1017; nepotvrđeno 11; bez spiska (Kosovo, inostranstvo, zavodi) 181
 
 DOKUMENTI (način čitanja, opštine, broj pročitanih mesta):
   ocr  Ада / Odluka o određivanju biračkih mesta za izbor narodnih poslanika raspisanih za 25 oktobar 2026..pdf: Ада; zapisa 29, sa brojem 29
@@ -316,23 +316,18 @@ PO OPŠTINAMA:
     BM 13: spojeno po broju (numeracija potvrđena 97%), naziv se razlikuje: odluka „ОКУ „СКЕБА““ / CSV „ОКY "CNESA"“
 [60/60] Град Кикинда
     BM 48: spojeno po broju (numeracija potvrđena 98%), naziv se razlikuje: odluka „“ / CSV „ОШ "1.ОКТОБАР"“
-[20/22] Нови Кнежевац
-    BM 4 (САЛА СКУПШТИНЕ ОПШТИНЕ - ЗГРАДА ВОЈВОЂАНСКЕ БАНКЕ): nije nađeno u odluci
+[22/22] Нови Кнежевац
     BM 9: spojeno po broju (numeracija potvrđena 84%), naziv se razlikuje: odluka „ЈКП Нови Кнежевац“ / CSV „ЈКП "7.ОКТОБАР"“
     BM 10: spojeno po broju (numeracija potvrđena 84%), naziv se razlikuje: odluka „ЈКП Нови Кнежевац“ / CSV „ЈКП "7.ОКТОБАР"“
-    BM 11 (ДВД НОВИ КНЕЖЕВАЦ): nije nađeno u odluci
 [31/31] Сента
 [22/22] Чока
     BM 10: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „Месна заједница“ / CSV „МЕСНА КАНЦЕЛАРИЈА“
 [24/24] Алибунар
 [19/19] Бела Црква
-[53/56] Град Вршац
+[56/56] Град Вршац
     BM 3: spojeno po broju (numeracija potvrđena 87%), naziv se razlikuje: odluka „“ / CSV „ДЕЧИЈИ ВРТИЋ“
-    BM 4 (ГИМНАЗИЈА): nije nađeno u odluci
     BM 7: spojeno po broju (numeracija potvrđena 87%), naziv se razlikuje: odluka „МУЕ5Т роо ВРШАЦ“ / CSV „MIDALA INVEST GROUP DOO“
     BM 8: spojeno po broju (numeracija potvrđena 87%), naziv se razlikuje: odluka „НИЦА ц – ша УСР 5“ / CSV „МЕСНА ЗАЈЕДНИЦА - УСР "ШАРАН" ВРШАЦ“
-    BM 22 (МЕСНА ЗАЈЕДНИЦА): nije nađeno u odluci
-    BM 24 (ХЕМИЈСКО-МЕДИЦИНСКА ШКОЛА): odbijeno, naziv u odluci „И И“ (sličnost 32, potvrda numeracije 87%)
     BM 54: spojeno po broju (numeracija potvrđena 87%), naziv se razlikuje: odluka „МЕ а НИЦА“ / CSV „МЕСНА ЗАЈЕДНИЦА“
 [21/21] Ковачица
 [26/26] Ковин
@@ -357,10 +352,7 @@ PO OPŠTINAMA:
     BM 5: spojeno po broju (numeracija potvrđena 84%), naziv se razlikuje: odluka „..“ / CSV „КУД "МЛАДОСТ"“
     BM 18: spojeno po broju (numeracija potvrđena 84%), naziv se razlikuje: odluka „“ / CSV „ОШ "АЛЕКСА ШАНТИЋ"“
     BM 19: spojeno po broju (numeracija potvrđena 84%), naziv se razlikuje: odluka „..“ / CSV „ОШ "СВЕТИ САВА"“
-[40/43] Бачка Паланка
-    BM 11 (ОШ "СВЕТИ САВА"): nije nađeno u odluci
-    BM 13 (ОШ "СВЕТИ САВА"): nije nađeno u odluci
-    BM 41 (ДОМ КУЛТУРЕ): nije nađeno u odluci
+[43/43] Бачка Паланка
 [11/11] Бачки Петровац
 [16/16] Беочин
 [38/38] Бечеј
@@ -379,9 +371,7 @@ PO OPŠTINAMA:
     BM 1: spojeno po broju (numeracija potvrđena 93%), naziv se razlikuje: odluka „“ / CSV „УГОСТИТЕЉСКИ ОБЈЕКАТ“
     BM 3: spojeno po broju (numeracija potvrđena 93%), naziv se razlikuje: odluka „“ / CSV „ДОМ ЗДРАВЉА“
 [8/8] Сремски Карловци
-[29/31] Темерин
-    BM 7 (ПУ "ВЕЉКО ВЛАХОВИЋ" ОБЈЕКАТ "БАМБИ"): nije nađeno u odluci
-    BM 23 (ЕПС ЕЛЕКТРОВОЈВОДИНА): nije nađeno u odluci
+[31/31] Темерин
 [25/25] Тител
 [36/37] Инђија
     BM 6 (ОБЈЕКАТ БИВШE ПИЦЕРИЈЕ "АСТОР"): odbijeno, naziv u odluci „РЕСТОРАН „КОД ГРАДИЋА““ (sličnost 34, potvrda numeracije 92%)
@@ -417,10 +407,9 @@ PO OPŠTINAMA:
 [38/38] Мионица
 [21/21] Осечина
     BM 13: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „ЗГРАДА МАГАЦИНА "РОРОВОКМА ЕКШСНТ"“ / CSV „ЗГРАДА МАГАЦИНА "PODGORINA FRUCHT"“
-[51/52] Уб
+[52/52] Уб
     BM 13: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „Ва аи“ / CSV „ОСНОВНА ШКОЛА“
     BM 24: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „УНА“ / CSV „ОСНОВНА ШКОЛА“
-    BM 28 (ОСНОВНА ШКОЛА): nije nađeno u odluci
 [41/41] Аранђеловац
     BM 2: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „УШ Ш Ш“ / CSV „ОШ "СВЕТИ САВА"“
     BM 7: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „ПН АНА“ / CSV „ОШ "ИЛИЈА ГАРАШАНИН"“
@@ -435,9 +424,7 @@ PO OPŠTINAMA:
 [91/91] Град Јагодина
     BM 8: spojeno po broju (numeracija potvrđena 99%), naziv se razlikuje: odluka „ДОМ КУЛТУРЕ“ / CSV „ОСНОВНА ШКОЛА“
 [55/55] Параћин
-[34/36] Рековац
-    BM 1 (ОСНОВНА ШКОЛА): nije nađeno u odluci
-    BM 2 (МЕСНА ЗАЈЕДНИЦА): nije nađeno u odluci
+[36/36] Рековац
 [30/30] Свилајнац
 [31/31] Ћуприја
 [84/84] Град Ужице
@@ -447,13 +434,10 @@ PO OPŠTINAMA:
     BM 42: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „“ / CSV „ОСНОВНА ШКОЛА“
     BM 65: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „“ / CSV „МЕДИЦИНСКА ШКОЛА“
 [5/5] Градска општина Севојно
-[26/28] Ариље
+[28/28] Ариље
     BM 1: spojeno po broju (numeracija potvrđena 85%), naziv se razlikuje: odluka „“ / CSV „СПОРТСКА ХАЛА“
     BM 2: spojeno po broju (numeracija potvrđena 85%), naziv se razlikuje: odluka „ЗАНАТСКИ ДОМ“ / CSV „СОКОЛСКИ ДОМ“
-    BM 3 (ЗАНАТСКИ ДОМ): nije nađeno u odluci
-    BM 12 (ПОСЛОВНИ ОБЈЕКАТ СЛОБОДАНА НЕДЕЉКОВИЋА): nije nađeno u odluci
-[50/52] Бајина Башта
-    BM 1 (ЈП НАЦИОНАЛНИ ПАРК "ТАРА" - САЛА): nije nađeno u odluci
+[51/52] Бајина Башта
     BM 19 (НОВА ШКОЛА): odbijeno, naziv u odluci „АМБУЛАНТА-ВЕЖАЊА“ (sličnost 32, potvrda numeracije 98%)
 [29/29] Косјерић
     BM 22: spojeno po broju (numeracija potvrđena 93%), naziv se razlikuje: odluka „“ / CSV „КУЋА РАДОВАНОВИЋ ДРАГИШЕ“
@@ -495,35 +479,24 @@ PO OPŠTINAMA:
     BM 66: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „“ / CSV „ОШ "РАДЕ ДОДИЋ" МИЛУТОВАЦ“
 [18/18] Ћићевац
     BM 1: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „“ / CSV „КЛУБ ПЕНЗИОНЕРА“
-[44/47] Велика Плана
-    BM 3 (ОШ "ЦЕНТАР"): nije nađeno u odluci
-    BM 5 (ОШ "ЦЕНТАР"): nije nađeno u odluci
-    BM 6 (МЕСНА ЗАЈЕДНИЦА): odbijeno, naziv u odluci „зоо =гором—п»>ЕАМ 2олћ- ог т: о. оз по. ко= Ала И у => зе Рт о а ад У»тљ»фФољ»ог О 2 = «5 5 Р- 5: о О " ~ љ~ = 5 оз (о сл о - = 57>% а ~ •· Сви = у с“: њи 5: о-л»-" о ПАЗ тај ~: ПО РО О: Ке ле [о ДРУМ др 65“ ~ ~ од» о ~ со = то Р»> пгозљ ИЕ 0- ома ЈЕ а ~ јео — о 25597 РИМ И и ва ој = о ~ > 98 ОР љ гл >РЗа Ц 25 ма КО => = со сл ~ о ~ љоо ~ по = 9 шоља пе од = = Е — = Мо лло за: Ф ~ „ - – % о 5 о - =. = (> О др • =. ~ ДЕ ај ~ ~ ~ — о о ~ [ој Гоз Ро: ~ [7] а м~ ~ ~ с ~ = о том то - > ~ ~ о сло: лом сл — = сл. — ува ~ 5 2895 22: ~ ~ 895 828 о У = = У: ~ ~ су ~ 5 > У Си У ~ ~ осом со сл КЕ“ (sličnost 33, potvrda numeracije 96%)
-[77/78] Град Смедерево
-    BM 4 (ПЛАНИНАРСКО ДРУШТВО "ЧЕЛИК"): odbijeno, naziv u odluci „и а“ (sličnost 33, potvrda numeracije 99%)
-[48/49] Смедеревска Паланка
-    BM 29 (МЕСНА ЗАЈЕДНИЦА): nije nađeno u odluci
+[47/47] Велика Плана
+[78/78] Град Смедерево
+[49/49] Смедеревска Паланка
 [61/61] Град Пожаревац
     BM 18: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „“ / CSV „ОСНОВНА ШКОЛА“
     BM 20: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „к___- "“ / CSV „МЗ "БРАЋА ВУЈОВИЋ"“
     BM 23: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „“ / CSV „МЗ "БУЛЕВАР"“
     BM 32: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „“ / CSV „МЕДИЦИНСКА ШКОЛА“
     BM 34: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „“ / CSV „МЗ "ВАСА ПЕЛАГИЋ"“
-[10/12] Градска општина Костолац
-    BM 5 (ЈП "СРБИЈАШУМЕ"): odbijeno, naziv u odluci „ДАМЕ СР СЕВЕРНИ КУЧАЈ, _ СУ ПОЖАРЕВАЦ МАШИНСКИ ПАРК КОСТОЛАЦ“ (sličnost 32, potvrda numeracije 82%)
-    BM 9 (ВАТРОГАСНИ ДОМ): odbijeno, naziv u odluci „о ~ бо.“ (sličnost 33, potvrda numeracije 82%)
-[30/32] Велико Градиште
-    BM 30 (МЕСНА КАНЦЕЛАРИЈА): nije nađeno u odluci
-    BM 31 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+[12/12] Градска општина Костолац
+[32/32] Велико Градиште
 [30/30] Голубац
 [37/37] Жабари
     BM 21: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „Ореовица, ул. Краља Петра | Карађорђевића бр. 644“ / CSV „ОШ "ХЕРОЈ РОСА ТРИФУНОВИЋ" - ЂАЧКА КУХИЊА“
     BM 34: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „Симићево, ул. Симе Симића бр. 269“ / CSV „КУЋА ЈАНКОВИЋ РАКИЦЕ“
 [17/17] Жагубица
-[37/39] Кучево
-    BM 2 (ДОМ КУЛТУРЕ): red sa tim brojem nije između susednih mesta (sumnjiv broj)
+[39/39] Кучево
     BM 6: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „МЕСНА ЗАЈЕДНИЦА“ / CSV „ДОМ КУЛТУРЕ“
-    BM 12 (МЕСНА ЗАЈЕДНИЦА): nije nađeno u odluci
 [29/29] Мало Црниће
     BM 2: spojeno po broju (numeracija potvrđena 97%), naziv se razlikuje: odluka „“ / CSV „МЕСНА ЗАЈЕДНИЦА“
 [45/45] Петровац на Млави
