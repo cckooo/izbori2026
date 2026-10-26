@@ -103,6 +103,8 @@ def main():
     raw = Path(a.csv).read_bytes() if a.csv else fetch(URL)
     html_path = Path(a.html)
     html = html_path.read_bytes().decode("utf-8")  # bez konverzije krajeva redova
+    if re.search(r"^(<<<<<<<|>>>>>>>)", html, re.M) or len(re.findall(r"^const (DATA|NASELJA)=", html, re.M)) != 2:
+        raise SystemExit("HTML je pokvaren (git konflikt ili dupli podaci) - prvo ga popravi")
     m = re.search(r"^const DATA=(.*);(?=\r?$)", html, re.M)
     if not m:
         raise SystemExit("Nema linije `const DATA=...;` u HTML-u")

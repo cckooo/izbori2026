@@ -1,11 +1,11 @@
 IZVEŠTAJ O SPAJANJU ODLUKA O BIRAČKIM MESTIMA SA REZULTATIMA
 Ukupno biračkih mesta u CSV-u: 8392
-Spojeno (naselja upisana): 8324 (99.2%), od toga samo po broju uz potvrđenu numeraciju: 154, po nazivu između potvrđenih suseda (broj nije pročitan): 92, ručno prepisano sa strane odluke (rucno_naselja.csv): 140
+Spojeno (naselja upisana): 8334 (99.3%), od toga samo po broju uz potvrđenu numeraciju: 154, po nazivu između potvrđenih suseda (broj nije pročitan): 92, ručno prepisano sa strane odluke (rucno_naselja.csv): 150
 Opština bez odluke ili bez pročitanih redova: 0 mesta
-Mesto nije nađeno u odluci (OCR nije pročitao broj ili red): 51
-Odbijeno zbog nepoklapanja naziva: 17
+Mesto nije nađeno u odluci (OCR nije pročitao broj ili red): 46
+Odbijeno zbog nepoklapanja naziva: 12
 Provera položaja u odluci (red nije između susednih mesta): 5 slučajeva, od toga ostavljeno prazno: 4
-Naselje prema spisku RZS (Popis 2022): potvrđeno 7115, od toga OCR ispravki 77; gradsko naselje opštine 1017; nepotvrđeno 11; bez spiska (Kosovo, inostranstvo, zavodi) 181
+Naselje prema spisku RZS (Popis 2022): potvrđeno 7125, od toga OCR ispravki 77; gradsko naselje opštine 1017; nepotvrđeno 11; bez spiska (Kosovo, inostranstvo, zavodi) 181
 
 DOKUMENTI (način čitanja, opštine, broj pročitanih mesta):
   ocr  Ада / Odluka o određivanju biračkih mesta za izbor narodnih poslanika raspisanih za 25 oktobar 2026..pdf: Ада; zapisa 29, sa brojem 29
@@ -253,34 +253,27 @@ DOKUMENTI (način čitanja, opštine, broj pročitanih mesta):
   ocr  Ћуприја / Одлука о одређивању бирачких места.pdf: Ћуприја; zapisa 31, sa brojem 31
 
 PO OPŠTINAMA:
-[25/28] Градска општина Барајево
-    BM 2 (ОШ "КНЕЗ СИМА МАРКОВИЋ"): odbijeno, naziv u odluci „OLI „KHE3 CMMA“ (sličnost 47, potvrda numeracije 79%)
-    BM 3 (ЛОВАЧКИ ДОМ): odbijeno, naziv u odluci „JIOBAUKM BOM“ (sličnost 52, potvrda numeracije 79%)
-    BM 13 (ЛОКАЛ - БИВШИ ФРИЗЕРСКИ САЛОН): odbijeno, naziv u odluci „TIOKAJI - bMBUIM OPM3EPCKM | CAnOH“ (sličnost 42, potvrda numeracije 79%)
+[28/28] Градска општина Барајево
 [107/107] Градска општина Вождовац
     BM 3: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „“ / CSV „ОШ "БОРА СТАНКОВИЋ"“
     BM 58: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „“ / CSV „ДВ "НЕВЕН"“
     BM 68: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „Ноле. а.“ / CSV „ОШ "ВАСА ЧАРАПИЋ" - ИСТУРЕНО ОДЕЉЕЊЕ ЗУЦЕ“
     BM 92: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „“ / CSV „ОШ "ЈАЈИНЦИ"“
 [63/63] Градска општина Врачар
-[51/52] Градска општина Гроцка
+[52/52] Градска општина Гроцка
     BM 1: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „БЕГАЉИЦА, БОРИСА КИДРИЧА ББ.“ / CSV „ЛОВАЧКИ ДОМ“
     BM 11: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „МЕ И САВА“ / CSV „ОШ "СВЕТИ САВА" (ЦЕНТАР)“
-    BM 40 (ОШ "АЛЕКСА ШАНТИЋ"): nije nađeno u odluci
     BM 42: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „“ / CSV „ОШ "НИКОЛА ТЕСЛА"“
 [115/115] Градска општина Земун
     BM 50: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „“ / CSV „ОШ "СУТЈЕСКА"“
     BM 51: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „“ / CSV „ОШ "СУТЈЕСКА"“
     BM 61: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „OHLI"CABA“ / CSV „ОШ "САВА ШУМАНОВИЋ"“
 [100/100] Градска општина Звездара
-[62/65] Градска општина Лазаревац
+[65/65] Градска општина Лазаревац
     BM 6: spojeno po broju (numeracija potvrđena 83%), naziv se razlikuje: odluka „ош "ВОЈИСЛАВ ВОКА САВИЋ"“ / CSV „РЕСТОРАН КОД ГРАДИЋА“
     BM 21: spojeno po broju (numeracija potvrđena 83%), naziv se razlikuje: odluka „ДОМ КУЛТУРЕ - ГОРЊА САЛА“ / CSV „ОШ ШКОЛА ПЕТАР КОЦИЋ“
     BM 22: spojeno po broju (numeracija potvrđena 83%), naziv se razlikuje: odluka „ДОМ КУЛТУРЕ - ДОЊА САЛА“ / CSV „ОШ ШКОЛА ПЕТАР КОЦИЋ“
     BM 29: spojeno po broju (numeracija potvrđena 83%), naziv se razlikuje: odluka „КОЛА“ / CSV „ОСНОВНА ШКОЛА“
-    BM 61 (ДОМ КУЛТУРЕ): nije nađeno u odluci
-    BM 62 (ДОМ КУЛТУРЕ): nije nađeno u odluci
-    BM 65 (ОШ "КНЕЗ ЛАЗАР"-ХОЛ): nije nađeno u odluci
 [59/59] Градска општина Младеновац
     BM 2: spojeno po broju (numeracija potvrđena 93%), naziv se razlikuje: odluka „“ / CSV „ЕЛЕКТРОДИСТРИБУЦИЈА“
     BM 5: spojeno po broju (numeracija potvrđena 93%), naziv se razlikuje: odluka „“ / CSV „ЗГРАДА БИВШЕГ СОЦИЈАЛНОГ“
@@ -305,22 +298,19 @@ PO OPŠTINAMA:
 [23/23] Мали Иђош
 [102/102] Град Суботица
 [31/31] Житиште
-[72/74] Град Зрењанин
+[74/74] Град Зрењанин
     BM 5: spojeno po broju (numeracija potvrđena 90%), naziv se razlikuje: odluka „“ / CSV „ОШ "1.ОКТОБАР"“
     BM 9: spojeno po broju (numeracija potvrđena 90%), naziv se razlikuje: odluka „РА = " А РЕДА =“ / CSV „МЗ "ЕЧКА" - "ЛОВАЧКА САЛА"“
     BM 10: spojeno po broju (numeracija potvrđena 90%), naziv se razlikuje: odluka „Е "“ / CSV „ОШ "ЂУРА ЈАКШИЋ"“
     BM 13: spojeno po broju (numeracija potvrđena 90%), naziv se razlikuje: odluka „" _ ПИ СРИ“ / CSV „ОШ "СТЕВАН КНИЋАНИН"“
     BM 20: spojeno po broju (numeracija potvrđena 90%), naziv se razlikuje: odluka „"“ / CSV „ОШ "ДР БОШКО ВРЕБАЛОВ"“
-    BM 29 (ОШ "ДОСИТЕЈ ОБРАДОВИЋ"): odbijeno, naziv u odluci „ан А“ (sličnost 28, potvrda numeracije 90%)
     BM 47: spojeno po broju (numeracija potvrđena 90%), naziv se razlikuje: odluka „А " ИУ "“ / CSV „ДОМ МЗ "ШУМИЦА"“
-    BM 70 (КЛУБ МУЖЉАНАЦА): odbijeno, naziv u odluci „ПАЛА“ (sličnost 33, potvrda numeracije 90%)
 [25/25] Нова Црња
 [31/31] Нови Бечеј
     BM 3: spojeno po broju (numeracija potvrđena 87%), naziv se razlikuje: odluka „У 8 Чиплил 4“ / CSV „ОШ "МИЛОЈЕ ЧИПЛИЋ"“
     BM 28: spojeno po broju (numeracija potvrđena 87%), naziv se razlikuje: odluka „НАТО АН ДОМ)“ / CSV „МЕСНА ЗАЈЕДНИЦА (ВАТРОГАСНИ ДОМ)“
     BM 29: spojeno po broju (numeracija potvrđena 87%), naziv se razlikuje: odluka „м а Г“ / CSV „ОШ "МИЛАН СТАНЧИЋ - УЧА" - 4. УЧИОНИЦА“
-[16/17] Сечањ
-    BM 13 (ОШ "АЛЕКСА ШАНТИЋ"): red sa tim brojem nije između susednih mesta (sumnjiv broj)
+[17/17] Сечањ
 [29/29] Ада
 [33/33] Кањижа
     BM 13: spojeno po broju (numeracija potvrđena 97%), naziv se razlikuje: odluka „ОКУ „СКЕБА““ / CSV „ОКY "CNESA"“

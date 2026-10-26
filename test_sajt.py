@@ -83,6 +83,11 @@ def run(p, width, height, mobile):
     return errors, info
 
 
+src = HTML.read_text(encoding="utf-8")
+if re.search(r"^(<<<<<<<|=======|>>>>>>>)", src, re.M) or src.count("\nconst DATA=") != 1:
+    print("GREŠKE: git konflikt ili dupli podaci u HTML-u")
+    sys.exit(1)
+
 with sync_playwright() as p:
     ok = True
     for w, h, mob in [(1280, 900, False), (390, 844, True)]:
