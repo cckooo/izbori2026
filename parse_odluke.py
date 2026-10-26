@@ -383,6 +383,14 @@ def extract_records(doc, targets):
             recs.append({"br": num, "naziv": clean(f["naziv"]), "adresa": clean(f["adresa"]),
                          "naselja": f["podr"], "cilj": cur_target, "imaBr": "br" in r, "str": pno})
     for i, r in enumerate(recs):
+        if not r["naselja"].strip():
+            # pomerene kolone: spisak ulica je završio u nazivu ili adresi
+            lists = [k for k in ("naziv", "adresa") if len(re.findall(r"[,;]", r[k])) >= 2 and len(r[k]) > 30]
+            if lists:
+                k = max(lists, key=lambda k: len(r[k]))
+                r["naselja"], r[k] = r[k], ""
+                if k == "naziv":
+                    r["naziv_pomeren"] = True
         r["naselja"] = clean_naselja(r["naselja"])
         r["i"] = i  # redosled u odluci (za dodelu između potvrđenih suseda)
     # broj koji OCR nije pročitao ili je pročitao pogrešno: između k i k+2 je k+1
@@ -451,6 +459,10 @@ def main():
     # ---- spajanje
     naselja, rep, detalji = {}, [], []
     ref = load_rzs()
+    rucno = defaultdict(dict)
+    if (HERE / "rucno_naselja.csv").exists():
+        for rr in csv.DictReader(open(HERE / "rucno_naselja.csv", encoding="utf-8")):
+            rucno[rr["opstina"]][int(rr["bm_broj"])] = rr
     # broj stanovnika po naselju (Popis 2022) za opštine iz CSV-a: {opština: {naselje: [stanovnika, punoletnih]}}
     stanovnici = {}
     for op in ops:
@@ -546,6 +558,12 @@ def main():
                 acc[k] = (src, pick, ps, "redosled")
                 used.add((src, pick["i"]))
                 del why[k]
+        # ručna dopuna (rucno_naselja.csv): prepisano sa strane odluke, ima prednost
+        for k, rr in rucno.get(op, {}).items():
+            if k in info["bm"]:
+                acc[k] = (Path("rik_fajlovi") / rr["izvor"], {"naziv": "", "adresa": rr["adresa"],
+                          "naselja": clean_naselja(rr["podrucje"]), "str": int(rr["strana"] or 0)}, 100, "rucno")
+                why.pop(k, None)
         for k, nm in sorted(info["bm"].items()):
             if k in why:
                 miss_reasons.append(why[k])
@@ -559,7 +577,9 @@ def main():
                             "izvor": src.as_posix(), "strana": r["str"], "naselje": nas, "naselja": r["naselja"],
                             "nacin": how})
             stats["spojeno"] += 1
-            if how == "redosled":
+            if how == "rucno":
+                stats["spojeno_rucno"] += 1
+            elif how == "redosled":
                 stats["spojeno_po_redosledu"] += 1
             elif s < 70:
                 stats["spojeno_po_broju"] += 1
@@ -575,7 +595,8 @@ def main():
         f"Ukupno biračkih mesta u CSV-u: {total}",
         f"Spojeno (naselja upisana): {stats['spojeno']} ({stats['spojeno'] / total:.1%}), "
         f"od toga samo po broju uz potvrđenu numeraciju: {stats['spojeno_po_broju']}, "
-        f"po nazivu između potvrđenih suseda (broj nije pročitan): {stats['spojeno_po_redosledu']}",
+        f"po nazivu između potvrđenih suseda (broj nije pročitan): {stats['spojeno_po_redosledu']}, "
+        f"ručno prepisano sa strane odluke (rucno_naselja.csv): {stats['spojeno_rucno']}",
         f"Opština bez odluke ili bez pročitanih redova: {stats['bez_odluke']} mesta",
         f"Mesto nije nađeno u odluci (OCR nije pročitao broj ili red): {stats['nije_nadjeno']}",
         f"Odbijeno zbog nepoklapanja naziva: {stats['odbijeno']}",
