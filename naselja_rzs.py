@@ -23,7 +23,8 @@ import pypdfium2 as pdfium
 BASE = "https://publikacije.stat.gov.rs/G2023/Pdf/"
 HERE = Path(__file__).resolve().parent
 NUM = r"(?:\d{1,3}(?: \d{3})*|\d+|-)"
-HH = re.compile(rf"^(?P<ime>[^\d]+?)(?P<g> г)? (?P<ukupno>{NUM})(?: {NUM}){{6}} (?:\d+,\d+|-) (?P<lat>.+)$")
+# kod malih naselja PDF ponekad spoji dve cifre ("5 5" -> "55"), pa red ima broj manje: 5-7 brojeva
+HH = re.compile(rf"^(?P<ime>[^\d]+?)(?P<g> г)? (?P<ukupno>{NUM})(?: {NUM}){{5,7}} (?:\d+,\d+|-) (?P<lat>.+)$")
 POP_C = re.compile(r"^(?P<ime>[^\d]+?)(?: г)? С (?P<uk>\d+)\b")        # parna strana: ukupno (С = svega)
 POP_T = re.compile(r"(?P<pun>\d+) \d+,\d+ T (?P<lat>.+)$")             # neparna: punoletni, prosečna starost
 NOT_OP = re.compile(r"^(Република|Србија|Регион|Град Београд$|Град Ниш$)|област$")

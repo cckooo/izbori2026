@@ -1,11 +1,11 @@
 IZVEŠTAJ O SPAJANJU ODLUKA O BIRAČKIM MESTIMA SA REZULTATIMA
 Ukupno biračkih mesta u CSV-u: 8392
-Spojeno (naselja upisana): 8252 (98.3%), od toga samo po broju uz potvrđenu numeraciju: 163, po nazivu između potvrđenih suseda (broj nije pročitan): 93, ručno prepisano sa strane odluke (rucno_naselja.csv): 78
+Spojeno (naselja upisana): 8317 (99.1%), od toga samo po broju uz potvrđenu numeraciju: 154, po nazivu između potvrđenih suseda (broj nije pročitan): 92, ručno prepisano sa strane odluke (rucno_naselja.csv): 133
 Opština bez odluke ili bez pročitanih redova: 0 mesta
-Mesto nije nađeno u odluci (OCR nije pročitao broj ili red): 89
-Odbijeno zbog nepoklapanja naziva: 51
+Mesto nije nađeno u odluci (OCR nije pročitao broj ili red): 54
+Odbijeno zbog nepoklapanja naziva: 21
 Provera položaja u odluci (red nije između susednih mesta): 5 slučajeva, od toga ostavljeno prazno: 4
-Naselje prema spisku RZS (Popis 2022): potvrđeno 7042, od toga OCR ispravki 78; gradsko naselje opštine 1018; nepotvrđeno 11; bez spiska (Kosovo, inostranstvo, zavodi) 181
+Naselje prema spisku RZS (Popis 2022): potvrđeno 7108, od toga OCR ispravki 77; gradsko naselje opštine 1017; nepotvrđeno 11; bez spiska (Kosovo, inostranstvo, zavodi) 181
 
 DOKUMENTI (način čitanja, opštine, broj pročitanih mesta):
   ocr  Ада / Odluka o određivanju biračkih mesta za izbor narodnih poslanika raspisanih za 25 oktobar 2026..pdf: Ада; zapisa 29, sa brojem 29
@@ -224,7 +224,7 @@ DOKUMENTI (način čitanja, opštine, broj pročitanih mesta):
   ocr  Суботица / odluka o ispravci teh greske.pdf: Град Суботица; zapisa 0, sa brojem 0  <-- ništa nije pročitano
   ocr  Сурдулица / Odluka o odredjivanju birackih mesta Surdulica 2026.pdf: Сурдулица; zapisa 44, sa brojem 44
   ocr  Сурдулица / Одлука о измени одлуке о одређивању бирачких места на територији општине Сурдулица.pdf: Сурдулица; zapisa 0, sa brojem 0  <-- ništa nije pročitano
-  ocr  Сурчин / Одлука  - Бирачка места.pdf: Градска општина Сурчин; zapisa 32, sa brojem 29
+  ocr  Сурчин / Одлука  - Бирачка места.pdf: Градска општина Сурчин; zapisa 31, sa brojem 31
   ocr  Сјеница / Odluka o određivanju biračkih mesta na teritoriji opštine Sjenica_ PARLAMENTARNI 26.pdf: Сјеница; zapisa 70, sa brojem 57
   ocr  Темерин / ОДЛУКА О ИЗМЕНАМА И ДОПУНАМА ОДЛУКЕ О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА НА ИЗБОРАМА 25.10.pdf: Темерин; zapisa 24, sa brojem 24
   ocr  Темерин / ОДЛУКА О ОДРЕЂИВАЊУ БИРАЧКИХ МЕСТА НА ТЕРИТОРИЈИ ОПШТИНЕ ТЕМЕРИН ЗА ГЛАСАЊЕ НА .pdf: Темерин; zapisa 31, sa brojem 29
@@ -253,12 +253,10 @@ DOKUMENTI (način čitanja, opštine, broj pročitanih mesta):
   ocr  Ћуприја / Одлука о одређивању бирачких места.pdf: Ћуприја; zapisa 31, sa brojem 31
 
 PO OPŠTINAMA:
-[23/28] Градска општина Барајево
-    BM 2 (ОШ "КНЕЗ СИМА МАРКОВИЋ"): odbijeno, naziv u odluci „OLI „KHE3 CMMA“ (sličnost 47, potvrda numeracije 72%)
-    BM 3 (ЛОВАЧКИ ДОМ): odbijeno, naziv u odluci „JIOBAUKM BOM“ (sličnost 52, potvrda numeracije 72%)
-    BM 6 (ОШ "ГЛУМЧЕВО БРДО"): odbijeno, naziv u odluci „957 '49 О049 "оазгуауч“ (sličnost 33, potvrda numeracije 72%)
-    BM 13 (ЛОКАЛ - БИВШИ ФРИЗЕРСКИ САЛОН): odbijeno, naziv u odluci „TIOKAJI - bMBUIM OPM3EPCKM | CAnOH“ (sličnost 42, potvrda numeracije 72%)
-    BM 20 (ОСНОВНА ШКОЛА): odbijeno, naziv u odluci „Т '49 хиџми ИЈУПНАЈ“ (sličnost 19, potvrda numeracije 72%)
+[25/28] Градска општина Барајево
+    BM 2 (ОШ "КНЕЗ СИМА МАРКОВИЋ"): odbijeno, naziv u odluci „OLI „KHE3 CMMA“ (sličnost 47, potvrda numeracije 79%)
+    BM 3 (ЛОВАЧКИ ДОМ): odbijeno, naziv u odluci „JIOBAUKM BOM“ (sličnost 52, potvrda numeracije 79%)
+    BM 13 (ЛОКАЛ - БИВШИ ФРИЗЕРСКИ САЛОН): odbijeno, naziv u odluci „TIOKAJI - bMBUIM OPM3EPCKM | CAnOH“ (sličnost 42, potvrda numeracije 79%)
 [107/107] Градска општина Вождовац
     BM 3: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „“ / CSV „ОШ "БОРА СТАНКОВИЋ"“
     BM 58: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „“ / CSV „ДВ "НЕВЕН"“
@@ -288,29 +286,11 @@ PO OPŠTINAMA:
     BM 5: spojeno po broju (numeracija potvrđena 93%), naziv se razlikuje: odluka „“ / CSV „ЗГРАДА БИВШЕГ СОЦИЈАЛНОГ“
     BM 36: spojeno po broju (numeracija potvrđena 93%), naziv se razlikuje: odluka „“ / CSV „ОШ "РУДНИК"“
     BM 58: spojeno po broju (numeracija potvrđena 93%), naziv se razlikuje: odluka „[О“ / CSV „ОСНОВНА ШКОЛА“
-[139/149] Градска општина Нови Београд
-    BM 27: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „МТЕКМАПОМАГ“ / CSV „ZEPTER INTERNATIONAL“
-    BM 28: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „ТЕРТЕК“ / CSV „ZEPTER INTERNATIONAL“
-    BM 89: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „3, 'а9 УнИаУЈМЈ УГИаАГ“ / CSV „МЗ "САВА" - ВЕЛИКА САЛА“
-    BM 90: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „81 'а9 УГИЗАГ“ / CSV „МЗ "САВА" - ВЕЛИКА САЛА“
-    BM 91 (ОШ "БРАНКО РАДИЧЕВИЋ"): odbijeno, naziv u odluci „31 МУНИЗУЈУЈ МГИЗАГ“ (sličnost 24, potvrda numeracije 86%)
-    BM 92: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „31 '49 МНИаУЈМУЈ МГИЗАГ“ / CSV „КЛУБ ЗА СТАРА ЛИЦА "ДР МИХАЈЛО СТУПАР II"“
-    BM 93 (КЛУБ ЗА СТАРА ЛИЦА "ДР МИХАЈЛО СТУПАР II"): odbijeno, naziv u odluci „81 '49 МГИЗАГ“ (sličnost 33, potvrda numeracije 86%)
-    BM 94: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „бе '49 УМОНУШУГ“ / CSV „ИНСТИТУТ ЗА СТРАНЕ ЈЕЗИКЕ“
-    BM 95 (ИНСТИТУТ ЗА СТРАНЕ ЈЕЗИКЕ): nije nađeno u odluci
-    BM 96 (МЗ "БЕЖАНИЈСКИ БЛОКОВИ"): odbijeno, naziv u odluci „891 '49 УНИаУЈУЈ УГИЗАГ“ (sličnost 28, potvrda numeracije 86%)
-    BM 97 (МЗ "БЕЖАНИЈСКИ БЛОКОВИ"): odbijeno, naziv u odluci „'а9 униауЈуЈ угиалг“ (sličnost 34, potvrda numeracije 86%)
-    BM 98 (ДВ "ИСТОК" - ХОЛ): odbijeno, naziv u odluci „16 '89 уаучиа мнузи 47“ (sličnost 18, potvrda numeracije 86%)
-    BM 99 (ДВ "ИСТОК" - САЛА): odbijeno, naziv u odluci „16 '89 маучиа“ (sličnost 32, potvrda numeracije 86%)
-    BM 100: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „ад маучиа унуди“ / CSV „ОШ "КНЕГИЊА МИЛИЦА"“
-    BM 101: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „ад маучиа унуди ап“ / CSV „ЗАВОД ЗА ЗАШТИТУ ПРИРОДЕ СРБИЈЕ“
-    BM 102 (ОШ "КНЕГИЊА МИЛИЦА"): odbijeno, naziv u odluci „8 '49 мамчиа Уунуди“ (sličnost 33, potvrda numeracije 86%)
-    BM 103 (ОШ "КНЕГИЊА МИЛИЦА"): odbijeno, naziv u odluci „8 '49 мамчиа мнузи“ (sličnost 34, potvrda numeracije 86%)
-    BM 104: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „461 '49 УНИаУЈУЈ МГИЧАГ“ / CSV „ОШ "КНЕГИЊА МИЛИЦА"“
-    BM 105 (ОШ "КНЕГИЊА МИЛИЦА"): odbijeno, naziv u odluci „122 '49 УНИаУЈМЈ“ (sličnost 35, potvrda numeracije 86%)
-    BM 106: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „'49 мгиалг“ / CSV „ОШ "КНЕГИЊА МИЛИЦА"“
-    BM 113: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „“ / CSV „МЗ "МЛАДОСТ"“
-    BM 132: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „“ / CSV „ДВ "БАМБИ"“
+[149/149] Градска општина Нови Београд
+    BM 27: spojeno po broju (numeracija potvrđena 97%), naziv se razlikuje: odluka „МТЕКМАПОМАГ“ / CSV „ZEPTER INTERNATIONAL“
+    BM 28: spojeno po broju (numeracija potvrđena 97%), naziv se razlikuje: odluka „ТЕРТЕК“ / CSV „ZEPTER INTERNATIONAL“
+    BM 113: spojeno po broju (numeracija potvrđena 97%), naziv se razlikuje: odluka „“ / CSV „МЗ "МЛАДОСТ"“
+    BM 132: spojeno po broju (numeracija potvrđena 97%), naziv se razlikuje: odluka „“ / CSV „ДВ "БАМБИ"“
 [57/57] Градска општина Обреновац
 [123/123] Градска општина Палилула (Београд)
 [76/76] Градска општина Раковица
@@ -318,24 +298,8 @@ PO OPŠTINAMA:
 [39/39] Градска општина Савски Венац
 [33/33] Градска општина Сопот
 [56/56] Градска општина Стари Град
-[23/31] Градска општина Сурчин
-    BM 2 (ОШ "СТЕВАН СРЕМАЦ"): nije nađeno u odluci
-    BM 3 (ДОМ КУЛТУРЕ - КУД): nije nađeno u odluci
-    BM 4 (ОШ "СТЕВАН СРЕМАЦ"): nije nađeno u odluci
-    BM 9 (ОШ "ВУК КАРАЏИЋ"): nije nađeno u odluci
-    BM 10: spojeno po broju (numeracija potvrđena 85%), naziv se razlikuje: odluka „каз малониџаг и Ннићало“ / CSV „ОШ "ВУК КАРАЏИЋ"“
-    BM 17 (ОШ "ВОЖД КАРАЂОРЂЕ"): nije nađeno u odluci
-    BM 18 (ОШ "ВОЖД КАРАЂОРЂЕ"): odbijeno, naziv u odluci „2:89“ (sličnost 32, potvrda numeracije 85%)
-    BM 22 (ОШ "БРАНКО РАДИЧЕВИЋ"): odbijeno, naziv u odluci „Пув:а8 з8у2 Ј013820 НИЋаАО“ (sličnost 27, potvrda numeracije 85%)
-    BM 23 ("АУТОКОМЕРЦ"): odbijeno, naziv u odluci „Каз узилном амлоаџ“ (sličnost 34, potvrda numeracije 85%)
-[106/113] Градска општина Чукарица
-    BM 8 (ОШ "ЈОСИФ ПАНЧИЋ"): nije nađeno u odluci
-    BM 9 (ОШ "ЈОСИФ ПАНЧИЋ"): nije nađeno u odluci
-    BM 10 (ХЕМИЈСКА ШКОЛА - УЧИОНИЦА 1): odbijeno, naziv u odluci „“ (sličnost 40, potvrda numeracije 74%)
-    BM 11 (ХЕМИЈСКА ШКОЛА - УЧИОНИЦА 2): odbijeno, naziv u odluci „“ (sličnost 40, potvrda numeracije 74%)
-    BM 27 (ОШ "МИЛОШ ЦРЊАНСКИ"): nije nađeno u odluci
-    BM 31 (ОШ "МИЛОШ ЦРЊАНСКИ"): odbijeno, naziv u odluci „“ (sličnost 41, potvrda numeracije 74%)
-    BM 94 (МЗ "ОМЛАДИНСКИХ АКЦИЈА!" - ВЕЛИКА САЛА): odbijeno, naziv u odluci „Пе "ОМЛАДИНСК С.“ (sličnost 68, potvrda numeracije 74%)
+[31/31] Градска општина Сурчин
+[113/113] Градска општина Чукарица
 [50/50] Бачка Топола
     BM 1: spojeno po broju (numeracija potvrđena 96%), naziv se razlikuje: odluka „“иу“ / CSV „ЗГРАДА "НОВИ БАМБИ"“
 [22/23] Мали Иђош
@@ -394,15 +358,9 @@ PO OPŠTINAMA:
 [40/40] Кула
 [27/27] Оџаци
     BM 4: spojeno po broju (numeracija potvrđena 96%), naziv se razlikuje: odluka „ОСНОВНА КОЛА »МАРКО“ / CSV „ОШ "МАРКО ОРЕШКОВИЋ"“
-[70/76] Град Сомбор
-    BM 10 (ОСНОВНА ШКОЛА): odbijeno, naziv u odluci „РАНЧЕВУ“ (sličnost 32, potvrda numeracije 84%)
+[76/76] Град Сомбор
     BM 21: spojeno po broju (numeracija potvrđena 84%), naziv se razlikuje: odluka „о | ЛУГОВУ“ / CSV „ОСНОВНА ШКОЛА“
-    BM 31 (БИВША ПРОДАВНИЦА "ПЕР СУ"): odbijeno, naziv u odluci „= и 2.“ (sličnost 21, potvrda numeracije 84%)
-    BM 41 (ЈКП "ЧИСТОЋА" - БИВША СИНАГОГА): odbijeno, naziv u odluci „ВИВЕЈА“ (sličnost 30, potvrda numeracije 84%)
     BM 42: spojeno po broju (numeracija potvrđena 84%), naziv se razlikuje: odluka „5 ИВОДВЛАЉИВАЕ "“ / CSV „ОСНОВНА ШКОЛА "ИВО ЛОЛА РИБАР"“
-    BM 54 (ОШ "БРАТСТВО-ЈЕДИНСТВО"): odbijeno, naziv u odluci „ст Д Д УЧИОНИЦА ЗА 1 РАЗРЕД“ (sličnost 35, potvrda numeracije 84%)
-    BM 59 (ЗГРАДА УДРУЖЕЊА БОРАЦА): odbijeno, naziv u odluci „ни Ц“ (sličnost 33, potvrda numeracije 84%)
-    BM 60 (ОШ "НИКОЛА ТЕСЛА"): odbijeno, naziv u odluci „ЗА | " _ Ц Д“ (sličnost 29, potvrda numeracije 84%)
     BM 61: spojeno po broju (numeracija potvrđena 84%), naziv se razlikuje: odluka „тил И 153 53“ / CSV „ДОМ КУЛТУРЕ - УЛАЗ ИЗ УЛИЦЕ КРАЉА ПЕТРА I“
     BM 62: spojeno po broju (numeracija potvrđena 84%), naziv se razlikuje: odluka „“ / CSV „ДОМ КУЛТУРЕ“
     BM 65: spojeno po broju (numeracija potvrđena 84%), naziv se razlikuje: odluka „у“ / CSV „ДОМ КУЛТУРЕ - ЛАЗАРЕВ КОНАК“
@@ -424,10 +382,8 @@ PO OPŠTINAMA:
 [35/36] Врбас
     BM 2: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „"ОВА = БДАРЕ“ / CSV „НОВА АМБУЛАНТА "СТАРИ ВРБАС"“
     BM 3 (ПУ "БОШКО БУХА"): odbijeno, naziv u odluci „ВЕЛИ на“ (sličnost 27, potvrda numeracije 94%)
-[28/31] Жабаљ
-    BM 1 (ОШ "ЖАРКО ЗРЕЊАНИН"): odbijeno, naziv u odluci „95 учинаћитуа УМНУ44“ (sličnost 34, potvrda numeracije 90%)
-    BM 2 (ОШ "ЖАРКО ЗРЕЊАНИН"): odbijeno, naziv u odluci „9С УмнУа4 ТИПНИЧОПОЈОЛ“ (sličnost 31, potvrda numeracije 90%)
-    BM 17: spojeno po broju (numeracija potvrđena 90%), naziv se razlikuje: odluka „“ / CSV „СШ "22.ОКТОБАР"“
+[30/31] Жабаљ
+    BM 17: spojeno po broju (numeracija potvrđena 97%), naziv se razlikuje: odluka „“ / CSV „СШ "22.ОКТОБАР"“
     BM 21 (ОШ "ЂУРА ЈАКШИЋ" - СТАРА ЗГРАДА): nije nađeno u odluci
 [220/221] Град Нови Сад
     BM 35 (МЗ "ЈУЖНИ ТЕЛЕП"): odbijeno, naziv u odluci „АТИЛА"“ (sličnost 24, potvrda numeracije 94%)
@@ -459,11 +415,7 @@ PO OPŠTINAMA:
 [39/39] Шид
     BM 1: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „“ / CSV „ОШ "ВУК КАРАЏИЋ"“
     BM 38: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „ЛЕ“ / CSV „ДОМ ПЕНЗИОНЕРА“
-[27/31] Богатић
-    BM 27 (ОСНОВНА ШКОЛА): nije nađeno u odluci
-    BM 28 (ОСНОВНА ШКОЛА): nije nađeno u odluci
-    BM 29 (ОСНОВНА ШКОЛА): nije nađeno u odluci
-    BM 30 (ОСНОВНА ШКОЛА): nije nađeno u odluci
+[31/31] Богатић
 [34/34] Владимирци
     BM 1: spojeno po broju (numeracija potvrđena 97%), naziv se razlikuje: odluka „“ / CSV „О.Ф.К. "БЕЛПОС"“
 [33/33] Коцељева
@@ -510,11 +462,7 @@ PO OPŠTINAMA:
     BM 25: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „“ / CSV „ОСНОВНА ШКОЛА“
     BM 42: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „“ / CSV „ОСНОВНА ШКОЛА“
     BM 65: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „“ / CSV „МЕДИЦИНСКА ШКОЛА“
-[1/5] Градска општина Севојно
-    BM 1 (ГРАДСКА ОПШТИНА СЕВОЈНО): odbijeno, naziv u odluci „“ (sličnost 32, potvrda numeracije 33%)
-    BM 2 (СОЛИТЕР "Б" 54): nije nađeno u odluci
-    BM 3 (ОШ "АЛЕКСА ДЕЈОВИЋ"): nije nađeno u odluci
-    BM 5 (БИВШИ МОТЕЛ ПОРЕД ВАТРОГАСНОГ ДОМА): nije nađeno u odluci
+[5/5] Градска општина Севојно
 [26/28] Ариље
     BM 1: spojeno po broju (numeracija potvrđena 85%), naziv se razlikuje: odluka „“ / CSV „СПОРТСКА ХАЛА“
     BM 2: spojeno po broju (numeracija potvrđena 85%), naziv se razlikuje: odluka „ЗАНАТСКИ ДОМ“ / CSV „СОКОЛСКИ ДОМ“
@@ -558,16 +506,7 @@ PO OPŠTINAMA:
     BM 28: spojeno po broju (numeracija potvrđena 93%), naziv se razlikuje: odluka „на“ / CSV „СЕОСКИ ДОМ“
 [40/40] Варварин
 [132/132] Град Крушевац
-[58/67] Трстеник
-    BM 52 (ОШ "ЉУБИВОЈЕ БАЈИЋ"): nije nađeno u odluci
-    BM 53 (ОШ "ЉУБИВОЈЕ БАЈИЋ"): nije nađeno u odluci
-    BM 54 (ОШ "ЉУБИВОЈЕ БАЈИЋ"): nije nađeno u odluci
-    BM 55 (ОШ "ЉУБИВОЈЕ БАЈИЋ"): nije nađeno u odluci
-    BM 56 (ОШ "ДОБРИЦА ЋОСИЋ"): nije nađeno u odluci
-    BM 57 (ДОМ КУЛТУРЕ): nije nađeno u odluci
-    BM 58 (МЕСНА ЗАЈЕДНИЦА): nije nađeno u odluci
-    BM 59 (ОШ "ДОБРИЦА ЋОСИЋ"): nije nađeno u odluci
-    BM 60 (ОШ "ДОБРИЦА ЋОСИЋ"): nije nađeno u odluci
+[67/67] Трстеник
     BM 63: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „Еве " "“ / CSV „ОШ "РАДЕ ДОДИЋ" МИЛУТОВАЦ“
     BM 65: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „Ман " ““ / CSV „ОШ "РАДЕ ДОДИЋ" МИЛУТОВАЦ“
     BM 66: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „“ / CSV „ОШ "РАДЕ ДОДИЋ" МИЛУТОВАЦ“
@@ -594,13 +533,8 @@ PO OPŠTINAMA:
     BM 30 (МЕСНА КАНЦЕЛАРИЈА): nije nađeno u odluci
     BM 31 (ОСНОВНА ШКОЛА): nije nađeno u odluci
 [30/30] Голубац
-[32/37] Жабари
-    BM 7 (ДОМ КУЛТУРЕ): nije nađeno u odluci
-    BM 11 (ОШ "ХЕРОЈ РОСА ТРИФУНОВИЋ" - УЧИОНИЦА БР. 2): nije nađeno u odluci
-    BM 16 (ОШ "ДУДЕ ЈОВИЋ"): odbijeno, naziv u odluci „Жабари, ул. Кнеза Милоша бр. 182“ (sličnost 28, potvrda numeracije 86%)
+[37/37] Жабари
     BM 21: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „Ореовица, ул. Краља Петра | Карађорђевића бр. 644“ / CSV „ОШ "ХЕРОЈ РОСА ТРИФУНОВИЋ" - ЂАЧКА КУХИЊА“
-    BM 26 (ОШ "ДУДЕ ЈОВИЋ"): odbijeno, naziv u odluci „Породин, Главна улица бр. 69“ (sličnost 31, potvrda numeracije 86%)
-    BM 29 (ОШ "ХЕРОЈ РОСА ТРИФУНОВИЋ"): odbijeno, naziv u odluci „Свињарево, ул. 27. Октобра бр. 41“ (sličnost 33, potvrda numeracije 86%)
     BM 34: spojeno po broju (numeracija potvrđena 86%), naziv se razlikuje: odluka „Симићево, ул. Симе Симића бр. 269“ / CSV „КУЋА ЈАНКОВИЋ РАКИЦЕ“
 [17/17] Жагубица
 [37/39] Кучево
@@ -683,15 +617,7 @@ PO OPŠTINAMA:
     BM 161: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „КАРАЏИЋ" ВЕЛИКА ГРАБОВНИЦА“ / CSV „ОШ "ВУК КАРАЏИЋ" - ИЗДВОЈЕНО ОДЕЉЕЊЕ“
     BM 166: spojeno po broju (numeracija potvrđena 92%), naziv se razlikuje: odluka „де СЕ па““ / CSV „ДОМ ПАЛИХ БОРАЦА“
 [24/24] Медвеђа
-[4/12] Црна Трава
-    BM 3 (ОСНОВНА ШКОЛА): nije nađeno u odluci
-    BM 4 (МЕСНА КАНЦЕЛАРИЈА): nije nađeno u odluci
-    BM 5 (МЕСНА КАНЦЕЛАРИЈА): nije nađeno u odluci
-    BM 6 (ОСНОВНА ШКОЛА): nije nađeno u odluci
-    BM 7 (ОСНОВНА ШКОЛА): nije nađeno u odluci
-    BM 9 (ОСНОВНА ШКОЛА): nije nađeno u odluci
-    BM 10 (ДОМ КУЛТУРЕ): nije nađeno u odluci
-    BM 11 (АМБУЛАНТА): nije nađeno u odluci
+[12/12] Црна Трава
 [110/113] Град Врање
     BM 1 (ОШ "РАДОЈЕ ДОМАНОВИЋ"): nije nađeno u odluci
     BM 2 (ОШ "РАДОЈЕ ДОМАНОВИЋ"): nije nađeno u odluci

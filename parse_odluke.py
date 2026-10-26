@@ -227,6 +227,12 @@ def load_rzs():
     return ref
 
 
+def join_names(names):
+    """Spisak imena -> "A, B и C" (bez ponavljanja)."""
+    n = list(dict.fromkeys(names))
+    return n[0] if len(n) == 1 else ", ".join(n[:-1]) + " и " + n[-1]
+
+
 def official(name, cands, cut=88):
     """Zvanično ime naselja za dati tekst (tačno ili blisko, jednoznačno), inače None."""
     k = asc(name)
@@ -247,13 +253,14 @@ def canon_naselje(nas, op, ref, stats, area=""):
         return nas
     # područje koje počinje selima ("Набоје и Шипче", "Горња Бејашница, Горња Топоница, …") ima prednost
     # nad mestom iz adrese biračkog mesta; bar pola prvih stavki mora biti zvanično naselje
-    t = re.sub(r"^(насељено место|насеље|мз|месна заједница|за насељено место)\s+", "", area.strip(), flags=re.I)
-    items = [re.sub(r"[\s\d\-–/.,:;()]+$", "", x).strip() for x in re.split(r",|;|:|\s+и\s+|\s+i\s+", t)][:6]
+    t = re.sub(r"^[\W\d_]*(за\s+)?(насељен[оа]\s+мест[оа]|насеља|насеље|мз|месна заједница)\s*[:.]?\s*", "",
+               area.strip(), flags=re.I)
+    items = [re.sub(r"[\s\d\-–/.,:;()]+$", "", x).strip() for x in re.split(r",|;|:|\s+и\s+|\s+i\s+", t, flags=re.I)][:6]
     items = [x for x in items if x]
     hits = [h for h in (official(x, cands) for x in items) if h]
     if items and len(hits) * 2 >= len(items):
         stats["naselje_potvrdjeno"] += 1
-        return " и ".join(dict.fromkeys(hits))
+        return join_names(hits)
     parts = [p.strip() for p in re.split(r",|\s+и\s+|\s+i\s+", nas) if p.strip()]
     fixed = []
     for p in parts:
@@ -270,10 +277,10 @@ def canon_naselje(nas, op, ref, stats, area=""):
         fixed.append(None)
     if all(fixed):
         stats["naselje_potvrdjeno"] += 1
-        return " и ".join(dict.fromkeys(fixed))
+        return join_names(fixed)
     if any(fixed):
         stats["naselje_potvrdjeno"] += 1  # deo imena je potvrđen (ostalo su zaseoci, delovi naselja)
-        return " и ".join(dict.fromkeys(f for f in fixed if f))
+        return join_names(f for f in fixed if f)
     # tekst sadrži ime zvaničnog naselja ("Сакуле Трг Маршала" -> Сакуле)
     full = asc(nas)
     inside = [c for c in cands if len(c[1]) > 3 and re.search(rf"\b{re.escape(asc(c[1]))}\b", full)]
