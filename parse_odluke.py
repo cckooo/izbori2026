@@ -319,6 +319,11 @@ def extract_records(doc, targets):
             elif a is not None and r["br"] is not None and r["br"] != a + 1 \
                     and str(a + 1).endswith(str(r["br"])) and b in (None, a + 2):
                 r["br"], r["izveden"] = a + 1, True  # izgubljena prva cifra: "2" umesto 12
+    # prvi red tabele: ako slede k i k+1, on je k-1 ("1." pročitano kao "4.")
+    nums = [r for r in recs if r["imaBr"]]
+    if len(nums) >= 3 and nums[1]["br"] is not None and nums[2]["br"] == nums[1]["br"] + 1 \
+            and nums[1]["br"] > 1 and nums[0]["br"] != nums[1]["br"] - 1:
+        nums[0]["br"], nums[0]["izveden"] = nums[1]["br"] - 1, True
     # niz redova bez broja između a i b, kojih ima tačno b-a-1 (ili na početku pre broja k: k-1 redova)
     known = [i for i, r in enumerate(recs) if r["br"] is not None and r["imaBr"]]
     for i0, i1 in zip([-1] + known, known):
@@ -404,12 +409,28 @@ def main():
             else:
                 why[k] = (f"BM {k} ({nm}): odbijeno, naziv u odluci „{r['naziv']}“ "
                           f"(sličnost {s:.0f}, potvrda numeracije {ok_share:.0%})")
-        # drugi prolaz: mesto bez pročitanog broja traži se po nazivu, samo među redovima odluke
-        # koji stoje između dva već potvrđena suseda (redosled u odluci prati redosled mesta)
-        used = {(src, r["i"]) for src, r, _, _ in acc.values()}
         by_src = defaultdict(list)
         for _, src, r in cands:
             by_src[src].append(r)
+        # provera položaja: red za mesto k mora u odluci da stoji između redova za k-1 i k+1
+        # (inače je broj pogrešno pročitan, npr. dva reda "4." sa istim nazivom škole)
+        for k in sorted(acc):
+            src, r, s, how = acc[k]
+            lo, hi = acc.get(k - 1), acc.get(k + 1)
+            if not lo or not hi or lo[0] != src or hi[0] != src or lo[1]["i"] < r["i"] < hi[1]["i"]:
+                continue
+            alt = [x for x in by_src[src] if x is not r and x["br"] == k and lo[1]["i"] < x["i"] < hi[1]["i"]
+                   and x["naselja"]]
+            if alt:
+                acc[k] = (src, alt[0], name_sim(alt[0]["naziv"] + " " + alt[0]["adresa"], info["bm"][k]), how)
+            else:
+                del acc[k]
+                why[k] = f"BM {k} ({info['bm'][k]}): red sa tim brojem nije između susednih mesta (sumnjiv broj)"
+                stats["polozaj_prazno"] += 1
+            stats["popravljen_polozaj"] += 1
+        # drugi prolaz: mesto bez pročitanog broja traži se po nazivu, samo među redovima odluke
+        # koji stoje između dva već potvrđena suseda (redosled u odluci prati redosled mesta)
+        used = {(src, r["i"]) for src, r, _, _ in acc.values()}
         for k in sorted(why):
             nm = info["bm"][k]
             lo = max((j for j in acc if j < k), default=None)
@@ -475,6 +496,8 @@ def main():
         f"Opština bez odluke ili bez pročitanih redova: {stats['bez_odluke']} mesta",
         f"Mesto nije nađeno u odluci (OCR nije pročitao broj ili red): {stats['nije_nadjeno']}",
         f"Odbijeno zbog nepoklapanja naziva: {stats['odbijeno']}",
+        f"Provera položaja u odluci (red nije između susednih mesta): {stats['popravljen_polozaj']} "
+        f"slučajeva, od toga ostavljeno prazno: {stats['polozaj_prazno']}",
         "",
         "DOKUMENTI (način čitanja, opštine, broj pročitanih mesta):",
     ]
