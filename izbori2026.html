@@ -97,6 +97,12 @@ tbody tr.click:hover{background:var(--hover)}
 .facts b{display:block;font-family:Literata,Georgia,serif;font-size:1.45rem;line-height:1.2}
 .facts span{color:var(--muted);font-size:.9rem}
 .lim .xr{display:none!important}
+.plot{width:100%;height:auto;display:block}
+.plot text{font-size:11px;fill:var(--muted)}
+.plot text.ax{font-size:12px;fill:var(--ink)}
+.plot .pt{cursor:pointer}
+.seatwrap{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;margin-top:8px}
+.seatwrap>svg{flex:1 1 360px}
 .morebtn{margin-top:8px}
 .subnav{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 4px}
 .subnav button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 13px;font:inherit;font-size:.9rem;cursor:pointer}
@@ -499,6 +505,7 @@ function viewPregled(){
      <div><b>${N(A.upd)}</b><span>${U("upisanih birača na obrađenim mestima","registered voters at counted stations")}</span></div>
      <div><b>${N(A.n-A.nd)}</b><span>${U("biračkih mesta bez unetog rezultata","polling stations not yet counted")}</span></div>
    </div>
+   ${seatsBlock(A)}
    <div class="block"><h2>${U("Rezultati po listama","Results by list")}</h2>
    <p class="note">${U("Klik na listu otvara njen profil: gde je najjača i najslabija. Klik na naslov kolone menja redosled. „Pobede, mesta“ su biračka mesta na kojima je lista imala najviše glasova; isto važi za opštine.","Click a list to open its profile: where it is strongest and weakest. Click a column heading to sort. “Wins, stations” counts polling stations where the list came first; the same for municipalities.")}</p>
    <div id="resTbl"></div></div>
@@ -858,6 +865,7 @@ function viewListe(){
      <div><b>${N(wonOp)}</b><span>${U("opština u kojima je prva","municipalities where it came first")}</span></div>
      <div><b>${N(zero)}</b><span>${U(`mesta bez ijednog glasa (od ${N(E.length)})`,`stations with no votes (of ${N(E.length)})`)}</span></div>
    </div>
+   ${shareHist(L)}
    <div class="grid2 block">
     ${opTable(U("Najjače opštine","Strongest municipalities"),minOp,top(ops,e=>e.p,-1),L)}
     ${opTable(U("Najslabije opštine","Weakest municipalities"),minOp,top(ops,e=>e.p,1),L)}
@@ -900,6 +908,152 @@ function miniTable(title,note,items,valLabel,valFn){
   const n=LIM(10,3);
   const body=items.map((r,i)=>`<tr class="${xr(i,n)}"><td class="ttl" data-l="${bl}">${bmTitle(r)}</td><td class="num" data-l="${ul}">${N(r.up)}</td><td class="num" data-l="${valLabel}"><b>${valFn(r)}</b></td><td data-l="${zl}">${r.url?`<a href="${esc(encodeURI(r.url))}" target="_blank" rel="noopener">PDF</a>`:""}</td></tr>`).join("");
   return `<div class="${items.length>n?"lim":""}"><h3>${title}</h3><p class="note">${note}</p><div class="tw"><table class="cards"><thead><tr><th>${bl}</th><th class="num">${ul}</th><th class="num">${valLabel}</th><th>${zl}</th></tr></thead><tbody>${body}</tbody></table></div>${moreBtn(items.length,n)}</div>`;
+}
+/* ---------- Grafikoni (SVG) ---------- */
+// osnova za grafik sa osama: domen x0..x1, y0..y1; body(sx,sy) vraća SVG elemente
+function svgPlot(o){
+  // na telefonu uži koordinatni sistem, da tekst ne bude sitan
+  const W0=o.w||640,W=MOBILE()?Math.min(W0,420):W0,H=Math.round((o.h||400)*(W===W0?1:Math.min(1.25,W0/W*.8))),m={l:46,r:14,t:12,b:40},iw=W-m.l-m.r,ih=H-m.t-m.b;
+  const sx=v=>m.l+(v-o.x0)/(o.x1-o.x0)*iw,sy=v=>m.t+ih-(v-o.y0)/(o.y1-o.y0)*ih;
+  const fx=o.fx||(v=>v),fy=o.fy||(v=>v);
+  const gx=(o.xt||[]).map(v=>`<line x1="${sx(v)}" x2="${sx(v)}" y1="${m.t}" y2="${m.t+ih}" style="stroke:var(--line)"/><text x="${sx(v)}" y="${m.t+ih+15}" text-anchor="middle">${fx(v)}</text>`).join("");
+  const gy=(o.yt||[]).map(v=>`<line x1="${m.l}" x2="${m.l+iw}" y1="${sy(v)}" y2="${sy(v)}" style="stroke:var(--line)"/><text x="${m.l-6}" y="${sy(v)+4}" text-anchor="end">${fy(v)}</text>`).join("");
+  return `<svg class="plot" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.label||"")}" style="max-width:${o.maxw||W}px">
+    <rect x="${m.l}" y="${m.t}" width="${iw}" height="${ih}" style="fill:var(--surface)"/>${gx}${gy}
+    <text x="${m.l+iw/2}" y="${H-4}" text-anchor="middle" class="ax">${o.xl||""}</text>
+    <text x="12" y="${m.t+ih/2}" text-anchor="middle" class="ax" transform="rotate(-90 12 ${m.t+ih/2})">${o.yl||""}</text>
+    ${o.body(sx,sy,{m,iw,ih})}</svg>`;
+}
+const fP=v=>`${Math.round(v*100)}%`,fPP=v=>(v>0?"+":v<0?"−":"")+Math.abs(Math.round(v*100));
+
+/* Raspodela mandata (procena): D'Hondt, 250 mesta. Cenzus 3% birača koji su glasali; liste nacionalnih manjina
+   učestvuju i ispod cenzusa, uz količnike uvećane za 35% (Zakon o izboru narodnih poslanika).
+   Status manjinske liste (rešenja RIK-a, prema RTS-u i Danasu): liste 4, 5, 6, 7, 10, 13, 14, 17 i 18. */
+const MANJINSKE=new Set([4,5,6,7,10,13,14,17,18].map(n=>n-1));
+const SEATS=250;
+function seatCalc(A){
+  const thr=.03*A.gl,q=[];
+  for(let i=0;i<NL;i++){
+    const v=A.v[i];if(!v)continue;
+    const mn=MANJINSKE.has(i);if(!mn&&v<thr)continue;
+    const k=mn&&v<thr?1.35:1;
+    for(let d=1;d<=SEATS;d++)q.push([v*k/d,i]);
+  }
+  q.sort((a,b)=>b[0]-a[0]||a[1]-b[1]);
+  const s=new Array(NL).fill(0);for(let j=0;j<Math.min(SEATS,q.length);j++)s[q[j][1]]++;
+  return {s,thr};
+}
+function hemicycle(s){
+  const R=10,r0=.38,rad=[...Array(R)].map((_,k)=>r0+k*(1-r0)/(R-1)),sum=rad.reduce((a,b)=>a+b,0);
+  const per=rad.map(r=>Math.round(SEATS*r/sum));per[R-1]+=SEATS-per.reduce((a,b)=>a+b,0);
+  const pts=[];rad.forEach((r,k)=>{const n=per[k];for(let j=0;j<n;j++){const a=Math.PI*(1-(n===1?.5:j/(n-1)));pts.push({a,r})}});
+  pts.sort((p,q)=>q.a-p.a||p.r-q.r);
+  const order=[...Array(NL).keys()].filter(i=>s[i]>0); // redosled sa listića, s leva na desno
+  const col=[];order.forEach(i=>{for(let j=0;j<s[i];j++)col.push(i)});
+  const W=640,H=340,cx=W/2,cy=H-14,Rr=W/2-16,dr=Rr*(1-r0)/(R-1)*.42;
+  const dots=pts.map((p,j)=>`<circle cx="${(cx+Math.cos(p.a)*p.r*Rr).toFixed(1)}" cy="${(cy-Math.sin(p.a)*p.r*Rr).toFixed(1)}" r="${dr.toFixed(1)}" fill="${LISTS[col[j]].c}"><title>${esc(LISTS[col[j]].short)}: ${s[col[j]]}</title></circle>`).join("");
+  return `<svg class="plot" viewBox="0 0 ${W} ${H}" role="img" aria-label="${U("Raspodela mandata","Seat distribution")}" style="max-width:640px">${dots}
+    <text x="${cx}" y="${cy-8}" text-anchor="middle" style="font-size:28px;font-weight:700;fill:var(--ink)">${SEATS}</text>
+    <text x="${cx}" y="${cy-40}" text-anchor="middle" class="ax">${U("većina 126","majority 126")}</text></svg>`;
+}
+function seatsBlock(A){
+  if(!A.va)return "";
+  const {s,thr}=seatCalc(A);
+  const rows=[...Array(NL).keys()].filter(i=>A.v[i]>0).sort((a,b)=>s[b]-s[a]||A.v[b]-A.v[a]);
+  const lab=U("Lista","List"),ml=U("Mandata","Seats"),pl=U("Udeo","Share"),st=U("Status","Status");
+  const body=rows.map((i,k)=>{const p=A.v[i]/A.va,mn=MANJINSKE.has(i),under=A.v[i]<thr;
+    return `<tr class="${xr(k,s[i]>0?99:0)}"><td class="ttl" data-l="${lab}">${sw(i)}${esc(LISTS[i].short)}</td><td class="num" data-l="${ml}"><b>${s[i]}</b></td><td class="num" data-l="${pl}">${P(p)}</td><td data-l="${st}"><span class="muted">${mn?U("manjinska","minority")+(under?" ×1,35":""):under?U("ispod cenzusa","below threshold"):""}</span></td></tr>`}).join("");
+  const nOut=rows.filter(i=>!s[i]).length;
+  return `<div class="block"><h2>${U("Raspodela mandata (procena)","Seat distribution (estimate)")}</h2>
+    <p class="note">${U(`Procena na osnovu dosad unetih mesta: 250 mandata metodom najvećeg količnika (D'Ont). Cenzus je 3% birača koji su glasali (${N(Math.round(thr))} glasova). Liste nacionalnih manjina učestvuju u raspodeli i ispod cenzusa, a tada im se količnici uvećavaju za 35%. Status manjinske liste imaju liste 4, 5, 6, 7, 10, 13, 14, 17 i 18 (rešenja RIK-a). Zvaničnu raspodelu utvrđuje RIK posle konačnih rezultata.`,
+      `Estimate from the stations counted so far: 250 seats by the highest-quotient (D'Hondt) method. The threshold is 3% of voters who voted (${N(Math.round(thr))} votes). National minority lists take part below the threshold, with quotients increased by 35%. Lists 4, 5, 6, 7, 10, 13, 14, 17 and 18 have minority status (RIK decisions). RIK sets the official distribution after the final results.`)}</p>
+    <div class="seatwrap">${hemicycle(s)}
+    <div class="${nOut?"lim":""}" style="flex:1;min-width:260px"><div class="tw"><table><thead><tr><th>${lab}</th><th class="num">${ml}</th><th class="num">${pl}</th><th>${st}</th></tr></thead><tbody>${body}</tbody></table></div>${nOut?`<button type="button" class="btn ghost morebtn">${U(`Prikaži i liste bez mandata (${N(nOut)})`,`Show lists without seats (${N(nOut)})`)}</button>`:""}</div></div></div>`;
+}
+
+/* Test poslednje cifre: kod stvarnih brojeva glasova (bar 100) svaka cifra 0–9 javlja se oko 10%.
+   χ² sa 9 stepeni slobode: kritično 16,92 (p = 0,05) i 21,67 (p = 0,01). */
+let digitSel=0; // indeks liste ili -1 za broj birača koji su glasali
+function digitBlock(E){
+  const val=r=>digitSel<0?r.gl:r.v[digitSel];
+  const cnt=new Array(10).fill(0);for(const r of E){const v=val(r);if(v>=100)cnt[v%10]++}
+  const n=cnt.reduce((a,b)=>a+b,0),e=n/10,chi=n?cnt.reduce((s,o)=>s+(o-e)**2/e,0):0;
+  const ok=LISTS.map((l,i)=>i).filter(i=>E.filter(r=>r.v[i]>=100).length>=200);
+  const opts=`<option value="-1" ${digitSel<0?"selected":""}>${U("Broj birača koji su glasali","Voters who voted")}</option>`+ok.map(i=>`<option value="${i}" ${i===digitSel?"selected":""}>${LISTS[i].n}. ${esc(LISTS[i].short)}</option>`).join("");
+  const mx=Math.max(.15,...cnt.map(c=>n?c/n:0));
+  const verdict=!n?"":chi<16.92?U("raspodela je u granicama slučajnog odstupanja","the distribution is within random variation"):chi<21.67?U("blago odstupanje (p < 0,05), vredi pogledati","mild deviation (p < 0.05), worth a look"):U("izraženo odstupanje (p < 0,01)","strong deviation (p < 0.01)");
+  const svg=svgPlot({w:560,h:300,x0:-.5,x1:9.5,y0:0,y1:mx,yt:[0,.05,.1,.15].filter(v=>v<=mx),fy:fP,xl:U("Poslednja cifra","Last digit"),yl:U("Udeo mesta","Share of stations"),label:U("Test poslednje cifre","Last-digit test"),
+    body:(sx,sy)=>cnt.map((c,d)=>`<rect x="${sx(d-.38)}" y="${sy(n?c/n:0)}" width="${sx(.38)-sx(-.38)}" height="${sy(0)-sy(n?c/n:0)}" fill="${digitSel<0?"var(--accent)":LISTS[digitSel].c}" style="fill:${digitSel<0?"var(--accent)":LISTS[digitSel].c}"><title>${d}: ${N(c)} (${P(n?c/n:0)})</title></rect><text x="${sx(d)}" y="${sy(0)+15}" text-anchor="middle">${d}</text>`).join("")+
+      `<line x1="${sx(-.5)}" x2="${sx(9.5)}" y1="${sy(.1)}" y2="${sy(.1)}" style="stroke:var(--ink);stroke-dasharray:5 4"/>`});
+  return `<div class="block" id="digBlk"><h3>${U("Test poslednje cifre","Last-digit test")}</h3>
+    <p class="note">${U(`Kada se brojevi glasova pišu „napamet“, ljudi nesvesno biraju neke cifre češće (0 i 5). Kod stvarnih brojeva od bar 100 glasova poslednja cifra je praktično slučajna, pa se svaka javlja na oko 10% mesta (isprekidana linija). Mesta sa bar 100: ${N(n)}; χ² = ${chi.toFixed(1).replace(".",",")} (granica 16,9 za p = 0,05): ${verdict}.`,
+      `When vote counts are invented, people unconsciously favour some digits (0 and 5). For genuine counts of at least 100 the last digit is essentially random, so each appears at about 10% of stations (dashed line). Stations with at least 100: ${N(n)}; χ² = ${chi.toFixed(1)} (threshold 16.9 for p = 0.05): ${verdict}.`)}</p>
+    <div class="ctl"><label>${U("Broj","Count")}<select id="digL">${opts}</select></label></div>
+    <div class="chart">${svg}</div></div>`;
+}
+
+/* Nevažeći listići prema udelu prve liste, po biračkim mestima (tačke) i prosek po pojasevima od 5 p.p. (linija) */
+function invalidBlock(E){
+  const pts=E.filter(r=>r.lis>=50&&r.win>=0),ymax=.15;
+  const bins=[...Array(20)].map(()=>[0,0]);
+  for(const r of pts){const b=Math.min(19,Math.floor(r.v[r.win]/r.va*20));bins[b][0]+=r.nv;bins[b][1]+=r.lis}
+  const avg=bins.map((b,k)=>b[1]>=500?[(k+.5)/20,b[0]/b[1]]:null).filter(Boolean);
+  const svg=svgPlot({w:640,h:380,x0:0,x1:1,y0:0,y1:ymax,xt:[0,.2,.4,.6,.8,1],yt:[0,.05,.1,.15],fx:fP,fy:fP,
+    xl:U("Udeo prve liste na mestu","Share of the leading list at the station"),yl:U("Nevažeći listići","Invalid ballots"),label:U("Nevažeći listići i udeo prve liste","Invalid ballots and leading-list share"),
+    body:(sx,sy)=>pts.map(r=>`<circle cx="${sx(r.v[r.win]/r.va).toFixed(1)}" cy="${sy(Math.min(ymax,r.inv)).toFixed(1)}" r="1.6" fill="${LISTS[r.win].c}" style="opacity:.35"/>`).join("")+
+      `<polyline points="${avg.map(([x,y])=>`${sx(x).toFixed(1)},${sy(y).toFixed(1)}`).join(" ")}" style="fill:none;stroke:var(--ink);stroke-width:2.5"/>`});
+  const hi=pts.filter(r=>r.inv>ymax).length;
+  return `<div class="block"><h3>${U("Nevažeći listići i udeo prve liste","Invalid ballots and leading-list share")}</h3>
+    <p class="note">${U(`Svaka tačka je biračko mesto sa bar 50 listića u kutiji, u boji liste koja je tu prva; crna linija je prosek nevažećih po pojasevima udela. Ako se na mestima sa ubedljivom pobedom nevažeći listići naglo menjaju (npr. padaju na nulu ili skaču), to može značiti da su listići popunjavani ili poništavani. ${hi?`Mesta sa više od 15% nevažećih (${N(hi)}) prikazana su na gornjoj ivici.`:""}`,
+      `Each dot is a polling station with at least 50 ballots in the box, coloured by the list that came first there; the black line is the average share of invalid ballots by band of leading-list share. A sudden change in invalid ballots where the win is overwhelming (e.g. dropping to zero or jumping) may indicate ballots being filled in or spoiled. ${hi?`Stations with more than 15% invalid (${N(hi)}) are drawn at the top edge.`:""}`)}</p>
+    <div class="chart">${svg}</div></div>`;
+}
+
+/* Poređenje opština 2023 → 2026: promena izlaznosti i promena Vučićeve liste (tačka = opština, veličina = birači) */
+function scatter23(opE){
+  const E=opE.filter(e=>!SKIP_OP.test(OP[e.id].full));
+  if(!E.length)return "";
+  const dx=E.map(e=>e.c.t1-e.c.t0),dy=E.map(e=>e.c.v1-e.c.v0);
+  const x0=Math.min(-.05,Math.floor(Math.min(...dx)*20)/20),x1=Math.max(.05,Math.ceil(Math.max(...dx)*20)/20);
+  const y0=Math.min(-.05,Math.floor(Math.min(...dy)*20)/20),y1=Math.max(.05,Math.ceil(Math.max(...dy)*20)/20);
+  const tk=(a,b)=>{const t=[];for(let v=Math.ceil(a*10)/10;v<=b+1e-9;v+=.1)t.push(Math.round(v*10)/10);return t};
+  const mxU=Math.max(...E.map(e=>OP_AGG[e.id].upd));
+  const svg=svgPlot({w:640,h:440,x0,x1,y0,y1,xt:tk(x0,x1),yt:tk(y0,y1),fx:fPP,fy:fPP,
+    xl:U("Promena izlaznosti 2023 → 2026 (p.p.)","Turnout change 2023 → 2026 (p.p.)"),yl:U("Promena Vučićeve liste (p.p.)","Vučić list change (p.p.)"),label:U("Promena izlaznosti i Vučićeve liste po opštinama","Turnout and Vučić list change by municipality"),
+    body:(sx,sy)=>`<line x1="${sx(0)}" x2="${sx(0)}" y1="${sy(y0)}" y2="${sy(y1)}" style="stroke:var(--muted)"/><line x1="${sx(x0)}" x2="${sx(x1)}" y1="${sy(0)}" y2="${sy(0)}" style="stroke:var(--muted)"/>`+
+      E.map(e=>`<circle class="pt" data-op="${e.id}" cx="${sx(e.c.t1-e.c.t0).toFixed(1)}" cy="${sy(e.c.v1-e.c.v0).toFixed(1)}" r="${(2.5+9*Math.sqrt(OP_AGG[e.id].upd/mxU)).toFixed(1)}" style="fill:${LISTS[0].c};fill-opacity:.35;stroke:${LISTS[0].c}"><title>${esc(T(OP[e.id].name))}: ${U("izlaznost","turnout")} ${signPP(e.c.t1-e.c.t0)}, Vučić ${signPP(e.c.v1-e.c.v0)}</title></circle>`).join("")});
+  return `<h3 style="margin-top:26px">${U("Opštine: promena izlaznosti i promena Vučićeve liste","Municipalities: turnout change and Vučić list change")}</h3>
+    <p class="note">${U("Svaki krug je opština (veći krug, više birača). Desno su opštine gde je izlaznost porasla, gore gde je Vučićeva lista porasla. Ako je veća izlaznost išla u korist vlasti, krugovi idu gore desno; ako u korist opozicije, dole desno. Opštine koje štrče od oblaka vredi pogledati. Klik na krug otvara opštinu.",
+      "Each circle is a municipality (bigger circle, more voters). Right: turnout rose; up: the Vučić list rose. If higher turnout favoured the government, circles go up-right; if it favoured the opposition, down-right. Municipalities away from the cloud are worth a look. Click a circle to open the municipality.")}</p>
+    <div class="chart">${svg}</div>`;
+}
+/* Izlaznost i Vučićeva lista po opštinama: strelica od 2023 do 2026 */
+function arrows23(opE){
+  const E=opE.filter(e=>!SKIP_OP.test(OP[e.id].full));
+  if(!E.length)return "";
+  const svg=svgPlot({w:640,h:440,x0:0,x1:1,y0:0,y1:1,xt:[0,.2,.4,.6,.8,1],yt:[0,.2,.4,.6,.8,1],fx:fP,fy:fP,
+    xl:U("Izlaznost","Turnout"),yl:U("Udeo Vučićeve liste","Vučić list share"),label:U("Izlaznost i Vučićeva lista 2023 → 2026","Turnout and Vučić list 2023 → 2026"),
+    body:(sx,sy)=>`<defs><marker id="ah" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0L6,3L0,6z" style="fill:var(--muted)"/></marker></defs>`+
+      E.map(e=>`<line x1="${sx(e.c.t0).toFixed(1)}" y1="${sy(e.c.v0).toFixed(1)}" x2="${sx(e.c.t1).toFixed(1)}" y2="${sy(e.c.v1).toFixed(1)}" marker-end="url(#ah)" style="stroke:var(--muted);stroke-opacity:.55"/>`).join("")+
+      E.map(e=>`<circle class="pt" data-op="${e.id}" cx="${sx(e.c.t1).toFixed(1)}" cy="${sy(e.c.v1).toFixed(1)}" r="3" style="fill:${LISTS[0].c}"><title>${esc(T(OP[e.id].name))}: ${U("izlaznost","turnout")} ${P(e.c.t0)} → ${P(e.c.t1)}, Vučić ${P(e.c.v0)} → ${P(e.c.v1)}</title></circle>`).join("")});
+  return `<h3 style="margin-top:26px">${U("Opštine: izlaznost i Vučićeva lista, 2023 → 2026","Municipalities: turnout and Vučić list, 2023 → 2026")}</h3>
+    <p class="note">${U("Strelica vodi od rezultata opštine 2023. do rezultata 2026. (tačka). Opštinska verzija otiska prsta: ako bi rast izlaznosti išao zajedno sa rastom vlasti, strelice bi išle gore desno.","Each arrow goes from the municipality's 2023 result to its 2026 result (dot). A municipal version of the fingerprint: if rising turnout went with rising government support, arrows would point up-right.")}</p>
+    <div class="chart">${svg}</div>`;
+}
+
+/* Liste: raspodela udela liste po biračkim mestima (polja od 2 p.p.) */
+function shareHist(L){
+  const E=ROWS.filter(r=>r.e&&r.va>=20),b=new Array(50).fill(0);
+  for(const r of E)b[Math.min(49,Math.floor(r.v[L]/r.va*50))]++;
+  const mx=Math.max(...b),base=TOTAL.va?TOTAL.v[L]/TOTAL.va:0;
+  const top=Math.max(.1,Math.ceil(Math.max(...b.map((c,k)=>c?(k+1)/50:0))*10)/10);
+  const svg=svgPlot({w:640,h:300,x0:0,x1:top,y0:0,y1:mx,xt:[...Array(Math.round(top*10)+1).keys()].map(k=>k/10).filter((v,k,a)=>a.length<=6||k%2===0),yt:[0,Math.round(mx/2),mx],fx:fP,fy:v=>N(v),
+    xl:U("Udeo liste na biračkom mestu","List share at the polling station"),yl:U("Broj mesta","Stations"),label:U("Raspodela udela po biračkim mestima","Share distribution by polling station"),
+    body:(sx,sy)=>b.map((c,k)=>k/50<top?`<rect x="${sx(k/50)+.5}" y="${sy(c)}" width="${Math.max(.5,sx(1/50)-sx(0)-1)}" height="${sy(0)-sy(c)}" style="fill:${LISTS[L].c}"><title>${k*2}–${k*2+2}%: ${N(c)} ${U("mesta","stations")}</title></rect>`:"").join("")+
+      `<line x1="${sx(base)}" x2="${sx(base)}" y1="${sy(0)}" y2="${sy(mx)}" style="stroke:var(--ink);stroke-dasharray:5 4"/><text x="${sx(base)+4}" y="${sy(mx)+12}" style="fill:var(--ink)">${U("Srbija","Serbia")} ${P(base)}</text>`});
+  return `<div class="block"><h3>${U("Raspodela udela po biračkim mestima","Share distribution by polling station")}</h3>
+    <p class="note">${U("Koliko biračkih mesta (sa bar 20 važećih glasova) ima koji udeo ove liste, u poljima od 2 procentna poena; isprekidana linija je udeo u celoj Srbiji. Široka raspodela znači ujednačenu podršku, dugačak rep desno „bastione“, a izdvojen vrh kod 90–100% mesta koja vredi proveriti.","How many polling stations (with at least 20 valid votes) have each share of this list, in 2-point bins; the dashed line is the share in all of Serbia. A broad distribution means even support, a long right tail strongholds, and a separate spike at 90–100% stations worth checking.")}</p>
+    <div class="chart">${svg}</div></div>`;
 }
 /* ---------- Otisak prsta izbora: izlaznost × udeo liste po biračkim mestima ---------- */
 // Na čistim izborima mesta čine jedan oblak; dopisivanje glasova i izlaznosti daje gomilu u gornjem desnom uglu
@@ -969,6 +1123,9 @@ function fpBlock(E){
       <label style="flex-direction:row;align-items:center;gap:6px;font-weight:400"><input type="checkbox" id="fp23" ${fp23?"checked":""} ${g0?"":"disabled"}> ${U("Uporedi sa 2023.","Compare with 2023")}</label></div>
     ${g0?"":`<p class="note">${U("Ova lista nema prethodnika na izborima 2023, pa nema poređenja.","This list has no predecessor in the 2023 election, so there is no comparison.")}</p>`}
     <div class="chart"><div class="fpwrap" style="display:flex;flex-wrap:wrap;gap:24px">${fig("fpCv","2026")}${two?fig("fpCv23","2023"):""}</div><div id="fpInfo" class="note" style="min-height:1.3em"></div></div></div>`;
+}
+function digHook(E){
+  const s=$("#digL");if(s)s.onchange=e=>{digitSel=+e.target.value;$("#digBlk").outerHTML=digitBlock(E);locNode($("#digBlk"));digHook(E)};
 }
 function fpHook(E){
   const re=()=>{$("#fpBlk").outerHTML=fpBlock(E);locNode($("#fpBlk"));fpHook(E)};
@@ -1060,7 +1217,7 @@ function prevBlock(){
     <h3 style="margin-top:26px">${U("Po okruzima","By district")}</h3>
     <p class="note">${U("Kolone pokazuju 2023 → 2026: procenat, a ispod broj birača koji su glasali (izlaznost) ili broj glasova (liste). Δ je promena u procentnim poenima, a ispod promena broja. Klik na naslov kolone menja sortiranje.","Columns show 2023 → 2026: percentage, with voters who voted (turnout) or votes (lists) below. Δ is the change in percentage points, with the change in numbers below. Click a column header to sort.")}</p><div id="p23Ok"></div>
     <h3 style="margin-top:26px">${U("Po opštinama","By municipality")}</h3>
-    <p class="note">${U("Klik na opštinu otvara njene rezultate i poređenje po biračkim mestima na kartici Opštine.","Click a municipality to open its results and station-level comparison on the Municipalities tab.")}</p><div id="p23Op"></div>
+    <p class="note">${U("Klik na opštinu otvara njene rezultate i poređenje po biračkim mestima na kartici Opštine.","Click a municipality to open its results and station-level comparison on the Municipalities tab.")}</p><div id="p23Op"></div><div id="p23Sc"></div>
     <h3 style="margin-top:26px">${U("Po biračkim mestima","By polling station")}</h3>
     <p>${U(`Rezultati izbora od 17. decembra 2023. po biračkim mestima (RIK) spojeni su sa ovogodišnjim po opštini i broju biračkog mesta, kad je naziv mesta isti ili sličan ili, ako je mesto preseljeno, kad mu se broj upisanih birača razlikuje najviše 15%. Mesta kojima se broj upisanih promenio za više od 40% nisu poređena, jer su im verovatno promenjene granice ili je pod istim brojem drugo mesto; nisu poređena ni nova i prenumerisana mesta. Spojeno je ${N(M.length)} mesta sa unetim rezultatom. Na tim mestima izlaznost je ${P(t23)} → ${P(t26)}, a Vučićeva lista (broj 1 na oba izbora) ${P(s23)} → ${P(s26)} važećih glasova. Broj upisanih birača: ${N(up23)} → ${N(up26)}.`,
       `Results of the 17 December 2023 election by polling station (RIK) were matched with this year's by municipality and station number, when the station name is the same or similar or, if the station moved, when its number of registered voters differs by at most 15%. Stations whose registered voters changed by more than 40% are not compared, as their boundaries probably changed or the number now denotes another station; new and renumbered stations are not compared either. ${N(M.length)} counted stations were matched. At these stations turnout went ${P(t23)} → ${P(t26)}, and the Vučić list (number 1 in both elections) ${P(s23)} → ${P(s26)} of valid votes. Registered voters: ${N(up23)} → ${N(up26)}.`)}</p>
@@ -1072,6 +1229,8 @@ function prevHook(){
   const okE=OK.map((o,i)=>({id:i,name:o.name,sub:o.region,c:cmp23(OP.map((p,j)=>j).filter(j=>OP[j].ok===i),OK_AGG[i])})).filter(e=>e.c);
   const opE=OP.map((o,i)=>({id:i,name:o.name,sub:OK[o.ok].name,c:cmp23([i],OP_AGG[i])})).filter(e=>e.c);
   if($("#p23Ok"))dataTable($("#p23Ok"),"p23ok",cmpCols(U("Okrug","District")),okE,{sort:"dt",dir:-1,limit:LIM(12,5)});
+  const sc=$("#p23Sc");
+  if(sc){sc.innerHTML=scatter23(opE)+arrows23(opE);locNode(sc);$$(".pt",sc).forEach(c=>c.onclick=()=>{state.okF="";state.opSearch=c.dataset.op;go("opstine")})}
   if($("#p23Op"))dataTable($("#p23Op"),"p23op",cmpCols(U("Opština","Municipality")),opE,{sort:"dt",dir:-1,limit:LIM(15,5),onRow:e=>{state.okF="";state.opSearch=String(e.id);go("opstine")}});
 }
 function viewStatistika(){
@@ -1145,7 +1304,7 @@ function viewStatistika(){
      U(`Takvih mesta ima ${N(hiMix.length)}; prikazano je do 10. `,`There are ${N(hiMix.length)} such stations; up to 10 are shown. `)+mixedNote(),hiMix.slice(0,10),hiCols)}</div>
    <div class="block">${bmTable(U("Skoro jednoglasni rezultati","Near-unanimous results"),
      U(`Biračka mesta na kojima su i izlaznost i udeo liste koja je tu prva najmanje 90%. Takvih mesta ima ${N(una.length)}; prikazano je do 30. Mesta sa najmanje 50 važećih glasova. `,`Polling stations where both turnout and the share of the list that came first there are at least 90%. There are ${N(una.length)} such stations; up to 30 are shown. Stations with at least 50 valid votes. `)+CAVEAT(),una.slice(0,30),unaCols)}</div>`;
-  SEC.otisak=()=>fpBlock(E);
+  SEC.otisak=()=>fpBlock(E)+digitBlock(E)+invalidBlock(E);
   SEC.zapisnici=()=>`
    <div class="block">${bmTable(U("Ispravljeni zapisnici","Corrected records"),
      korR.length?U(`Za ${N(korR.length)} biračkih mesta RIK je objavio rešenje o ispravljanju zapisnika o radu biračkog odbora (obrasci RG-7-1 do RG-7-4); rezultat na sajtu je posle ispravke. Najviše ih je u: ${korTop}. Ispravka sama po sebi nije nepravilnost, ali je dobro uporediti zapisnik i rešenje. Prikazano je do 40 mesta, prvo iz opština sa najviše ispravki.`,`For ${N(korR.length)} polling stations RIK published a decision correcting the polling board record (forms RG-7-1 to RG-7-4); the result shown is after the correction. Most are in: ${korTop}. A correction is not in itself an irregularity, but it is worth comparing the record and the decision. Up to 40 stations are shown, starting with the municipalities with the most corrections.`)
@@ -1166,11 +1325,11 @@ function viewStatistika(){
    <div class="subnav" role="group" aria-label="${U("Delovi statistike","Statistics sections")}">${subs}</div>
    ${SEC[sub]()}`;
   $$("#statistika .subnav button").forEach(b=>b.onclick=()=>go(b.dataset.sub==="osnovno"?"statistika":"statistika-"+b.dataset.sub));
-  if(sub==="otisak")fpHook(E);
+  if(sub==="otisak"){fpHook(E);digHook(E)}
   if(sub==="p2023")prevHook();
 }
 // delovi kartice Statistika (#statistika-<deo>)
-const STAT_SUB=[["osnovno","Osnovno","Basics"],["odstupanja","Odstupanja","Outliers"],["otisak","Otisak prsta","Fingerprint"],["zapisnici","Zapisnici","Records"],["p2023","Poređenje sa 2023.","Compared with 2023"]];
+const STAT_SUB=[["osnovno","Osnovno","Basics"],["odstupanja","Odstupanja","Outliers"],["otisak","Grafikoni","Charts"],["zapisnici","Zapisnici","Records"],["p2023","Poređenje sa 2023.","Compared with 2023"]];
 
 /* ---------- Navigacija i jezik ---------- */
 const VIEWS={pregled:viewPregled,liste:viewListe,okruzi:viewOkruzi,opstine:viewOpstine,mesta:viewMesta,statistika:viewStatistika};
