@@ -23,7 +23,9 @@
 <link rel="apple-touch-icon" href="https://izbori26.rs/ikona.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<!-- font ne blokira prikaz (media=print -> all), a display=optional: bez ponovnog raspoređivanja kad font stigne kasno -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,700&family=Source+Sans+3:wght@400;600;700&display=optional" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,700&family=Source+Sans+3:wght@400;600;700&display=optional"></noscript>
 <style>
 :root{
   --bg:#f2f4f8;--surface:#ffffff;--ink:#101826;--muted:#566175;--line:#d8dde6;--hover:#e8ecf4;--accent:#16294d;--focus:#2563eb;--bar-bg:#e3e7ee;

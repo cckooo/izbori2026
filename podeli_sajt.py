@@ -86,6 +86,15 @@ for const, fname in (("PRETHODNI", "prethodni.json"), ("MAPA", "mapa.json")):
     if m:
         (OUT / fname).write_text(m.group(1), encoding="utf-8")
         html = html[:m.start()] + f"const {const}=null;" + html[m.end():]
+# veliki podaci kao <script type="application/json"> + JSON.parse: pregledač ih čita brže nego JS literal
+blocks = []
+for const in ("DATA", "NASELJA", "STANOVNICI"):
+    m = re.search(rf"^const {const}=(.*);(?=\r?$)", html, re.M)
+    if m:
+        blocks.append(f'<script type="application/json" id="j{const}">' + m.group(1).replace("</", "<\\/") + "</script>")
+        html = html[:m.start()] + f'const {const}=JSON.parse(document.getElementById("j{const}").textContent);' + html[m.end():]
+i = html.index("<script>\nconst DATA=")
+html = html[:i] + "\n".join(blocks) + "\n" + html[i:]
 nas_map = SRC.with_name("mapa_naselja.json")  # granice naselja (mapa_naselja.py): po fajl za opštinu, preuzima se kad se otvori
 if nas_map.exists():
     nd = OUT / "naselja"
