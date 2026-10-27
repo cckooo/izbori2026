@@ -23,6 +23,9 @@ jobs:
       name: github-pages
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0       # istorija za vreme poslednje izmene sajta (podeli_sajt.py)
+          filter: blob:none
       - name: Pripremi sajt
         run: python3 podeli_sajt.py _site && cp og.png ikona.png _site/
       - uses: actions/upload-pages-artifact@v3

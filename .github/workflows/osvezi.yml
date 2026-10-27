@@ -24,6 +24,9 @@ jobs:
       name: github-pages
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0       # istorija za vreme poslednje izmene sajta (podeli_sajt.py)
+          filter: blob:none
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -38,7 +41,7 @@ jobs:
           git commit -m "Rezultati: $(grep -o '"snapshot":"[^"]*"' izbori2026.html | cut -d'"' -f4)"
           git push
       - name: Pripremi sajt
-        run: python3 podeli_sajt.py _site && cp og.png ikona.png _site/
+        run: python3 podeli_sajt.py _site --podaci && cp og.png ikona.png _site/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

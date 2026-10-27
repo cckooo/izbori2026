@@ -4,19 +4,49 @@ Priprema sajt za objavu: izbori2026.html -> <folder>/index.html + <folder>/ulice
 
 Spiskovi ulica čine oko 60 % HTML-a, a trebaju samo za pretragu i za „ulice“ u tabeli po biračkim
 mestima, pa se izdvajaju u ulice.json koji sajt preuzima tek kad zatreba. U NASELJA ostaju nazivi
-naselja, a umesto ulica stoji 1. Upisuje i vreme objave (BUILD, prikazuje se u podnožju). Izvorni izbori2026.html se ne menja i i dalje radi sam (lokalno).
+naselja, a umesto ulica stoji 1. Izvorni izbori2026.html se ne menja i i dalje radi sam (lokalno).
 
-    python podeli_sajt.py [_site] [izbori2026.html]
+U BUILD (prikazuje se u podnožju) upisuje:
+- sajt: vreme poslednjeg commit-a koji menja sajt, bez automatskih commit-a sa rezultatima (izbori-bot);
+- podaci: sadašnje vreme, samo uz --podaci (osvezi.yml, posle povlačenja CSV-a sa RIK-a).
+
+    python podeli_sajt.py [_site] [izbori2026.html] [--podaci]
 """
 import json
 import re
+import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-OUT = Path(sys.argv[1] if len(sys.argv) > 1 else "_site")
-SRC = Path(sys.argv[2] if len(sys.argv) > 2 else Path(__file__).with_name("izbori2026.html"))
+ARGS = [a for a in sys.argv[1:] if not a.startswith("--")]
+OUT = Path(ARGS[0] if ARGS else "_site")
+SRC = Path(ARGS[1] if len(ARGS) > 1 else Path(__file__).with_name("izbori2026.html"))
+SITE_FILES = ["izbori2026.html", "podeli_sajt.py", "og.png", "ikona.png"]
+BOT = "izbori-bot"
+try:
+    TZ = ZoneInfo("Europe/Belgrade")
+except ZoneInfoNotFoundError:  # Windows bez paketa tzdata
+    TZ = None
+
+
+def fmt(dt):
+    return dt.astimezone(TZ).strftime("%Y-%m-%d %H:%M")
+
+
+def site_changed():
+    """Vreme poslednjeg commit-a (ne bota) koji menja sajt; prazno ako git istorija nije dostupna."""
+    try:
+        log = subprocess.run(["git", "log", "-n", "300", "--format=%ct%x09%an", "--", *SITE_FILES],
+                             cwd=Path(__file__).parent, capture_output=True, text=True, check=True).stdout
+    except (OSError, subprocess.CalledProcessError):
+        return ""
+    for ln in log.splitlines():
+        ts, author = ln.split("\t", 1)
+        if author != BOT:
+            return fmt(datetime.fromtimestamp(int(ts)).astimezone())
+    return ""
 
 html = SRC.read_text(encoding="utf-8")
 m = re.search(r"^const NASELJA=(.*);(?=\r?$)", html, re.M)
@@ -31,13 +61,14 @@ for op, mesta in naselja.items():
             v[1] = 1
 line = "const NASELJA=" + json.dumps(naselja, ensure_ascii=False, separators=(",", ":")) + ";"
 html = html[:m.start()] + line + html[m.end():]
-try:
-    now = datetime.now(ZoneInfo("Europe/Belgrade"))
-except ZoneInfoNotFoundError:  # Windows bez paketa tzdata
-    now = datetime.now()
-html, n = re.subn(r'^const BUILD="[^"]*";', f'const BUILD="{now:%Y-%m-%d %H:%M}";', html, count=1, flags=re.M)
+build = {"sajt": site_changed()}
+if "--podaci" in sys.argv:
+    build["podaci"] = fmt(datetime.now().astimezone())
+line = "const BUILD=" + json.dumps(build, separators=(",", ":")) + ";"
+html, n = re.subn(r"^const BUILD=[^;\n]*;", lambda _: line, html, count=1, flags=re.M)
 if n != 1:
     raise SystemExit("Nema linije `const BUILD=...;` u HTML-u")
+print(line)
 
 OUT.mkdir(parents=True, exist_ok=True)
 (OUT / "index.html").write_text(html, encoding="utf-8", newline="")
