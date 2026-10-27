@@ -4,14 +4,16 @@ Priprema sajt za objavu: izbori2026.html -> <folder>/index.html + <folder>/ulice
 
 Spiskovi ulica čine oko 60 % HTML-a, a trebaju samo za pretragu i za „ulice“ u tabeli po biračkim
 mestima, pa se izdvajaju u ulice.json koji sajt preuzima tek kad zatreba. U NASELJA ostaju nazivi
-naselja, a umesto ulica stoji 1. Izvorni izbori2026.html se ne menja i i dalje radi sam (lokalno).
+naselja, a umesto ulica stoji 1. Upisuje i vreme objave (BUILD, prikazuje se u podnožju). Izvorni izbori2026.html se ne menja i i dalje radi sam (lokalno).
 
     python podeli_sajt.py [_site] [izbori2026.html]
 """
 import json
 import re
 import sys
+from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 OUT = Path(sys.argv[1] if len(sys.argv) > 1 else "_site")
 SRC = Path(sys.argv[2] if len(sys.argv) > 2 else Path(__file__).with_name("izbori2026.html"))
@@ -29,6 +31,13 @@ for op, mesta in naselja.items():
             v[1] = 1
 line = "const NASELJA=" + json.dumps(naselja, ensure_ascii=False, separators=(",", ":")) + ";"
 html = html[:m.start()] + line + html[m.end():]
+try:
+    now = datetime.now(ZoneInfo("Europe/Belgrade"))
+except ZoneInfoNotFoundError:  # Windows bez paketa tzdata
+    now = datetime.now()
+html, n = re.subn(r'^const BUILD="[^"]*";', f'const BUILD="{now:%Y-%m-%d %H:%M}";', html, count=1, flags=re.M)
+if n != 1:
+    raise SystemExit("Nema linije `const BUILD=...;` u HTML-u")
 
 OUT.mkdir(parents=True, exist_ok=True)
 (OUT / "index.html").write_text(html, encoding="utf-8", newline="")
