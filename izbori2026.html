@@ -810,14 +810,6 @@ function viewListe(){
     .map(([lab,lo,hi])=>band(lab,E.filter(r=>r.up>=lo&&r.up<hi)));
   const turnB=[[U("do 45%","up to 45%"),0,.45],["45–55%",.45,.55],["55–65%",.55,.65],["65–75%",.65,.75],[U("preko 75%","over 75%"),.75,9]]
     .map(([lab,lo,hi])=>band(lab,E.filter(r=>r.turn!=null&&r.turn>=lo&&r.turn<hi)));
-  // korelacija udela po biračkim mestima
-  const C=E.filter(r=>r.va>=50),n=C.length;
-  const corr=j=>{let sx=0,sy=0,sxx=0,syy=0,sxy=0;for(const r of C){const x=r.v[L]/r.va,y=r.v[j]/r.va;sx+=x;sy+=y;sxx+=x*x;syy+=y*y;sxy+=x*y}
-    const d=Math.sqrt((n*sxx-sx*sx)*(n*syy-sy*sy));return d>0?(n*sxy-sx*sy)/d:null};
-  const cr=LISTS.map((_,j)=>({j,c:j===L?null:corr(j)})).filter(e=>e.c!=null).sort((a,b)=>b.c-a.c);
-  const fc=c=>(c>=0?"+":"−")+fmt(2).format(Math.abs(c));
-  const corrBars=`<div class="bars"><div class="brow head"><span class="bl">${U("Lista","List")}</span><span>${U("← suprotno · zajedno →","← opposite · together →")}</span><span class="bv">r</span></div>`+
-    cr.map(e=>`<div class="brow"><span class="bl" title="${esc(LISTS[e.j].name)}">${sw(e.j)}${esc(LISTS[e.j].short)}</span><div class="dev"><i style="${e.c>=0?"left":"right"}:50%;width:${Math.abs(e.c)*50}%;background:${LISTS[e.j].c}"></i></div><span class="bv">${fc(e.c)}</span></div>`).join("")+`</div>`;
   const opts=LISTS.map((x,i)=>`<option value="${i}" ${i===L?"selected":""}>${x.n}. ${esc(x.short)}</option>`).join("");
   $("#liste").innerHTML=`
    <h2>${U("Profil liste","List profile")}</h2>
@@ -862,9 +854,6 @@ function viewListe(){
     <div><h3>${U("Po izlaznosti","By turnout")}</h3>
      <p class="note">${U("Biračka mesta prema izlaznosti; u zagradi je broj mesta. Crta je prosek Srbije.","Polling stations by turnout; the number of stations is in brackets. The line is the Serbian average.")}</p>
      ${shareBars(turnB,L,U("Izlaznost","Turnout"))}</div>
-    <div><h3>${U("Sa kojim listama se poklapa","Which lists it moves with")}</h3>
-     <p class="note">${U(`Korelacija udela ove i svake druge liste po biračkim mestima (${N(n)} mesta sa bar 50 važećih glasova), od −1 do +1. Pozitivna: gde je jedna lista jaka, jaka je i druga. Negativna: gde je jedna jaka, druga je slaba. Ovo opisuje geografiju glasanja, a ne to kako su glasali pojedinačni birači; dve velike liste su po prirodi stvari često negativno povezane.`,`Correlation between this list’s share and each other list’s share across polling stations (${N(n)} stations with at least 50 valid votes), from −1 to +1. Positive: where one is strong, so is the other. Negative: where one is strong, the other is weak. This describes the geography of the vote, not how individual voters voted; two large lists are naturally often negatively related.`)}</p>
-     ${corrBars}</div>
    </div>`;
   $("#lList").onchange=e=>{location.hash="lista-"+(+e.target.value+1)};
   $$("#liste tr[data-op]").forEach(tr=>tr.onclick=()=>{state.okF="";state.opSearch=tr.dataset.op;go("opstine")});
