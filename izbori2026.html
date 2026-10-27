@@ -859,16 +859,21 @@ function viewListe(){
   const zero=E.filter(r=>!r.v[L]).length;
   // opštine
   const ops=OP_AGG.map((a,i)=>({i,a,p:a.va?a.v[L]/a.va:0})).filter(e=>e.a.va>=200&&incOp(e.i));
-  const minOp=U("Opštine sa najmanje 200 važećih glasova. Klik na opštinu otvara njene rezultate.","Municipalities with at least 200 valid votes. Click a municipality for its results.");
+  // opštine sa podeljenim glasanjem (Preševo, Bujanovac, Sandžak, mađarske…) idu u posebne tabele, da ne zaklone ostale;
+  // ne za liste manjina i sandžačke liste, kojima su baš te opštine uporište
+  const split=!MIX_LISTS.includes(L);
+  const mixNote=split?U(" Bez opština sa podeljenim glasanjem (posebno ispod)."," Excluding municipalities with a divided vote (shown separately below)."):"";
+  const opsMain=split?ops.filter(e=>!MIXED[e.i]):ops,opsMix=split?ops.filter(e=>MIXED[e.i]):[];
+  const minOp=U("Opštine sa najmanje 200 važećih glasova. Klik na opštinu otvara njene rezultate.","Municipalities with at least 200 valid votes. Click a municipality for its results.")+mixNote;
   // biračka mesta
-  const big=E.filter(r=>r.va>=100);
+  const bigAll=E.filter(r=>r.va>=100),big=split?bigAll.filter(r=>!MIXED[r.op]):bigAll,bigMix=split?bigAll.filter(r=>MIXED[r.op]):[];
   const zeroBig=big.filter(r=>!r.v[L]).length;
-  const min100=U("Biračka mesta sa najmanje 100 važećih glasova.","Polling stations with at least 100 valid votes.");
+  const min100=U("Biračka mesta sa najmanje 100 važećih glasova.","Polling stations with at least 100 valid votes.")+mixNote;
   const sv=r=>`${PL(share(r),L)} <span class="muted">(${N(r.v[L])})</span>`;
   // najslabija: najmanji udeo, a među mestima sa istim udelom (npr. 0 glasova) prvo najveća
   const weak=big.slice().sort((a,b)=>share(a)-share(b)||b.va-a.va).slice(0,MORE);
   const low=miniTable(U("Najslabija biračka mesta","Weakest polling stations"),zeroBig>1
-    ?U(`Lista nema nijedan glas na ${N(zeroBig)} mesta sa bar 100 važećih glasova; prikazana su najveća od njih.`,`The list got no votes at ${N(zeroBig)} stations with at least 100 valid votes; the largest of them are shown.`)
+    ?U(`Lista nema nijedan glas na ${N(zeroBig)} mesta sa bar 100 važećih glasova; prikazana su najveća od njih.`,`The list got no votes at ${N(zeroBig)} stations with at least 100 valid votes; the largest of them are shown.`)+mixNote
     :min100,weak,U("Udeo","Share"),sv);
   const dv=devRows(L);
   const dcols=[{l:U("Na mestu","At station"),f:e=>PL(e.p,L)},{l:U("Ostatak opštine","Rest of municipality"),f:e=>PL(e.p0,L)},{l:U("Razlika","Difference"),f:e=>`<b>${signPP(e.d)}</b>`}];
@@ -903,14 +908,21 @@ function viewListe(){
    </div>
    ${shareHist(L)}
    <div class="grid2 block">
-    ${opTable(U("Najjače opštine","Strongest municipalities"),minOp,top(ops,e=>e.p,-1),L)}
-    ${opTable(U("Najslabije opštine","Weakest municipalities"),minOp,top(ops,e=>e.p,1),L)}
+    ${opTable(U("Najjače opštine","Strongest municipalities"),minOp,top(opsMain,e=>e.p,-1),L)}
+    ${opTable(U("Najslabije opštine","Weakest municipalities"),minOp,top(opsMain,e=>e.p,1),L)}
    </div>
    <div class="grid2 block">
     ${miniTable(U("Najjača biračka mesta","Strongest polling stations"),min100,top(big,share,-1),U("Udeo","Share"),sv)}
     ${low}
    </div>
    ${zeroBig>=10?`<div class="block">${most}</div>`:""}
+   ${split&&(opsMix.length||bigMix.length)?`<div class="block"><h3>${U("Isto, u opštinama sa podeljenim glasanjem","The same, in municipalities with a divided vote")}</h3>
+    <p class="note">${mixedNote()}</p></div>
+   <div class="grid2">
+    ${miniTable(U("Najjača biračka mesta","Strongest polling stations"),U("Biračka mesta sa najmanje 100 važećih glasova.","Polling stations with at least 100 valid votes."),top(bigMix,share,-1),U("Udeo","Share"),sv)}
+    ${miniTable(U("Najslabija biračka mesta","Weakest polling stations"),U("Biračka mesta sa najmanje 100 važećih glasova.","Polling stations with at least 100 valid votes."),bigMix.slice().sort((a,b)=>share(a)-share(b)||b.va-a.va).slice(0,MORE),U("Udeo","Share"),sv)}
+   </div>
+   <div class="block">${opTable(U("Opštine sa podeljenim glasanjem","Municipalities with a divided vote"),U("Poređane po udelu liste. Klik na opštinu otvara njene rezultate.","Sorted by the list’s share. Click a municipality for its results."),top(opsMix,e=>e.p,-1),L)}</div>`:""}
    <div class="block"><h3>${U("Mesta koja najviše odstupaju od svoje opštine","Stations that differ most from their municipality")}</h3>
     <p class="note">${U("Udeo liste na biračkom mestu poređen je sa udelom u ostatku iste opštine, bez tog mesta. Redosled uzima u obzir i veličinu mesta, pa mala mesta sa slučajnim odstupanjem ne izlaze na vrh. Mesta sa najmanje 50 važećih glasova, bez inostranstva i zatvora.","The list’s share at a station is compared with its share in the rest of the same municipality, excluding that station. The ranking also accounts for station size, so small stations with random swings do not rise to the top. Stations with at least 50 valid votes, excluding abroad and prisons.")} ${CAVEAT()}</p></div>
    <div class="grid2">
