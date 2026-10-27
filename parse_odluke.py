@@ -619,9 +619,13 @@ def main():
                 r"^(Градска општина|Општина|Град)\s+|\s*\(.*\)$", "", op))}
             if not nas or nas in seat:
                 hint = village_hint(r["adresa"], r["naselja"], op, ref)
+                post = re.search(r"\b\d{5}\s+([А-ЯЂЈЉЊЋЏа-яђјљњћџ ]{3,30})", r["adresa"])
                 if hint and hint not in seat:
                     nas = hint
                     stats["naselje_iz_adrese"] += 1
+                elif nas and post and official(post.group(1).strip(), ref.get(op_key(op)) or []) not in seat:
+                    nas = ""  # pošta je u drugom mestu (31265 Ражана): nije sedište, a selo se ne zna
+                    stats["naselje_nepotvrdjeno"] += 1
             naselja.setdefault(op, {})[str(k)] = [nas, ul]
             detalji.append({"opstina": op, "bm": k, "csv_naziv": nm, "naziv": r["naziv"], "slicnost": round(s),
                             "izvor": src.as_posix(), "strana": r["str"], "naselje": nas, "naselja": r["naselja"],

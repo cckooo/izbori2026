@@ -5,7 +5,7 @@ Opština bez odluke ili bez pročitanih redova: 0 mesta
 Mesto nije nađeno u odluci (OCR nije pročitao broj ili red): 3
 Odbijeno zbog nepoklapanja naziva: 2
 Provera položaja u odluci (red nije između susednih mesta): 5 slučajeva, od toga ostavljeno prazno: 4
-Naselje prema spisku RZS (Popis 2022): potvrđeno 7178, od toga OCR ispravki 96; gradsko naselje opštine 860; nepotvrđeno 149; bez spiska (Kosovo, inostranstvo, zavodi) 181
+Naselje prema spisku RZS (Popis 2022): potvrđeno 7178, od toga OCR ispravki 96; gradsko naselje opštine 860; nepotvrđeno 161; bez spiska (Kosovo, inostranstvo, zavodi) 181
 
 DOKUMENTI (način čitanja, opštine, broj pročitanih mesta):
   ocr  Ада / Odluka o određivanju biračkih mesta za izbor narodnih poslanika raspisanih za 25 oktobar 2026..pdf: Ада; zapisa 29, sa brojem 29
