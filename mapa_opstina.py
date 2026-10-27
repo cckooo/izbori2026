@@ -2,82 +2,36 @@
 """
 Granice opština za mapu na sajtu: OpenStreetMap (© OpenStreetMap contributors, ODbL) -> uprošćene SVG putanje.
 
-1. Overpass: relacije boundary=administrative nivoa 6–9 u okviru Srbije i Kosova (samo oznake).
+1. Granice iz izvoda OpenStreetMap-a (osm_granice.py -> _osm_cache/granice.json), nivoi 6–8.
 2. Za svaku opštinu iz DATA.opstine bira relaciju po zvaničnom imenu („Град X“, „Општина X“, „Градска општина X“);
    opštine na Kosovu su „Komuna e … / Opština …“ (nivo 6). Posebno: Косовска Каменица = Општина Каменица,
    Гора = Општина Драгаш (Gora je danas deo Dragaša). Ostale opštine na Kosovu idu u pozadinu (sivo).
-3. Skida geometriju, sklapa spoljne prstenove, projektuje (ekvidistantno, cos 44°) i uprošćava (Douglas–Peucker).
+3. Spoljne prstenove projektuje (ekvidistantno, cos 44°) i uprošćava (Douglas–Peucker).
 4. Upisuje `const MAPA={w,h,o:{"opština":"path"},bg:[path],ins:{bg|ni:{w,h,o}}};` u izbori2026.html (posle PRETHODNI);
    ins su uvećani isečci gradskih opština Beograda (bg) i Niša (ni).
 
-    python mapa_opstina.py            # treba internet (Overpass), oko minut
+    python osm_granice.py             # jednom: izvod Srbije i Kosova sa Geofabrik-a
+    python mapa_opstina.py
 """
 import json
 import math
 import re
-import sys
-import time
-import urllib.parse
-import urllib.request
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 HTML = HERE / "izbori2026.html"
-CACHE = HERE / "_osm_cache"  # sirovi odgovori Overpass-a (nije u repozitorijumu)
-HOSTS = ["https://overpass.kumi.systems/api/interpreter", "https://overpass-api.de/api/interpreter"]
-BBOX = "41.8,18.8,46.2,23.1"
+GRANICE = HERE / "_osm_cache" / "granice.json"  # osm_granice.py (nije u repozitorijumu)
 POSEBNO = {"Косовска Каменица": "Општина Каменица", "Гора": "Општина Драгаш"}
 BEOGRAD = "Град Београд"
 W = 600  # širina glavne mape u pikselima (viewBox)
 TOL = 0.6  # tolerancija uprošćavanja u pikselima
 
 
-def overpass(q, name):
-    CACHE.mkdir(exist_ok=True)
-    f = CACHE / name
-    if f.exists():
-        return json.loads(f.read_text(encoding="utf-8"))
-    for host in HOSTS:
-        for _ in range(2):
-            try:
-                req = urllib.request.Request(host, data=urllib.parse.urlencode({"data": q}).encode(),
-                                             headers={"User-Agent": "izbori26.rs election map"})
-                body = urllib.request.urlopen(req, timeout=900).read()
-                f.write_bytes(body)
-                return json.loads(body)
-            except Exception as e:  # zauzet server: sledeći ili ponovo
-                print("Overpass:", host, e, file=sys.stderr)
-                time.sleep(5)
-    raise SystemExit("Overpass nije dostupan")
-
-
-def rings(rel):
-    """Spoljni prstenovi multipoligona: spajanje puteva (way) po krajnjim tačkama."""
-    segs = [[(p["lon"], p["lat"]) for p in m["geometry"]] for m in rel.get("members", [])
-            if m["type"] == "way" and m.get("role") in ("outer", "") and m.get("geometry")]
-    out = []
-    while segs:
-        ring = segs.pop(0)
-        changed = True
-        while ring[0] != ring[-1] and changed:
-            changed = False
-            for i, s in enumerate(segs):
-                if s[0] == ring[-1]:
-                    ring += s[1:]
-                elif s[-1] == ring[-1]:
-                    ring += s[::-1][1:]
-                elif s[-1] == ring[0]:
-                    ring = s + ring[1:]
-                elif s[0] == ring[0]:
-                    ring = s[::-1] + ring[1:]
-                else:
-                    continue
-                segs.pop(i)
-                changed = True
-                break
-        if len(ring) >= 4:
-            out.append(ring)
-    return out
+def granice():
+    """Administrativne granice iz Geofabrik izvoda (osm_granice.py): {id: {"id","tags","rings"}}; prstenovi su (lon, lat)."""
+    if not GRANICE.exists():
+        raise SystemExit("Nema _osm_cache/granice.json; prvo pokreni: python osm_granice.py")
+    return {e["id"]: e for e in json.loads(GRANICE.read_text(encoding="utf-8"))["elements"]}
 
 
 def dp(pts, tol):
@@ -106,8 +60,8 @@ def dp(pts, tol):
 
 def opstine(data):
     """Relacija i geometrija za svaku opštinu iz DATA: (pick {opština: [id]}, G {id: prstenovi}, kosovo, missing)."""
-    tags = overpass(f'[out:json][timeout:600];rel["boundary"="administrative"]["admin_level"~"^(6|7|8)$"]({BBOX});out tags;',
-                    "tags.json")["elements"]
+    GR = granice()
+    tags = [e for e in GR.values() if e["tags"].get("admin_level") in ("6", "7", "8")]
     by_name = {}
     for e in tags:
         t = e["tags"]
@@ -128,8 +82,7 @@ def opstine(data):
             pick[name] = [e["id"] for e in c]
     ids = sorted({i for v in pick.values() for i in v} | {e["id"] for e in kosovo} |
                  set())
-    geo = overpass(f'[out:json][timeout:900];rel(id:{",".join(map(str, ids))});out geom;', f"geom_{hash(tuple(ids)) & 0xffffffff:08x}.json")["elements"]  # keš po spisku relacija
-    G = {e["id"]: rings(e) for e in geo}
+    G = {i: [[tuple(p) for p in r] for r in GR[i]["rings"]] for i in ids if i in GR}
 
     def centroid(i):
         pts = [p for r in G.get(i, []) for p in r]
