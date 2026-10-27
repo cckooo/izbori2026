@@ -100,7 +100,6 @@ def page(op, css, fonts, snap, map_svg, legend, okr_links):
 <main class="stp">
 <h1>Rezultati izbora 2026: {e(op['full'])}</h1>
 <p class="lead">{e(op['sum']) or e(op['full'] + ', ' + op['okrug'] + '.')}</p>
-{f'<p lang="sr-Cyrl" class="note">{e(op["sumC"])}</p>' if op['sum'] else ''}
 <p class="note">{e(op['full'])}, {e(op['okrug'])}. {op['status']}</p>
 <div class="cta"><a class="btn" href="{app}">Mapa sela, biračka mesta i poređenje sa 2023. →</a><a class="btn ghost" href="/#pregled">Gde ja glasam?</a></div>
 <div class="block"><h2>Rezultati svih listi</h2><p class="note">Udeo u važećim glasovima, na biračkim mestima sa unetim rezultatom.</p>
