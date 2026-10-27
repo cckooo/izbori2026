@@ -641,16 +641,21 @@ function viewOpstine(){
       const i=+state.opSearch,o=OP[i],a=OP_AGG[i];
       // podmeni izabrane opštine (pamti se dok se bira druga opština)
       const os=OSUB.some(x=>x[0]===state.osub)?state.osub:"rezultati";
+      // adresa prati izabranu opštinu (bez novog unosa u istoriji), pa se može kopirati ili osvežiti
+      const link="#opstina/"+opSlug(i)+(os==="rezultati"?"":"/"+os);
+      if(cur==="opstine"&&location.hash!==link)history.replaceState(null,"",link);
       const body={
         rezultati:()=>`<p class="note">${statusLine(a)} ${U("Udeo je u važećim glasovima.","Shares are of valid votes.")}</p><div class="dlg" style="padding:0;max-height:none;overflow:visible">${listRows(a)}</div><div id="opMap"></div>`,
         naselja:()=>`<p class="note">${U("Rezultati biračkih mesta sabrani po naselju. Klik na naselje otvara njegova biračka mesta. Broj stanovnika i punoletnih je iz Popisa 2022 (RZS); birački spisak se razlikuje (iseljeni, umrli, promene prebivališta).","Polling station results summed by settlement. Click a settlement to see its polling stations. Population and adults are from the 2022 census (RZS); the voter roll differs (emigration, deaths, changes of residence).")}</p><div id="opNas"></div>`,
         p2023:()=>op23Block(i)||`<p class="muted">${U("Podaci za 2023. se učitavaju ili nisu dostupni za ovu opštinu.","2023 data are loading or not available for this municipality.")}</p>`};
       D.innerHTML=`<div class="block" style="margin-top:20px"><h3>${esc(T(o.name))} <span class="muted" style="font-weight:400">${esc(T(OK[o.ok].name))}</span></h3>
+        <p style="margin:2px 0 8px"><button type="button" class="btn ghost" id="opLink">${navigator.share&&MOBILE()?U("Podeli link","Share link"):U("Kopiraj link","Copy link")}</button></p>
         <div class="subnav" role="group" aria-label="${U("Delovi opštine","Municipality sections")}">${OSUB.map(([k,sr,en])=>`<button type="button" data-sub="${k}" aria-current="${k===os}">${U(sr,en)}</button>`).join("")}</div>
         ${body[os]()}<p style="margin-top:12px"><button class="btn ghost" id="opSt">${U("Sva biračka mesta u opštini","All polling stations in the municipality")}</button></p></div>`;
       $$("#opDetail .subnav button").forEach(b=>b.onclick=()=>{state.osub=b.dataset.sub;const y=scrollY;draw();scrollTo(0,y)});
       if(os==="rezultati")drawOpMap(i); // mapa naselja je ispod rezultata svih listi
       $("#opSt").onclick=()=>{state.m={...state.m,q:"",ok:String(o.ok),op:String(i),page:0};go("mesta")};
+      $("#opLink").onclick=e=>shareLink(location.origin+location.pathname+link,T(o.name),e.currentTarget);
       if(os==="p2023")loadLazy("prethodni");
       if(os!=="naselja")return;
       const groups=new Map();
@@ -667,7 +672,7 @@ function viewOpstine(){
         {id:"pun",label:U("Punoletnih (2022)","Adults (2022)"),num:true,get:e=>e.pop?e.pop[1]:null,render:e=>e.pop&&e.pop[1]?N(e.pop[1]):"–"},
         {id:"st",label:U("Stanovnika (2022)","Population (2022)"),num:true,get:e=>e.pop?e.pop[0]:null,render:e=>e.pop?N(e.pop[0]):"–"});
       dataTable($("#opNas"),"opnas",ncols,ents2,{sort:"name",dir:1,page:LIM(25,10),onRow:e=>{state.m={...state.m,q:"",nas:e.key||NONE,ok:String(o.ok),op:String(i),page:0};go("mesta")}});
-    }else D.innerHTML="";
+    }else{D.innerHTML="";if(cur==="opstine"&&location.hash.startsWith("#opstina/"))history.replaceState(null,"","#opstine")}
   };
   const fillOp=()=>{$("#fOp").innerHTML=`<option value="">${U("Sve opštine","All municipalities")}</option>`+OP.map((o,i)=>({o,i})).filter(x=>state.okF===""||String(x.o.ok)===state.okF).sort((a,b)=>T(a.o.name).localeCompare(T(b.o.name),"sr")).map(x=>`<option value="${x.i}" ${String(x.i)===state.opSearch?"selected":""}>${esc(T(x.o.name))}</option>`).join("")};
   fillOp();
@@ -1447,6 +1452,18 @@ function viewStatistika(){
   if(sub==="p2023")prevHook();
   if(sub==="otisak"||sub==="p2023")loadLazy("prethodni"); // poređenje sa 2023.
 }
+// adresa opštine u linku: latinica, mala slova, crtice (npr. grad-cacak, gradska-opstina-palilula-beograd)
+const opSlug=i=>flat(OP[i].full).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+// deljenje linka: na telefonu sistemski meni za deljenje, inače kopiranje u međuspremnik
+function shareLink(url,title,btn){
+  const done=txt=>{const old=btn.textContent;btn.textContent=txt;setTimeout(()=>{btn.textContent=old},2000)};
+  if(navigator.share&&MOBILE()){navigator.share({title:title+" – izbori26.rs",url}).catch(()=>{});return}
+  const fallback=()=>{const ta=document.createElement("textarea");ta.value=url;ta.style.position="fixed";ta.style.opacity="0";
+    document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand("copy")}catch(_){}ta.remove();
+    done(ok?U("Link kopiran ✓","Link copied ✓"):url)};
+  if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(url).then(()=>done(U("Link kopiran ✓","Link copied ✓")),fallback);
+  else fallback();
+}
 // delovi izabrane opštine na kartici Opštine
 const OSUB=[["rezultati","Rezultati i mapa","Results and map"],["naselja","Po naseljima","By settlement"],["p2023","Poređenje sa 2023.","Compared with 2023"]];
 // delovi profila liste (#lista-N-<deo>)
@@ -1631,6 +1648,8 @@ function show(tab,first){ // first: prvi prikaz posle učitavanja (gotov Pregled
   const ln=/^lista-(\d+)(?:-(\w+))?$/.exec(tab); // #lista-3: profil liste broj 3; #lista-3-top: deo profila
   if(ln&&+ln[1]>=1&&+ln[1]<=NL){state.list=+ln[1]-1;state.lsub=ln[2]||"osnovno";tab="liste"}
   const st=/^statistika(?:-(\w+))?$/.exec(tab); // #statistika-zapisnici: deo statistike
+  const oz=/^opstina\/([a-z0-9-]+)(?:\/(\w+))?$/.exec(tab); // #opstina/grad-cacak[/naselja]: izabrana opština
+  if(oz){const i=OP.findIndex((_,j)=>opSlug(j)===oz[1]);tab="opstine";if(i>=0){state.okF="";state.opSearch=String(i);state.osub=oz[2]||"rezultati"}}
   if(st){state.stat=st[1]||"osnovno";tab="statistika"}
   if(!VIEWS[tab])tab="pregled";
   cur=tab;
