@@ -604,7 +604,7 @@ function drawMesta(){
   drawHist(rows);
   const L0=LISTS[L];
   const cols=[
-    {id:"nm",label:U("Biračko mesto","Polling station"),ttl:true,get:r=>flat(r.nm),render:r=>`${bmTitle(r)} <span class="tag">${r.n}</span>`},
+    {id:"nm",label:U("Biračko mesto","Polling station"),ttl:true,get:r=>opRank[r.op]*1e5+r.n,render:r=>`${bmTitle(r)} <span class="tag">${r.n}</span>`},
     {id:"nsl",label:U("Naselje","Settlement"),nas:true,get:r=>r.nsl?flat(r.nsl):null,render:nslCell},
     {id:"op",label:U("Opština","Municipality"),get:r=>flat(OP[r.op].name),render:r=>esc(T(OP[r.op].name))},
     {id:"up",label:U("Upisano","Registered"),num:true,get:r=>r.up,render:r=>N(r.up)},
@@ -614,6 +614,12 @@ function drawMesta(){
     {id:"inv",label:U("Nevažeći","Invalid"),num:true,get:r=>r.inv,render:r=>r.inv==null?"–":P(r.inv)},
     {id:"lnk",label:U("Zapisnik","Record"),nosort:true,get:r=>0,render:r=>r.url?`<a href="${esc(encodeURI(r.url))}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${U("RIK","RIK")} (PDF)</a>`:"–"}
   ];
+  // kolona „Biračko mesto“ se sortira po opštini (abecedno), pa po broju mesta;
+  // kad se izabere nova opština, mesta se prikazuju po broju
+  const opRank=[];
+  OP.map((o,i)=>i).sort((a,b)=>T(OP[a].name).localeCompare(T(OP[b].name),"sr")).forEach((i,k)=>opRank[i]=k);
+  if(m.op!==""&&m.op!==m.sortOp)state.tbl.mesta={key:"nm",dir:1};
+  m.sortOp=m.op;
   const st=state.tbl.mesta||(state.tbl.mesta={key:"turn",dir:-1});
   const col=cols.find(c=>c.id===st.key)||cols[0];
   const sorted=rows.slice().sort((x,y)=>{const p=col.get(x),q=col.get(y);if(p==null&&q==null)return 0;if(p==null)return 1;if(q==null)return -1;const c=typeof p==="string"?p.localeCompare(q,"sr"):p-q;return c*st.dir});
