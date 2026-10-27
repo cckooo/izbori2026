@@ -667,7 +667,8 @@ function viewOpstine(){
       $$("#opDetail .subnav button").forEach(b=>b.onclick=()=>{state.osub=b.dataset.sub;const y=scrollY;draw();scrollTo(0,y)});
       if(os==="rezultati")drawOpMap(i); // mapa naselja je ispod rezultata svih listi
       $("#opSt").onclick=()=>{state.m={...state.m,q:"",ok:String(o.ok),op:String(i),page:0};go("mesta")};
-      $("#opLink").onclick=e=>shareLink(location.origin+location.pathname+link,T(o.name),e.currentTarget);
+      // deli se posebna stranica opštine (stranice_opstina.py): ima sliku za pregled linka i vodi na interaktivni prikaz
+      $("#opLink").onclick=e=>shareLink(location.protocol==="file:"?location.href:location.origin+"/opstina/"+opSlug(i)+"/",T(o.name),e.currentTarget);
       if(os==="p2023")loadLazy("prethodni");
       if(os!=="naselja")return;
       const groups=new Map();
@@ -1720,7 +1721,8 @@ function chrome(){
     BUILD.sajt&&U("Poslednja izmena sajta: ","Site last updated: ")+esc(fmtSnap(BUILD.sajt)),
     BUILD.podaci&&U("Podaci sa RIK-a poslednji put povučeni: ","Data last fetched from RIK: ")+esc(fmtSnap(BUILD.podaci)),
     U("Kontakt: ","Contact: ")+`<a class="keep" href="mailto:izbori26.rs@gmail.com">izbori26.rs@gmail.com</a>`,
-    `<a href="#metodologija">${U("O sajtu i metodologija","About and methodology")}</a>`].filter(Boolean).join(" · "); // keep: adresa se ne preslovljava
+    `<a href="#metodologija">${U("O sajtu i metodologija","About and methodology")}</a>`,
+    location.protocol==="file:"?"":`<a href="/opstina/">${U("Rezultati po opštinama","Results by municipality")}</a>`].filter(Boolean).join(" · "); // posebne stranice opština (stranice_opstina.py) // keep: adresa se ne preslovljava
   locNode(document.body);
 }
 function setScript(s){
