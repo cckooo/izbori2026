@@ -650,6 +650,7 @@ function viewOpstine(){
       $$("#opDetail .subnav button").forEach(b=>b.onclick=()=>{state.osub=b.dataset.sub;const y=scrollY;draw();scrollTo(0,y)});
       if(os==="rezultati")drawOpMap(i); // mapa naselja je ispod rezultata svih listi
       $("#opSt").onclick=()=>{state.m={...state.m,q:"",ok:String(o.ok),op:String(i),page:0};go("mesta")};
+      if(os==="p2023")loadLazy("prethodni");
       if(os!=="naselja")return;
       const groups=new Map();
       for(const r of BY_OP[i]){const k=r.nsl||"";if(!groups.has(k))groups.set(k,[]);groups.get(k).push(r)}
@@ -1443,6 +1444,7 @@ function viewStatistika(){
   bezHook();
   if(sub==="otisak"){fpHook(E);digHook(E)}
   if(sub==="p2023")prevHook();
+  if(sub==="otisak"||sub==="p2023")loadLazy("prethodni"); // poređenje sa 2023.
 }
 // delovi izabrane opštine na kartici Opštine
 const OSUB=[["rezultati","Rezultati i mapa","Results and map"],["naselja","Po naseljima","By settlement"],["p2023","Poređenje sa 2023.","Compared with 2023"]];
@@ -1475,7 +1477,8 @@ function mapPaths(set,vals,scale){
 }
 function viewMapa(){
   const host=$("#mapa");
-  if(!MAP){host.innerHTML=`<h2>${U("Mapa","Map")}</h2><p class="muted">${LAZY.mapa.p?U("Učitava se mapa…","Loading the map…"):U("Mapa nije dostupna.","The map is not available.")}</p>`;return}
+  if(mapMode.startsWith("d"))loadLazy("prethodni"); // promena od 2023.
+  if(!MAP){host.innerHTML=`<h2>${U("Mapa","Map")}</h2><p class="muted">${LAZY.mapa.need?U("Učitava se mapa…","Loading the map…"):U("Mapa nije dostupna.","The map is not available.")}</p>`;loadLazy("mapa");return}
   const vals=new Map();OP.forEach((o,i)=>{const v=mapVal(i);if(v)vals.set(i,v)});
   const nums=[...vals.values()].filter(v=>v.v!=null).map(v=>v.v);
   vals.mn=Math.min(...nums);vals.mx=Math.max(...nums);vals.dmx=Math.max(...nums.map(Math.abs),.01);
@@ -1559,16 +1562,20 @@ const LAZY={
     redraw:()=>cur==="statistika"&&["p2023","otisak"].includes(state.stat)||cur==="opstine"&&state.opSearch!==""||cur==="mapa"&&mapMode.startsWith("d")},
   mapa:{need:typeof MAPA!=="undefined"&&MAPA===null,file:"mapa.json",set:j=>{MAP=j},redraw:()=>cur==="mapa"},
 };
-function loadLazy(){
-  if(location.protocol==="file:")return;
-  for(const [k,x] of Object.entries(LAZY))if(x.need&&!x.p)
-    x.p=fetch(x.file).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(j=>{x.set(j);x.need=false;
-      if(x.redraw()){const y=scrollY;VIEWS[cur]();scrollTo(0,y)}}).catch(()=>{});
+// preuzmi deo k tek kad zatreba (prikaz kome treba ga traži); posle prijema osveži prikaz ako ga koristi
+function loadLazy(k){
+  const x=LAZY[k];
+  if(!x.need||location.protocol==="file:")return Promise.resolve();
+  if(!x.p)x.p=fetch(x.file).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(j=>{x.set(j);x.need=false;
+      if(x.redraw()){const y=scrollY;VIEWS[cur]();scrollTo(0,y)}}).catch(()=>{x.p=null});
+  return x.p;
 }
 // link ka zapisniku pre nego što stigne zapisnici.json: sačekaj fajl pa otvori
 document.addEventListener("click",e=>{const a=e.target.closest("a[data-pdf]");if(!a)return;const r=ROWS[+a.dataset.pdf];
   if(r.url){a.href=encodeURI(r.url);return}
-  e.preventDefault();const w=window.open("","_blank");(LAZY.zapisnici.p||Promise.resolve()).then(()=>{if(r.url&&w)w.location=encodeURI(r.url);else if(w)w.close()})},true);
+  e.preventDefault();const w=window.open("","_blank");loadLazy("zapisnici").then(()=>{if(r.url&&w)w.location=encodeURI(r.url);else if(w)w.close()})},true);
+// spisak zapisnika počinje da se preuzima čim prst ili miš dodirne link, pa je obično stigao pre samog klika
+document.addEventListener("pointerdown",e=>{if(e.target.closest("a[data-pdf]"))loadLazy("zapisnici")},true);
 /* ---------- Navigacija i jezik ---------- */
 const VIEWS={pregled:viewPregled,mapa:viewMapa,liste:viewListe,okruzi:viewOkruzi,opstine:viewOpstine,mesta:viewMesta,statistika:viewStatistika};
 const TABN={pregled:["Pregled","Overview"],mapa:["Mapa","Map"],liste:["Liste","Lists"],okruzi:["Okruzi","Districts"],opstine:["Opštine","Municipalities"],mesta:["Biračka mesta","Polling stations"],statistika:["Statistika","Statistics"]};
@@ -1617,7 +1624,6 @@ $$("#lang button").forEach(b=>b.onclick=()=>setScript(b.dataset.s));
 window.addEventListener("hashchange",()=>show(location.hash.slice(1)));
 chrome();
 show(location.hash.slice(1)||"pregled",true);
-setTimeout(loadLazy,0); // posle prvog prikaza
 </script>
 </body>
 </html>
