@@ -14,3 +14,4 @@ ocr_*log.txt
 spajanje_detalji.json
 rik_ocr_lokalno_staro/
 G2023*.pdf
+_osm_cache/

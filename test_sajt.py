@@ -12,7 +12,7 @@ from playwright.sync_api import sync_playwright
 
 HTML = Path(sys.argv[1] if len(sys.argv) > 1 else Path(__file__).with_name("izbori2026.html")).resolve()
 SHOTS = Path(sys.argv[2]) if len(sys.argv) > 2 else None
-TABS = ["pregled", "liste", "okruzi", "opstine", "mesta", "statistika"]
+TABS = ["pregled", "mapa", "liste", "okruzi", "opstine", "mesta", "statistika"]
 # latinične reči koje smeju da ostanu u ćiriličnom prikazu (nesrpska imena, oznake)
 LAT_OK = re.compile(r"^(PDF|Lat|EN|Vajdasági|Magyar|Szövetség|Pásztor|Bálint|Shqiptar|[A-Za-z]{1,2})$")
 FOREIGN = re.compile(r"[qwxyäáàâéèëíïóöőôúüűç]", re.I)
