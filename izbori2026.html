@@ -565,7 +565,7 @@ function viewPregled(){
    <div class="block"><h2>${U("Rezultati po regionima","Results by region")}</h2>
    <p class="note">${U("Prikazano je šest listi sa najviše glasova, ostale su zbirno. Klik na red otvara sve liste.","The six largest lists are shown, the rest combined. Click a row for all lists.")}</p>
    <div id="regTbl"></div></div>`;
-  dataTable($("#resTbl"),"res",cols,items,{sort:"v",dir:-1,limit:LIM(18,8),onRow:l=>{location.hash="lista-"+l.n}});
+  dataTable($("#resTbl"),"res",cols,items,{sort:"v",dir:-1,limit:8,onRow:l=>{location.hash="lista-"+l.n}});
   const ents=REGIONS.map((g,i)=>({id:i,name:g,a:REG_AGG[i]}));
   const tl=A.rank.slice(0,6);
   const rcols=[
@@ -1551,7 +1551,7 @@ document.addEventListener("click",e=>{const a=e.target.closest("a[data-pdf]");if
 const VIEWS={pregled:viewPregled,mapa:viewMapa,liste:viewListe,okruzi:viewOkruzi,opstine:viewOpstine,mesta:viewMesta,statistika:viewStatistika};
 const TABN={pregled:["Pregled","Overview"],mapa:["Mapa","Map"],liste:["Liste","Lists"],okruzi:["Okruzi","Districts"],opstine:["Opštine","Municipalities"],mesta:["Biračka mesta","Polling stations"],statistika:["Statistika","Statistics"]};
 let cur=null;
-function show(tab){
+function show(tab,first){ // first: prvi prikaz posle učitavanja (gotov Pregled je već na ekranu)
   const ln=/^lista-(\d+)$/.exec(tab); // #lista-3: profil liste broj 3
   if(ln&&+ln[1]>=1&&+ln[1]<=NL){state.list=+ln[1]-1;tab="liste"}
   const st=/^statistika(?:-(\w+))?$/.exec(tab); // #statistika-zapisnici: deo statistike
@@ -1561,7 +1561,7 @@ function show(tab){
   $$("section").forEach(s=>s.hidden=s.id!==tab);
   $$("#tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===tab));
   VIEWS[tab]();
-  window.scrollTo(0,0);
+  if(!first)window.scrollTo(0,0); // pri prvom prikazu ne vraćaj na vrh: posetilac je možda već skrolovao gotov Pregled
 }
 function go(tab){if(location.hash==="#"+tab)show(tab);else location.hash=tab}
 function chrome(){
@@ -1594,7 +1594,7 @@ $(".brand").onclick=e=>{e.preventDefault();history.replaceState(null,"",location
 $$("#lang button").forEach(b=>b.onclick=()=>setScript(b.dataset.s));
 window.addEventListener("hashchange",()=>show(location.hash.slice(1)));
 chrome();
-show(location.hash.slice(1)||"pregled");
+show(location.hash.slice(1)||"pregled",true);
 setTimeout(loadLazy,0); // posle prvog prikaza
 </script>
 </body>
