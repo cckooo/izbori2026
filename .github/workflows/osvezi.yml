@@ -38,7 +38,7 @@ jobs:
           git commit -m "Rezultati: $(grep -o '"snapshot":"[^"]*"' izbori2026.html | cut -d'"' -f4)"
           git push
       - name: Pripremi sajt
-        run: mkdir -p _site && cp izbori2026.html _site/index.html && cp og.png ikona.png _site/
+        run: python3 podeli_sajt.py _site && cp og.png ikona.png _site/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

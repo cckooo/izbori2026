@@ -336,11 +336,27 @@ for(const r of ROWS){
   r.margin=r.e&&r.va>0?(r.v[b]-r.v[s2])/r.va:null;
   r.inv=r.e&&r.lis>0?r.nv/r.lis:null;
   const ns=(NASELJA[OP[r.op].full]||{})[r.n]||["",""];
-  r.nsl=ns[0];r.ul=ns[1];
+  r.nsl=ns[0];r.ul=typeof ns[1]==="string"?ns[1]:"";r.ulx=ns[1]===1; // 1: ulice su u ulice.json (objavljeni sajt)
   r.url=r.link?(r.link[0]==="!"?r.link.slice(1):RIK_BASE+r.link):"";
 }
 // tekst za pretragu se pravi tek pri prvoj pretrazi (ubrzava učitavanje)
 const rq=r=>r.q||(r.q=flat(r.nm+" "+OP[r.op].name+" "+OK[r.ok].name+" "+r.nsl+" "+r.ul));
+/* Na objavljenom sajtu su ulice izdvojene u ulice.json (podeli_sajt.py) i preuzimaju se tek za pretragu ili spisak ulica */
+const ULX=ROWS.some(r=>r.ulx);
+let ulOk=!ULX,ulP=null;
+function loadUlice(){
+  if(!ulP)ulP=fetch("ulice.json").then(x=>{if(!x.ok)throw new Error(x.status);return x.json()}).then(j=>{
+    for(const r of ROWS)if(r.ulx){const u=(j[OP[r.op].full]||{})[r.n];if(u){r.ul=u;r.q=null}}
+    ulOk=true;
+  }).catch(e=>{ulP=null;throw e});
+  return ulP;
+}
+document.addEventListener("toggle",e=>{
+  const d=e.target;
+  if(!d.open||!d.dataset||!d.dataset.ul||d.dataset.done)return;
+  const [op,n]=d.dataset.ul.split("|"),r=ROWS.find(x=>x.op===+op&&String(x.n)===n);
+  loadUlice().then(()=>{d.dataset.done=1;d.lastChild.textContent=T(r.ul)}).catch(()=>{d.lastChild.textContent=U("Spisak ulica trenutno nije dostupan.","Street list is unavailable.")});
+},true);
 function agg(rows){
   const a={n:rows.length,nd:0,up:0,upd:0,gl:0,va:0,nv:0,v:new Array(NL).fill(0)};
   for(const r of rows){
@@ -425,6 +441,7 @@ function bmTitle(r){
 }
 function nslCell(r){
   if(!r.nsl)return `<span class="muted">–</span>`;
+  if(r.ulx&&!r.ul)return `<b>${esc(T(r.nsl))}</b><details data-ul="${r.op}|${r.n}"><summary><span class="more">${U("ulice","streets")}</span></summary><span>…</span></details>`;
   return `<b>${esc(T(r.nsl))}</b>${r.ul?`<details><summary><span class="more">${U("ulice","streets")}</span></summary>${esc(T(r.ul))}</details>`:""}`;
 }
 function pctBar(share,color,max=1){
@@ -580,6 +597,7 @@ let sel=null;
 const NONE="-"; // vrednost filtera za mesta bez utvrđenog naselja
 function filteredStations(){
   const m=state.m,q=flat(m.q.trim());
+  if(q&&!ulOk)loadUlice().then(()=>{if(cur==="mesta")drawMesta()}).catch(()=>{}); // pretraga po ulicama kad stignu
   return ROWS.filter(r=>(m.ok===""||String(r.ok)===m.ok)&&(m.op===""||String(r.op)===m.op)&&(!m.nas||(m.nas===NONE?!r.nsl:r.nsl===m.nas))&&(!q||rq(r).includes(q)));
 }
 function viewMesta(){

@@ -5,7 +5,7 @@ name: Objavi sajt
 on:
   push:
     branches: [main]
-    paths: ["izbori2026.html", "og.png", "ikona.png"]
+    paths: ["izbori2026.html", "og.png", "ikona.png", "podeli_sajt.py"]
   workflow_dispatch: {}
 
 permissions:
@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Pripremi sajt
-        run: mkdir -p _site && cp izbori2026.html _site/index.html && cp og.png ikona.png _site/
+        run: python3 podeli_sajt.py _site && cp og.png ikona.png _site/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
