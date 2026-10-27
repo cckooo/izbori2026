@@ -61,6 +61,24 @@ JS_OP = r"""i => {
 }"""
 
 
+# meni kao na glavnom sajtu: kartice vode na glavni sajt; Ћир/EN otvaraju istu stranu na glavnom sajtu na tom pismu
+TABS = [("pregled", "Pregled"), ("mapa", "Mapa"), ("liste", "Liste"), ("okruzi", "Okruzi"), ("opstine", "Opštine"),
+        ("mesta", "Biračka mesta"), ("statistika", "Statistika")]
+MENU_CSS = """nav a{border-bottom:3px solid transparent;padding:14px 12px 11px;white-space:nowrap;color:var(--muted);font-weight:600;text-decoration:none}
+nav a[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)} nav a:hover{color:var(--ink)}
+.seg a{background:var(--surface);padding:5px 10px;color:var(--muted);font-weight:600;text-decoration:none}
+.seg a[aria-pressed="true"]{background:var(--accent);color:var(--surface)} .brand{text-decoration:none;color:inherit}
+@media (max-width:720px){nav a{padding:10px 12px 9px}}"""
+
+
+def header(app_hash):
+    nav = "".join(f'<a role="tab" href="/#{k}"' + (' aria-selected="true"' if k == "opstine" else "") + f">{n}</a>" for k, n in TABS)
+    lang = (f'<a href="/?jezik=cyr{app_hash}">Ћир</a><a aria-pressed="true" href="#">Lat</a>'
+            f'<a href="/?jezik=en{app_hash}">EN</a>')
+    return (f'<header class="top"><div class="top-in"><a class="brand" href="/">Izbori 2026</a>'
+            f'<nav id="tabs" aria-label="Pregledi">{nav}</nav><div class="seg keep" id="lang" role="group">{lang}</div></div></header>')
+
+
 def page(op, css, fonts, snap, map_svg, legend, okr_links):
     e = H.escape
     url = f"{BASE}/opstina/{op['slug']}/"
@@ -86,11 +104,11 @@ def page(op, css, fonts, snap, map_svg, legend, okr_links):
 {fonts}
 <style>{css}
 .stp{{max-width:1120px;margin:0 auto;padding:0 14px 30px}} .stp .cta{{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}}
-.stp .mapsvg{{max-width:560px}} .stp h1{{margin-top:18px}} .stp a.btn,.top .bar a{{text-decoration:none}} .top .bar a:not(.brand){{color:var(--ink)}}
+.stp .mapsvg{{max-width:560px}} .stp h1{{margin-top:18px}} .stp a.btn{{text-decoration:none}}
+{MENU_CSS}
 </style></head>
 <body>
-<header class="top"><div class="bar" style="max-width:1120px;margin:0 auto;padding:10px 14px;display:flex;gap:18px;align-items:center;flex-wrap:wrap">
-<a class="brand" href="/">Izbori 2026</a><a href="/">Pregled</a><a href="/opstina/">Sve opštine</a><a href="/#mapa">Mapa</a><a href="{app}">Interaktivni prikaz</a></div></header>
+{header(app)}
 <main class="stp">
 <h1>Rezultati izbora 2026: {e(op['full'])} <span lang="sr-Cyrl" class="muted" style="font-weight:400;font-size:.6em;white-space:nowrap">{e(op['fullC'])}</span></h1>
 <p class="lead">{e(op['sum']) or e(op['full'] + ', ' + op['okrug'] + '.')}</p>
@@ -183,8 +201,9 @@ def main():
 <title>Rezultati izbora 2026 po opštinama – izbori26.rs</title><meta name="description" content="Rezultati parlamentarnih izbora 2026. za svaku opštinu u Srbiji: liste, izlaznost, mapa sela i rezultati po naseljima.">
 <link rel="canonical" href="{BASE}/opstina/"><meta property="og:image" content="{BASE}/og.png"><link rel="icon" type="image/png" href="/ikona.png">
 {fonts}<style>{css}
-.stp{{max-width:1120px;margin:0 auto;padding:0 14px 30px}} .stp p a{{white-space:nowrap}} .top .bar a{{text-decoration:none}} .top .bar a:not(.brand){{color:var(--ink)}}</style></head>
-<body><header class="top"><div class="bar" style="max-width:1120px;margin:0 auto;padding:10px 14px;display:flex;gap:18px;align-items:center"><a class="brand" href="/">Izbori 2026</a><a href="/">Pregled</a><a href="/#mapa">Mapa</a></div></header>
+.stp{{max-width:1120px;margin:0 auto;padding:0 14px 30px}} .stp p a{{white-space:nowrap}}
+{MENU_CSS}</style></head>
+<body>{header("#opstine")}
 <main class="stp"><h1>Rezultati izbora 2026 po opštinama</h1><p class="lead">Izaberi opštinu za rezultate svih listi, mapu sela i rezultate po naseljima.</p>{lst}</main></body></html>""", encoding="utf-8")
     today = date.today().isoformat()
     urls = [f"{BASE}/", f"{BASE}/opstina/"] + [f"{BASE}/opstina/{o['slug']}/" for o in ops]

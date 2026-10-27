@@ -104,5 +104,12 @@ if k != 1:  # prvi put: nova linija odmah posle STANOVNICI
     html, k = re.subn(r"^(const STANOVNICI=.*;)(\r?\n)", lambda m: m.group(1) + m.group(2) + line + m.group(2), html, count=1, flags=re.M)
     if k != 1:
         raise SystemExit("Nema linije `const STANOVNICI=...;` u HTML-u")
+# ukupno za celu Srbiju 2023 (mala konstanta koja ostaje u stranici; za zbirni tekst na Pregledu)
+tot = {k: sum(int(a[c]) for a in old.values()) for k, c in
+       (("up", "upisani_biraci"), ("gl", "glasali_biraci"), ("va", "vazeci_glasovi"), ("v1", "lista_1"), ("v2", "lista_2"))}
+line2 = "const PRETHODNI_UKUPNO=" + json.dumps(tot, separators=(",", ":")) + ";"
+html, k = re.subn(r"^const PRETHODNI_UKUPNO=.*;(?=\r?$)", lambda _: line2, html, count=1, flags=re.M)
+if k != 1:
+    html = re.sub(r"^(const PRETHODNI=.*;)(\r?\n)", lambda m: m.group(1) + m.group(2) + line2 + m.group(2), html, count=1, flags=re.M)
 HTML.write_bytes(html.encode("utf-8"))
 print("PRETHODNI upisani u", HTML.name, f"({len(line) / 1e3:.0f} kB)")
