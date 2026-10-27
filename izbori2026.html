@@ -746,6 +746,27 @@ function opTable(title,note,ents,L){
     return `<tr class="click" data-op="${e.i}"><td class="ttl" data-l="${ol}"><b>${esc(T(o.name))}</b>${ok!==o.name?` <span class="muted">${esc(T(ok))}</span>`:""}</td><td class="num" data-l="${sl}"><div class="pctbar"><span class="b" style="width:${Math.max(1,e.p/mx*80)}px;background:${LISTS[L].c}"></span><b>${PL(e.p,L)}</b></div></td><td class="num" data-l="${vl}">${N(e.a.v[L])}</td></tr>`}).join("");
   return `<div><h3>${title}</h3><p class="note">${note}</p><div class="tw"><table class="cards"><thead><tr><th>${ol}</th><th class="num">${sl}</th><th class="num">${vl}</th></tr></thead><tbody>${body}</tbody></table></div></div>`;
 }
+// tabela biračkih mesta sa proizvoljnim kolonama; stavka je mesto ili {r:mesto,...}
+function bmTable(title,note,items,cols){
+  const bl=U("Biračko mesto","Polling station"),zl=U("Zapisnik","Record");
+  const body=items.map(it=>{const r=it.r||it;return `<tr><td class="ttl" data-l="${bl}">${bmTitle(r)}</td>${cols.map(c=>`<td class="num" data-l="${c.l}">${c.f(it)}</td>`).join("")}<td data-l="${zl}">${r.url?`<a href="${esc(encodeURI(r.url))}" target="_blank" rel="noopener">PDF</a>`:""}</td></tr>`}).join("");
+  return `<div><h3>${title}</h3><p class="note">${note}</p>${items.length?`<div class="tw"><table class="cards"><thead><tr><th>${bl}</th>${cols.map(c=>`<th class="num">${c.l}</th>`).join("")}<th>${zl}</th></tr></thead><tbody>${body}</tbody></table></div>`:`<p class="muted">${U("Nema takvih mesta.","No such stations.")}</p>`}</div>`;
+}
+const SKIP_OP=/Иностранство|Заводи/; // inostranstvo i zatvori nisu opštine sa kojima ima smisla porediti
+const signPP=d=>(d>=0?"+":"−")+PP(Math.abs(d));
+const CAVEAT=()=>U("Ovo je spisak za proveru, a ne dokaz nepravilnosti: zatvori, bolnice, domovi za stare i naselja sa drugačijim sastavom stanovništva legitimno glasaju drugačije od svoje opštine. Brojeve proveri u zapisniku.","This is a list for checking, not evidence of irregularities: prisons, hospitals, care homes and settlements with a different population legitimately vote differently from their municipality. Check the figures in the record.");
+// udeo liste L na mestu prema ostatku opštine (bez tog mesta); z uzima u obzir veličinu mesta
+// i prirodno rasipanje među mestima (0,04), pa mala mesta sa slučajnim odstupanjem ne izlaze na vrh
+function devRows(L){
+  const out=[];
+  for(const r of ROWS){
+    if(!r.e||r.va<50||SKIP_OP.test(OP[r.op].full))continue;
+    const a=OP_AGG[r.op],rv=a.va-r.va;if(rv<200)continue;
+    const p0=(a.v[L]-r.v[L])/rv,p=r.v[L]/r.va,q=Math.min(Math.max(p0,.5/rv),1-.5/rv);
+    out.push({r,p,p0,d:p-p0,z:(p-p0)/Math.sqrt(q*(1-q)*(1/r.va+.04))});
+  }
+  return out;
+}
 function viewListe(){
   const L=state.list,l=LISTS[L],A=TOTAL;
   const E=ROWS.filter(r=>r.e&&r.va>0);
@@ -766,6 +787,9 @@ function viewListe(){
   const low=miniTable(U("Najslabija biračka mesta","Weakest polling stations"),zeroBig>1
     ?U(`Lista nema nijedan glas na ${N(zeroBig)} mesta sa bar 100 važećih glasova; prikazana su najveća od njih.`,`The list got no votes at ${N(zeroBig)} stations with at least 100 valid votes; the largest of them are shown.`)
     :min100,weak,U("Udeo","Share"),sv);
+  const dv=devRows(L);
+  const dcols=[{l:U("Na mestu","At station"),f:e=>PL(e.p,L)},{l:U("Ostatak opštine","Rest of municipality"),f:e=>PL(e.p0,L)},{l:U("Razlika","Difference"),f:e=>`<b>${signPP(e.d)}</b>`}];
+  const dUp=dv.filter(e=>e.z>0).sort((a,b)=>b.z-a.z).slice(0,10),dDown=dv.filter(e=>e.z<0).sort((a,b)=>a.z-b.z).slice(0,10);
   const most=miniTable(U("Najviše glasova","Most votes"),U("Biračka mesta sa najviše glasova za listu.","Polling stations with the most votes for the list."),top(E,r=>r.v[L],-1),U("Glasova","Votes"),r=>`${N(r.v[L])} <span class="muted">(${PL(share(r),L)})</span>`);
   // okruzi, veličina naselja, veličina mesta, izlaznost
   const okr=OK.map((o,i)=>({lab:esc(T(o.name)),a:OK_AGG[i]})).filter(e=>e.a.va>0).sort((x,y)=>y.a.v[L]/y.a.va-x.a.v[L]/x.a.va);
@@ -808,6 +832,12 @@ function viewListe(){
     ${low}
    </div>
    ${zeroBig>=10?`<div class="grid2 block">${most}</div>`:""}
+   <div class="block"><h3>${U("Mesta koja najviše odstupaju od svoje opštine","Stations that differ most from their municipality")}</h3>
+    <p class="note">${U("Udeo liste na biračkom mestu poređen je sa udelom u ostatku iste opštine, bez tog mesta. Redosled uzima u obzir i veličinu mesta, pa mala mesta sa slučajnim odstupanjem ne izlaze na vrh. Mesta sa najmanje 50 važećih glasova, bez inostranstva i zatvora.","The list’s share at a station is compared with its share in the rest of the same municipality, excluding that station. The ranking also accounts for station size, so small stations with random swings do not rise to the top. Stations with at least 50 valid votes, excluding abroad and prisons.")} ${CAVEAT()}</p></div>
+   <div class="grid2">
+    ${bmTable(U("Mnogo jača nego u opštini","Much stronger than in the municipality"),"",dUp,dcols)}
+    ${bmTable(U("Mnogo slabija nego u opštini","Much weaker than in the municipality"),"",dDown,dcols)}
+   </div>
    <div class="block"><h3>${U("Po okruzima","By district")}</h3>
     <p class="note">${U(`Okruzi poređani po udelu liste. Crta je prosek Srbije (${PL(A.v[L]/A.va,L)}).`,`Districts sorted by the list’s share. The line is the Serbian average (${PL(A.v[L]/A.va,L)}).`)}</p>
     ${shareBars(okr,L,U("Okrug","District"))}</div>
@@ -851,6 +881,18 @@ function viewStatistika(){
   const un=ROWS.filter(r=>!r.e);
   const unByReg=REGIONS.map((g,i)=>[g,BY_REG[i].filter(r=>!r.e).length]).filter(x=>x[1]>0).map(x=>`${esc(T(x[0]))}: ${N(x[1])}`).join(", ");
   const min100=U("Biračka mesta sa najmanje 100 upisanih.","Polling stations with at least 100 registered voters.");
+  // izlaznost i udeo prve liste istovremeno bar 10 p.p. iznad ostatka opštine (bez tog mesta)
+  const hiAll=[];
+  for(const r of ROWS){
+    if(!r.e||r.va<100||r.win<0||SKIP_OP.test(OP[r.op].full))continue;
+    const a=OP_AGG[r.op],ru=a.upd-r.up,rv=a.va-r.va;if(ru<300||rv<200)continue;
+    const w=r.win,t0=(a.gl-r.gl)/ru,p0=(a.v[w]-r.v[w])/rv,p=r.v[w]/r.va;
+    if(r.turn-t0>=.1&&p-p0>=.1)hiAll.push({r,w,t0,p0,p,k:Math.min(r.turn-t0,p-p0)});
+  }
+  const hi=hiAll.sort((a,b)=>b.k-a.k).slice(0,20);
+  const hiCols=[
+    {l:U("Izlaznost (opština)","Turnout (municipality)"),f:e=>`<b>${P(e.r.turn)}</b> <span class="muted">(${P(e.t0)})</span>`},
+    {l:U("Prva lista (opština)","Leading list (municipality)"),f:e=>`${sw(e.w)}${esc(shortLabel(e.w))} <b>${P(e.p)}</b> <span class="muted">(${P(e.p0)})</span>`}];
   $("#statistika").innerHTML=`
    <h2>${U("Statistika","Statistics")}</h2>
    <p>${U("Pregled raspodele izlaznosti, veličine biračkih mesta i izdvojenih slučajeva. Sve brojke se računaju samo na mestima sa unetim rezultatom.","Turnout distribution, polling station size and outliers. All figures use only stations with entered results.")}</p>
@@ -871,6 +913,8 @@ function viewStatistika(){
     ${miniTable(U("Najveća biračka mesta","Largest polling stations"),U("Po broju upisanih birača.","By number of registered voters."),by(ROWS,r=>r.up,-1),U("Izašlo","Voted"),r=>r.e?N(r.gl):"–")}
     ${miniTable(U("Najubedljivija pobeda liste","Biggest wins"),U("Najmanje 100 važećih glasova; udeo prve liste.","At least 100 valid votes; share of the leading list."),by(E.filter(r=>r.va>=100),r=>r.v[r.win]/r.va,-1),hWin,r=>`${esc(LISTS[r.win].short)} ${P(r.v[r.win]/r.va,1)}`)}
    </div>
+   <div class="block">${bmTable(U("Neobično visoka izlaznost i udeo prve liste","Unusually high turnout and leading-list share"),
+     U(`Biračka mesta na kojima su i izlaznost i udeo liste koja je tu prva bar 10 procentnih poena veći nego u ostatku iste opštine (u zagradi, bez tog mesta). Takvih mesta ima ${N(hiAll.length)}; prikazano je do 20 sa najvećim odstupanjem. Mesta sa najmanje 100 važećih glasova, bez inostranstva i zatvora. `,`Polling stations where both turnout and the share of the list that came first there are at least 10 percentage points higher than in the rest of the same municipality (in brackets, excluding that station). There are ${N(hiAll.length)} such stations; up to 20 with the largest gap are shown. Stations with at least 100 valid votes, excluding abroad and prisons. `)+CAVEAT(),hi,hiCols)}</div>
    <div class="block"><h3>${U("Napomene o podacima","Notes on the data")}</h3>
     <p>${U(`Rezultati nisu uneti za ${N(un.length)} biračkih mesta. Po regionima: ${unByReg||"nema"}. Ukupni rezultati i udeli zato mogu da se promene kada se unesu preostala mesta.`,`Results are missing for ${N(un.length)} polling stations. By region: ${unByReg||"none"}. Totals and shares may therefore change when the remaining stations are entered.`)}</p>
     <p>${U(`Na ${N(noMatch)} mesta broj birača koji su glasali ne poklapa se sa brojem listića u kutiji. Izlaznost je računata po broju birača koji su glasali, a udeli listi po važećim glasovima.`,`At ${N(noMatch)} stations the number of voters who voted differs from the number of ballots in the box. Turnout uses voters who voted; list shares use valid votes.`)}</p>
