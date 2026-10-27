@@ -98,7 +98,7 @@ def page(op, css, fonts, snap, map_svg, legend, okr_links):
 <body>
 {header(app)}
 <main class="stp">
-<h1>Rezultati izbora 2026: {e(op['full'])} <span lang="sr-Cyrl" class="muted" style="font-weight:400;font-size:.6em;white-space:nowrap">{e(op['fullC'])}</span></h1>
+<h1>Rezultati izbora 2026: {e(op['full'])}</h1>
 <p class="lead">{e(op['sum']) or e(op['full'] + ', ' + op['okrug'] + '.')}</p>
 {f'<p lang="sr-Cyrl" class="note">{e(op["sumC"])}</p>' if op['sum'] else ''}
 <p class="note">{e(op['full'])}, {e(op['okrug'])}. {op['status']}</p>
