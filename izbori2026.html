@@ -96,6 +96,10 @@ tbody tr.click:hover{background:var(--hover)}
 .facts div:last-child{border-right:0}
 .facts b{display:block;font-family:Literata,Georgia,serif;font-size:1.45rem;line-height:1.2}
 .facts span{color:var(--muted);font-size:.9rem}
+.subnav{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 4px}
+.subnav button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 13px;font:inherit;font-size:.9rem;cursor:pointer}
+.subnav button:hover{background:var(--hover)}
+.subnav button[aria-current="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface);font-weight:600}
 .chart{position:relative;background:var(--surface);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:10px 8px 6px}
 canvas{display:block;width:100%;touch-action:pan-y}
 .tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--surface);padding:6px 9px;border-radius:4px;font-size:.85rem;max-width:260px;z-index:5;line-height:1.35;display:none}
@@ -1013,9 +1017,8 @@ function viewStatistika(){
   const hiCols=[
     {l:U("Izlaznost (opština)","Turnout (municipality)"),f:e=>`<b>${P(e.r.turn)}</b> <span class="muted">(${P(e.t0)})</span>`},
     {l:U("Prva lista (opština)","Leading list (municipality)"),f:e=>`${sw(e.w)}${esc(shortLabel(e.w))} <b>${P(e.p)}</b> <span class="muted">(${P(e.p0)})</span>`}];
-  $("#statistika").innerHTML=`
-   <h2>${U("Statistika","Statistics")}</h2>
-   <p>${U("Pregled raspodele izlaznosti, veličine biračkih mesta i izdvojenih slučajeva. Sve brojke se računaju samo na mestima sa unetim rezultatom.","Turnout distribution, polling station size and outliers. All figures use only stations with entered results.")}</p>
+  const SEC={};
+  SEC.osnovno=()=>`
    <div class="grid2">
     <div><h3>${U("Izlaznost po biračkim mestima","Turnout by polling station")}</h3>
       <div class="hist" id="tHist">${bins.map((b,i)=>`<div style="height:${b/mx*100}%" title="${i*5}–${i*5+5}%: ${N(b)} ${U("mesta","stations")}"></div>`).join("")}</div>
@@ -1032,27 +1035,39 @@ function viewStatistika(){
     ${miniTable(U("Najmanja razlika prve dve liste","Closest race between the top two"),U("Najmanje 100 važećih glasova.","At least 100 valid votes."),by(E.filter(r=>r.va>=100),r=>r.margin,1),U("Razlika","Margin"),r=>PP(r.margin))}
     ${miniTable(U("Najveća biračka mesta","Largest polling stations"),U("Po broju upisanih birača.","By number of registered voters."),by(ROWS,r=>r.up,-1),U("Izašlo","Voted"),r=>r.e?N(r.gl):"–")}
     ${miniTable(U("Najubedljivija pobeda liste","Biggest wins"),U("Najmanje 100 važećih glasova; udeo prve liste.","At least 100 valid votes; share of the leading list."),by(E.filter(r=>r.va>=100),r=>r.v[r.win]/r.va,-1),hWin,r=>`${esc(LISTS[r.win].short)} ${P(r.v[r.win]/r.va,1)}`)}
-   </div>
+   </div>${notesBlock()}`;
+  SEC.odstupanja=()=>`
    <div class="block">${bmTable(U("Neobično visoka izlaznost i udeo prve liste","Unusually high turnout and leading-list share"),
      U(`Biračka mesta na kojima su i izlaznost i udeo liste koja je tu prva bar 10 procentnih poena veći nego u ostatku iste opštine (u zagradi, bez tog mesta). Takvih mesta ima ${N(hiMain.length)}; prikazano je do 20 sa najvećim odstupanjem. Mesta sa najmanje 100 važećih glasova, bez inostranstva, zatvora i opština sa podeljenim glasanjem (posebno ispod). `,`Polling stations where both turnout and the share of the list that came first there are at least 10 percentage points higher than in the rest of the same municipality (in brackets, excluding that station). There are ${N(hiMain.length)} such stations; up to 20 with the largest gap are shown. Stations with at least 100 valid votes, excluding abroad, prisons and municipalities with a divided vote (shown separately below). `)+CAVEAT(),hiMain.slice(0,20),hiCols)}</div>
    <div class="block">${bmTable(U("Isto, u opštinama sa podeljenim glasanjem","The same, in municipalities with a divided vote"),
      U(`Takvih mesta ima ${N(hiMix.length)}; prikazano je do 10. `,`There are ${N(hiMix.length)} such stations; up to 10 are shown. `)+mixedNote(),hiMix.slice(0,10),hiCols)}</div>
-   ${fpBlock(E)}
    <div class="block">${bmTable(U("Skoro jednoglasni rezultati","Near-unanimous results"),
-     U(`Biračka mesta na kojima su i izlaznost i udeo liste koja je tu prva najmanje 90%. Takvih mesta ima ${N(una.length)}; prikazano je do 30. Mesta sa najmanje 50 važećih glasova. `,`Polling stations where both turnout and the share of the list that came first there are at least 90%. There are ${N(una.length)} such stations; up to 30 are shown. Stations with at least 50 valid votes. `)+CAVEAT(),una.slice(0,30),unaCols)}</div>
+     U(`Biračka mesta na kojima su i izlaznost i udeo liste koja je tu prva najmanje 90%. Takvih mesta ima ${N(una.length)}; prikazano je do 30. Mesta sa najmanje 50 važećih glasova. `,`Polling stations where both turnout and the share of the list that came first there are at least 90%. There are ${N(una.length)} such stations; up to 30 are shown. Stations with at least 50 valid votes. `)+CAVEAT(),una.slice(0,30),unaCols)}</div>`;
+  SEC.otisak=()=>fpBlock(E);
+  SEC.zapisnici=()=>`
    <div class="block">${bmTable(U("Ispravljeni zapisnici","Corrected records"),
      korR.length?U(`Za ${N(korR.length)} biračkih mesta RIK je objavio rešenje o ispravljanju zapisnika o radu biračkog odbora (obrasci RG-7-1 do RG-7-4); rezultat na sajtu je posle ispravke. Najviše ih je u: ${korTop}. Ispravka sama po sebi nije nepravilnost, ali je dobro uporediti zapisnik i rešenje. Prikazano je do 40 mesta, prvo iz opština sa najviše ispravki.`,`For ${N(korR.length)} polling stations RIK published a decision correcting the polling board record (forms RG-7-1 to RG-7-4); the result shown is after the correction. Most are in: ${korTop}. A correction is not in itself an irregularity, but it is worth comparing the record and the decision. Up to 40 stations are shown, starting with the municipalities with the most corrections.`)
        :U("Podaci o rešenjima o ispravljanju zapisnika biće dostupni posle sledećeg osvežavanja podataka sa RIK-a.","Data on record corrections will be available after the next data refresh from RIK."),korR.slice(0,40),korCols)}</div>
-   ${prevBlock()}
    <div class="block">${bmTable(U("Broj glasalih se ne poklapa sa brojem listića u kutiji","Voters who voted differ from ballots in the box"),
      U(`Prema zapisniku, „glasali birači“ je broj birača zaokruženih u izvodu iz biračkog spiska (dobili su listić), a „listići u kutiji“ zbir važećih i nevažećih listića. Razlika postoji na ${N(noMatch)} mesta; na ${N(misLess.length)} od njih u kutiji je manje listića nego što je birača glasalo. Na ${N(misSmall)} mesta razlika je 1 ili 2 listića, što je uobičajeno (birač ponese listić ili ga ne ubaci u kutiju). Velike razlike su najčešće greška pri popunjavanju ili unosu zapisnika, ali ih vredi proveriti u zapisniku (PDF).${nUp?` Na ${N(nUp)} mesta broj glasalih u podacima RIK-a jednak je broju upisanih birača (izlaznost tačno 100%), a u kutiji je mnogo manje listića; to je verovatno greška pri unosu zapisnika u RIK-u i ta mesta su označena. Brojke su prikazane kako ih RIK objavljuje.`:""} Prikazano je do 30 mesta sa najvećom razlikom; u zagradi je razlika kao udeo u broju glasalih.`,
-       `Per the record, “voters who voted” is the number of voters marked in the voter-list extract (they received a ballot), and “ballots in the box” is valid plus invalid ballots. They differ at ${N(noMatch)} stations; at ${N(misLess.length)} of them the box holds fewer ballots than voters who voted. At ${N(misSmall)} stations the difference is 1 or 2 ballots, which is common (a voter takes the ballot away or does not put it in the box). Large differences are most often an error in filling in or entering the record, but are worth checking in the record (PDF).${nUp?` At ${N(nUp)} stations the RIK data give voters who voted equal to registered voters (exactly 100% turnout) while the box holds far fewer ballots; this is likely an error in entering the record at RIK, and these stations are marked. Figures are shown as published by RIK.`:""} Up to 30 stations with the largest difference are shown; the share of voters who voted is in brackets.`),mis.slice(0,30),misCols)}</div>
-   <div class="block"><h3>${U("Napomene o podacima","Notes on the data")}</h3>
+       `Per the record, “voters who voted” is the number of voters marked in the voter-list extract (they received a ballot), and “ballots in the box” is valid plus invalid ballots. They differ at ${N(noMatch)} stations; at ${N(misLess.length)} of them the box holds fewer ballots than voters who voted. At ${N(misSmall)} stations the difference is 1 or 2 ballots, which is common (a voter takes the ballot away or does not put it in the box). Large differences are most often an error in filling in or entering the record, but are worth checking in the record (PDF).${nUp?` At ${N(nUp)} stations the RIK data give voters who voted equal to registered voters (exactly 100% turnout) while the box holds far fewer ballots; this is likely an error in entering the record at RIK, and these stations are marked. Figures are shown as published by RIK.`:""} Up to 30 stations with the largest difference are shown; the share of voters who voted is in brackets.`),mis.slice(0,30),misCols)}</div>`;
+  SEC.p2023=()=>prevBlock()||`<p class="muted">${U("Podaci o izborima 2023. nisu dostupni.","2023 election data are not available.")}</p>`;
+  function notesBlock(){return `<div class="block"><h3>${U("Napomene o podacima","Notes on the data")}</h3>
     <p>${U(`Rezultati nisu uneti za ${N(un.length)} biračkih mesta. Po regionima: ${unByReg||"nema"}. Ukupni rezultati i udeli zato mogu da se promene kada se unesu preostala mesta.`,`Results are missing for ${N(un.length)} polling stations. By region: ${unByReg||"none"}. Totals and shares may therefore change when the remaining stations are entered.`)}</p>
-    <p>${U(`Na ${N(noMatch)} mesta broj birača koji su glasali ne poklapa se sa brojem listića u kutiji (tabela iznad). Izlaznost je računata po broju birača koji su glasali, a udeli listi po važećim glasovima.`,`At ${N(noMatch)} stations the number of voters who voted differs from the number of ballots in the box (table above). Turnout uses voters who voted; list shares use valid votes.`)}</p>
-    <p>${U("Naselja i ulice po biračkim mestima su pročitani iz odluka opštinskih izbornih komisija o određivanju biračkih mesta (skenirani dokumenti, OCR); moguće su sitne greške u nazivima i kućnim brojevima.","Settlements and streets per polling station were read from the municipal electoral commissions’ decisions on polling stations (scanned documents, OCR); minor errors in names and house numbers are possible.")}</p></div>`;
-  fpHook(E);
+    <p>${U(`Na ${N(noMatch)} mesta broj birača koji su glasali ne poklapa se sa brojem listića u kutiji (deo „Zapisnici“). Izlaznost je računata po broju birača koji su glasali, a udeli listi po važećim glasovima.`,`At ${N(noMatch)} stations the number of voters who voted differs from the number of ballots in the box (“Records” section). Turnout uses voters who voted; list shares use valid votes.`)}</p>
+    <p>${U("Naselja i ulice po biračkim mestima su pročitani iz odluka opštinskih izbornih komisija o određivanju biračkih mesta (skenirani dokumenti, OCR); moguće su sitne greške u nazivima i kućnim brojevima.","Settlements and streets per polling station were read from the municipal electoral commissions’ decisions on polling stations (scanned documents, OCR); minor errors in names and house numbers are possible.")}</p></div>`}
+  const sub=SEC[state.stat]?state.stat:"osnovno";
+  const subs=STAT_SUB.map(([k,sr,en])=>`<button type="button" data-sub="${k}" aria-current="${k===sub}">${U(sr,en)}</button>`).join("");
+  $("#statistika").innerHTML=`
+   <h2>${U("Statistika","Statistics")}</h2>
+   <p>${U("Raspodela izlaznosti, izdvojeni slučajevi i provere zapisnika. Sve brojke se računaju samo na mestima sa unetim rezultatom.","Turnout distribution, outliers and record checks. All figures use only stations with entered results.")}</p>
+   <div class="subnav" role="group" aria-label="${U("Delovi statistike","Statistics sections")}">${subs}</div>
+   ${SEC[sub]()}`;
+  $$("#statistika .subnav button").forEach(b=>b.onclick=()=>go(b.dataset.sub==="osnovno"?"statistika":"statistika-"+b.dataset.sub));
+  if(sub==="otisak")fpHook(E);
 }
+// delovi kartice Statistika (#statistika-<deo>)
+const STAT_SUB=[["osnovno","Osnovno","Basics"],["odstupanja","Odstupanja","Outliers"],["otisak","Otisak prsta","Fingerprint"],["zapisnici","Zapisnici","Records"],["p2023","Poređenje sa 2023.","Compared with 2023"]];
 
 /* ---------- Navigacija i jezik ---------- */
 const VIEWS={pregled:viewPregled,liste:viewListe,okruzi:viewOkruzi,opstine:viewOpstine,mesta:viewMesta,statistika:viewStatistika};
@@ -1061,6 +1076,8 @@ let cur=null;
 function show(tab){
   const ln=/^lista-(\d+)$/.exec(tab); // #lista-3: profil liste broj 3
   if(ln&&+ln[1]>=1&&+ln[1]<=NL){state.list=+ln[1]-1;tab="liste"}
+  const st=/^statistika(?:-(\w+))?$/.exec(tab); // #statistika-zapisnici: deo statistike
+  if(st){state.stat=st[1]||"osnovno";tab="statistika"}
   if(!VIEWS[tab])tab="pregled";
   cur=tab;
   $$("section").forEach(s=>s.hidden=s.id!==tab);

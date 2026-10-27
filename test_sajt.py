@@ -47,6 +47,15 @@ def run(p, width, height, mobile):
                 left = latin_leftovers(pg)
                 if left:
                     info.setdefault("latinica_u_cyr", {})[t] = left[:15]
+        # delovi kartice Statistika (podmeni)
+        for s in pg.evaluate("STAT_SUB.map(x => x[0])"):
+            pg.evaluate(f"go('statistika-{s}')")
+            pg.wait_for_timeout(350)
+            over["statistika-" + s] = pg.evaluate("document.documentElement.scrollWidth - window.innerWidth")
+            if lang == "cyr":
+                left = latin_leftovers(pg)
+                if left:
+                    info.setdefault("latinica_u_cyr", {})["statistika-" + s] = left[:15]
         info[f"overflow_{lang}"] = max(over.values())
     info["tab_en"] = pg.evaluate("document.querySelector('nav button[data-tab=mesta]').textContent")
     pg.click('#lang button[data-s="cyr"]')
