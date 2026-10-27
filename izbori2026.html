@@ -382,6 +382,11 @@ function dataTable(host,id,cols,items,opt={}){
   if(opt.onRow)$$("tbody tr",host).forEach(tr=>tr.onclick=()=>opt.onRow(items.find(x=>String(x.id)===tr.dataset.id)));
 }
 /* Naselje biračkog mesta, a spisak ulica (i zaseoka) se otvara klikom */
+// naziv mesta: opština, naselje, pa ime biračkog mesta
+function bmTitle(r){
+  const pre=[OP[r.op].name,r.nsl].filter(Boolean).map(x=>esc(T(x))).join(", ");
+  return `<span class="muted">${pre},</span> <b>${esc(T(r.nm))}</b>`;
+}
 function nslCell(r){
   if(!r.nsl)return `<span class="muted">–</span>`;
   return `<b>${esc(T(r.nsl))}</b>${r.ul?`<details><summary><span class="more">${U("ulice","streets")}</span></summary>${esc(T(r.ul))}</details>`:""}`;
@@ -599,7 +604,7 @@ function drawMesta(){
   drawHist(rows);
   const L0=LISTS[L];
   const cols=[
-    {id:"nm",label:U("Biračko mesto","Polling station"),ttl:true,get:r=>flat(r.nm),render:r=>`<b>${esc(T(r.nm))}</b>${r.nsl?`, ${esc(T(r.nsl))}`:""} <span class="tag">${r.n}</span>`},
+    {id:"nm",label:U("Biračko mesto","Polling station"),ttl:true,get:r=>flat(r.nm),render:r=>`${bmTitle(r)} <span class="tag">${r.n}</span>`},
     {id:"nsl",label:U("Naselje","Settlement"),nas:true,get:r=>r.nsl?flat(r.nsl):null,render:nslCell},
     {id:"op",label:U("Opština","Municipality"),get:r=>flat(OP[r.op].name),render:r=>esc(T(OP[r.op].name))},
     {id:"up",label:U("Upisano","Registered"),num:true,get:r=>r.up,render:r=>N(r.up)},
@@ -673,7 +678,7 @@ function drawHist(rows){
 /* ---------- Statistika ---------- */
 function miniTable(title,note,items,valLabel,valFn){
   const bl=U("Biračko mesto","Polling station"),ul=U("Upisano","Registered"),zl=U("Zapisnik","Record");
-  const body=items.map(r=>`<tr><td class="ttl" data-l="${bl}"><b>${esc(T(r.nm))}</b>${r.nsl?`, ${esc(T(r.nsl))}`:""}<br><span class="muted" style="font-size:.85rem">${esc(T(OP[r.op].name))}</span></td><td class="num" data-l="${ul}">${N(r.up)}</td><td class="num" data-l="${valLabel}"><b>${valFn(r)}</b></td><td data-l="${zl}">${r.url?`<a href="${esc(encodeURI(r.url))}" target="_blank" rel="noopener">PDF</a>`:""}</td></tr>`).join("");
+  const body=items.map(r=>`<tr><td class="ttl" data-l="${bl}">${bmTitle(r)}</td><td class="num" data-l="${ul}">${N(r.up)}</td><td class="num" data-l="${valLabel}"><b>${valFn(r)}</b></td><td data-l="${zl}">${r.url?`<a href="${esc(encodeURI(r.url))}" target="_blank" rel="noopener">PDF</a>`:""}</td></tr>`).join("");
   return `<div><h3>${title}</h3><p class="note">${note}</p><div class="tw"><table class="cards"><thead><tr><th>${bl}</th><th class="num">${ul}</th><th class="num">${valLabel}</th><th>${zl}</th></tr></thead><tbody>${body}</tbody></table></div></div>`;
 }
 function viewStatistika(){
