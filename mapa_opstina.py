@@ -104,9 +104,8 @@ def dp(pts, tol):
     return [p for p, k in zip(pts, keep) if k]
 
 
-def main():
-    html = HTML.read_text(encoding="utf-8")
-    data = json.loads(re.search(r"^const DATA=(.*);\r?$", html, re.M).group(1))
+def opstine(data):
+    """Relacija i geometrija za svaku opštinu iz DATA: (pick {opština: [id]}, G {id: prstenovi}, kosovo, missing)."""
     tags = overpass(f'[out:json][timeout:600];rel["boundary"="administrative"]["admin_level"~"^(6|7|8)$"]({BBOX});out tags;',
                     "tags.json")["elements"]
     by_name = {}
@@ -142,6 +141,13 @@ def main():
             c.sort(key=lambda i: -centroid(i)[1] if "Београд" in name else centroid(i)[1])
         pick[name] = c[:1]
     missing = [n for n, c in pick.items() if not c] + [n for n, _ in data["opstine"] if n not in pick]
+    return pick, G, kosovo, missing, centroid
+
+
+def main():
+    html = HTML.read_text(encoding="utf-8")
+    data = json.loads(re.search(r"^const DATA=(.*);\r?$", html, re.M).group(1))
+    pick, G, kosovo, missing, centroid = opstine(data)
 
     # projekcija: x = lon·cos 44°, y = −lat; glavna mapa W px
     k = math.cos(math.radians(44))

@@ -5,7 +5,7 @@ name: Objavi sajt
 on:
   push:
     branches: [main]
-    paths: ["izbori2026.html", "og.png", "ikona.png", "podeli_sajt.py"]
+    paths: ["izbori2026.html", "og.png", "ikona.png", "podeli_sajt.py", "mapa_naselja.json"]
   workflow_dispatch: {}
 
 permissions:

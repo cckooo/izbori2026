@@ -633,7 +633,8 @@ function viewOpstine(){
     const D=$("#opDetail");
     if(state.opSearch!==""){
       const i=+state.opSearch,o=OP[i],a=OP_AGG[i];
-      D.innerHTML=`<div class="block" style="margin-top:20px"><h3>${U("Sve liste","All lists")}: ${esc(T(o.name))}</h3><p class="note">${statusLine(a)} ${U("Udeo je u važećim glasovima.","Shares are of valid votes.")}</p><div class="dlg" style="padding:0;max-height:none;overflow:visible">${listRows(a)}</div>${op23Block(i)}<h3 style="margin-top:26px">${U("Rezultati po naseljima","Results by settlement")}</h3><p class="note">${U("Rezultati biračkih mesta sabrani po naselju. Klik na naselje otvara njegova biračka mesta. Broj stanovnika i punoletnih je iz Popisa 2022 (RZS); birački spisak se razlikuje (iseljeni, umrli, promene prebivališta).","Polling station results summed by settlement. Click a settlement to see its polling stations. Population and adults are from the 2022 census (RZS); the voter roll differs (emigration, deaths, changes of residence).")}</p><div id="opNas"></div><p style="margin-top:12px"><button class="btn ghost" id="opSt">${U("Sva biračka mesta u opštini","All polling stations in the municipality")}</button></p></div>`;
+      D.innerHTML=`<div class="block" style="margin-top:20px"><h3>${U("Sve liste","All lists")}: ${esc(T(o.name))}</h3><p class="note">${statusLine(a)} ${U("Udeo je u važećim glasovima.","Shares are of valid votes.")}</p><div class="dlg" style="padding:0;max-height:none;overflow:visible">${listRows(a)}</div><div id="opMap"></div>${op23Block(i)}<h3 style="margin-top:26px">${U("Rezultati po naseljima","Results by settlement")}</h3><p class="note">${U("Rezultati biračkih mesta sabrani po naselju. Klik na naselje otvara njegova biračka mesta. Broj stanovnika i punoletnih je iz Popisa 2022 (RZS); birački spisak se razlikuje (iseljeni, umrli, promene prebivališta).","Polling station results summed by settlement. Click a settlement to see its polling stations. Population and adults are from the 2022 census (RZS); the voter roll differs (emigration, deaths, changes of residence).")}</p><div id="opNas"></div><p style="margin-top:12px"><button class="btn ghost" id="opSt">${U("Sva biračka mesta u opštini","All polling stations in the municipality")}</button></p></div>`;
+      drawOpMap(i);
       $("#opSt").onclick=()=>{state.m={...state.m,q:"",ok:String(o.ok),op:String(i),page:0};go("mesta")};
       const groups=new Map();
       for(const r of BY_OP[i]){const k=r.nsl||"";if(!groups.has(k))groups.set(k,[]);groups.get(k).push(r)}
@@ -853,7 +854,7 @@ const inc=r=>!BEZ||!EXOP[r.op],incOp=i=>!BEZ||!EXOP[i];
 const skipOp=i=>SKIP_OP.test(OP[i].full)||(BEZ&&EXOP[i]); // poređenje mesta sa sopstvenom opštinom
 function bezToggle(){
   const n=ROWS.filter(r=>r.e&&EXOP[r.op]).length;
-  return `<label class="bez"><input type="checkbox" class="bezT" ${BEZ?"checked":""}> ${U("Bez inostranstva, zatvora i Kosova i Metohije","Excluding abroad, prisons and Kosovo")} <span class="muted">(${BEZ?U(`izostavljeno ${N(n)} mesta u tabelama i grafikonima; ukupni rezultati ih uključuju`,`${N(n)} stations left out of tables and charts; totals include them`):U(`uključeno ${N(n)} mesta`,`${N(n)} stations included`)})</span></label>`;
+  return `<label class="bez"><input type="checkbox" class="bezT" ${BEZ?"checked":""}> ${U("Bez inostranstva, zatvora i Kosova i Metohije","Excluding abroad, prisons and Kosovo")} <span class="muted">(${BEZ?U(`izostavljeno ${N(n)} mesta u tabelama i grafikonima; ukupni rezultati ih uključuju`,`${N(n)} stations left out of tables and charts; totals include them`):U(`uključeno ${N(n)} mesta; tabele koje porede mesto sa ostatkom njegove opštine ni tada ne prikazuju inostranstvo i zatvore`,`${N(n)} stations included; tables comparing a station with the rest of its municipality still leave out abroad and prisons`)})</span></label>`;
 }
 function bezHook(){const c=$(`#${cur} .bezT`);if(c)c.onchange=e=>{BEZ=e.target.checked;try{localStorage.setItem("izbori2026.bez",BEZ?"1":"0")}catch(_){}const y=scrollY;VIEWS[cur]();scrollTo(0,y)}}
 const MORE=100; // top-liste: pripremi do 100, prikazuje se postepeno („Prikaži još“)
@@ -1475,6 +1476,51 @@ function viewMapa(){
   });
 }
 
+/* ---------- Mapa naselja izabrane opštine (mapa_naselja.py -> mapa_naselja.json, preuzima se kad zatreba) ---------- */
+let nasP=null,nasMap=null,nasMode="win";
+function loadNasMap(){
+  if(location.protocol==="file:"){nasMap=false;return Promise.resolve()} // lokalni fajl: mapa naselja je samo na objavljenom sajtu
+  if(!nasP)nasP=fetch("mapa_naselja.json").then(x=>{if(!x.ok)throw new Error(x.status);return x.json()}).then(j=>{nasMap=j}).catch(()=>{nasMap=false});
+  return nasP;
+}
+function drawOpMap(i){
+  const host=$("#opMap");if(!host)return;
+  if(nasMap===null){host.innerHTML=`<p class="muted">${U("Učitava se mapa naselja…","Loading settlement map…")}</p>`;loadNasMap().then(()=>{if(state.opSearch===String(i))drawOpMap(i)});return}
+  const m=nasMap&&nasMap[OP[i].full];
+  if(!m){host.innerHTML="";return}
+  // rezultat po naselju: biračka mesta čiji spisak naselja sadrži to naselje
+  const vals=new Map(),rows=BY_OP[i].filter(r=>r.e&&r.va>0);
+  for(const n of Object.keys(m.n)){const rs=rows.filter(r=>r.nsl&&r.nsl.split(/, | и /).includes(n));if(rs.length)vals.set(n,{a:agg(rs),rs})}
+  const L=mapList,sh=a=>a.v[L]/a.va;
+  const nums=[...vals.values()].map(v=>nasMode==="turn"?v.a.turn:nasMode==="share"?sh(v.a):null).filter(v=>v!=null);
+  const mn=Math.min(...nums),mx=Math.max(...nums);
+  const fill=v=>{if(!v)return ["var(--bar-bg)",1];const a=v.a;
+    if(nasMode==="win"){const s=a.v[a.win]/a.va;return [LISTS[a.win].c,.35+.65*Math.min(1,Math.max(0,(s-.3)/.5))]}
+    const x=nasMode==="turn"?a.turn:sh(a);return [nasMode==="turn"?"var(--accent)":LISTS[L].c,.12+.88*Math.max(0,(x-mn)/((mx-mn)||1))]};
+  const tip=(n,v)=>`${T(n)}: `+(!v?U("nema rezultata","no results"):nasMode==="win"?`${LISTS[v.a.win].short} ${P(v.a.v[v.a.win]/v.a.va)}`:nasMode==="turn"?`${U("izlaznost","turnout")} ${P(v.a.turn)}`:`${LISTS[L].short} ${PL(sh(v.a),L)}`)+` (${N(v.rs.length||0)} ${U("bir. mesta","stations")})`;
+  const paths=Object.entries(m.n).map(([n,d])=>{const v=vals.get(n),[c,o]=fill(v);
+    return `<path d="${d}" data-n="${esc(n)}" style="fill:${c};fill-opacity:${o.toFixed(2)};stroke:var(--surface);stroke-width:.8"><title>${esc(tip(n,v))}</title></path>`}).join("");
+  const noPoly=new Set(rows.flatMap(r=>(r.nsl||"").split(/, | и /)).filter(n=>n&&!m.n[n])).size;
+  let legend="";
+  if(nasMode==="win"){const cnt=new Map();vals.forEach(v=>cnt.set(v.a.win,(cnt.get(v.a.win)||0)+1));legend=[...cnt].sort((a,b)=>b[1]-a[1]).map(([w,n])=>`<span>${sw(w)}${esc(shortLabel(w))} (${N(n)})</span>`).join("")}
+  else if(nums.length){const col=nasMode==="turn"?"var(--accent)":LISTS[L].c,f=nasMode==="turn"?P:x=>PL(x,L);legend=`<span>${f(mn)}</span><span class="grad" style="background:linear-gradient(90deg,color-mix(in srgb,${col} 12%,transparent),${col})"></span><span>${f(mx)}</span>`}
+  const modes=[["win","Ko je prvi","Who came first"],["share","Udeo liste","List share"],["turn","Izlaznost","Turnout"]].map(([k,sr,en])=>`<option value="${k}" ${k===nasMode?"selected":""}>${U(sr,en)}</option>`).join("");
+  host.innerHTML=`<h3 style="margin-top:26px">${U("Mapa naselja","Settlement map")}</h3>
+    <div class="ctl"><label>${U("Prikaz","Show")}<select id="nmMode">${modes}</select></label>${nasMode==="share"?`<label>${U("Lista","List")}<select id="nmList">${LISTS.map((l,k)=>`<option value="${k}" ${k===L?"selected":""}>${l.n}. ${esc(l.short)}</option>`).join("")}</select></label>`:""}</div>
+    <div class="lgd maplgd">${legend}</div>
+    <div class="mapwrap"><svg class="mapsvg" viewBox="0 0 ${m.w} ${m.h}" role="img" aria-label="${U("Mapa naselja","Settlement map")}" style="max-width:520px"><path d="${m.o}" style="fill:var(--bar-bg);stroke:var(--line)"/>${paths}</svg><p id="nmInfo" class="note" style="flex:1 1 200px;min-height:2.6em"></p></div>
+    <p class="note">${U(`Klik na naselje otvara njegova biračka mesta. Gradsko naselje sa više biračkih mesta je jedno polje, jer granice područja biračkih mesta nisu javne.${noPoly?` Bez granice na mapi: ${N(noPoly)} naselja.`:""} Granice: © OpenStreetMap saradnici (ODbL).`,
+      `Click a settlement to see its polling stations. An urban settlement with many stations is a single area, as polling-station area boundaries are not public.${noPoly?` Settlements without a boundary: ${N(noPoly)}.`:""} Boundaries: © OpenStreetMap contributors (ODbL).`)}</p>`;
+  locNode(host);
+  $("#nmMode").onchange=e=>{nasMode=e.target.value;drawOpMap(i)};
+  if($("#nmList"))$("#nmList").onchange=e=>{mapList=+e.target.value;drawOpMap(i)};
+  $$("path[data-n]",host).forEach(p=>{
+    p.onmouseenter=()=>{$("#nmInfo").textContent=p.querySelector("title").textContent};
+    p.onclick=()=>{const n=p.dataset.n,keys=new Set(rows.map(r=>r.nsl).filter(k=>k&&k.split(/, | и /).includes(n)));
+      state.m={...state.m,q:keys.size===1?"":n,nas:keys.size===1?[...keys][0]:"",ok:String(OP[i].ok),op:String(i),page:0};go("mesta")};
+  });
+}
+/* ---------- Navigacija i jezik ---------- */
 const VIEWS={pregled:viewPregled,mapa:viewMapa,liste:viewListe,okruzi:viewOkruzi,opstine:viewOpstine,mesta:viewMesta,statistika:viewStatistika};
 const TABN={pregled:["Pregled","Overview"],mapa:["Mapa","Map"],liste:["Liste","Lists"],okruzi:["Okruzi","Districts"],opstine:["Opštine","Municipalities"],mesta:["Biračka mesta","Polling stations"],statistika:["Statistika","Statistics"]};
 let cur=null;

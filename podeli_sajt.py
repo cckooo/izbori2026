@@ -71,6 +71,9 @@ if n != 1:
 print(line)
 
 OUT.mkdir(parents=True, exist_ok=True)
+nas_map = SRC.with_name("mapa_naselja.json")  # granice naselja (mapa_naselja.py), sajt ih preuzima kad se otvori opština
+if nas_map.exists():
+    (OUT / nas_map.name).write_bytes(nas_map.read_bytes())
 (OUT / "index.html").write_text(html, encoding="utf-8", newline="")
 (OUT / "ulice.json").write_text(json.dumps(ulice, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 print(f"index.html {len(html.encode()) / 1e6:.2f} MB, ulice.json {(OUT / 'ulice.json').stat().st_size / 1e6:.2f} MB")
