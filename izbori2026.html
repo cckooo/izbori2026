@@ -120,6 +120,8 @@ path[data-op]:hover{stroke:var(--ink)!important;stroke-width:1.5px}
 .seatwrap{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;margin-top:8px}
 .seatwrap>svg{flex:1 1 360px}
 .morebtn{margin-top:8px}
+.sharebtn{display:inline-flex;align-items:center;gap:7px}
+.sharebtn .ico{flex:none}
 .morebar{display:flex;flex-wrap:wrap;gap:8px}
 .morebar .lessbtn{margin-top:8px}
 .subnav{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 4px}
@@ -1458,11 +1460,13 @@ function viewStatistika(){
 }
 // adresa opštine u linku: latinica, mala slova, crtice (npr. grad-cacak, gradska-opstina-palilula-beograd)
 const opSlug=i=>flat(OP[i].full).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
-const shareBtn=id=>`<p style="margin:2px 0 8px"><button type="button" class="btn ghost" id="${id}">${navigator.share&&MOBILE()?U("Podeli link","Share link"):U("Kopiraj link","Copy link")}</button></p>`;
+// ikonica „podeli“ (tri povezane tačke), u boji teksta
+const ICON_SHARE=`<svg class="ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></g></svg>`;
+const shareBtn=id=>`<p style="margin:2px 0 8px"><button type="button" class="btn ghost sharebtn" id="${id}">${ICON_SHARE}<span>${navigator.share&&MOBILE()?U("Podeli link","Share link"):U("Kopiraj link","Copy link")}</span></button></p>`;
 const siteUrl=h=>location.origin+location.pathname+h;
 // deljenje linka: na telefonu sistemski meni za deljenje, inače kopiranje u međuspremnik
 function shareLink(url,title,btn){
-  const done=txt=>{const old=btn.textContent;btn.textContent=txt;setTimeout(()=>{btn.textContent=old},2000)};
+  const lab=btn.querySelector("span")||btn,done=txt=>{const old=lab.textContent;lab.textContent=txt;setTimeout(()=>{lab.textContent=old},2000)}; // ikonica ostaje
   if(navigator.share&&MOBILE()){navigator.share({title:title+" – izbori26.rs",url}).catch(()=>{});return}
   const fallback=()=>{const ta=document.createElement("textarea");ta.value=url;ta.style.position="fixed";ta.style.opacity="0";
     document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand("copy")}catch(_){}ta.remove();
