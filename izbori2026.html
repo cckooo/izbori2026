@@ -118,6 +118,8 @@ path[data-op]:hover{stroke:var(--ink)!important;stroke-width:1.5px}
 .seatwrap{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;margin-top:8px}
 .seatwrap>svg{flex:1 1 360px}
 .morebtn{margin-top:8px}
+.morebar{display:flex;flex-wrap:wrap;gap:8px}
+.morebar .lessbtn{margin-top:8px}
 .subnav{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 4px}
 .subnav button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 13px;font:inherit;font-size:.9rem;cursor:pointer}
 .subnav button:hover{background:var(--hover)}
@@ -439,14 +441,25 @@ function sw(i){return `<span class="sw" style="background:${LISTS[i].c}"></span>
 // duge tabele i spiskovi: prvih n redova, ostali (klasa xr) posle klika na „Prikaži sve“
 const MOBILE=()=>innerWidth<=720;
 const LIM=(desk,mob)=>MOBILE()?mob:desk;
-const xr=(i,n)=>i>=n?" xr":"";
-// „Prikaži još“: svaki klik otkriva sledećih n redova (data-step); kad ih nema, dugme nestaje
+const xr=(i,n)=>i>=n?" xr xm":""; // xr: skriven red; xm: red van početnih n (za „Prikaži manje“)
+// „Prikaži još“: svaki klik otkriva sledećih n redova (data-step); „Prikaži manje“ vraća početnih n
 const moreLab=left=>U(`Prikaži još (${N(left)})`,`Show more (${N(left)})`);
-const moreBtn=(total,n)=>total>n?`<button type="button" class="btn ghost morebtn" data-step="${n}">${moreLab(total-n)}</button>`:"";
-document.addEventListener("click",e=>{const b=e.target.closest(".morebtn");if(!b||b.dataset.own)return;const w=b.closest(".lim");if(!w)return;
-  const hid=[...w.querySelectorAll(".xr")],step=+b.dataset.step||1e9;
-  if(!b.dataset.step||hid.length<=step){hid.forEach(x=>x.classList.remove("xr"));w.classList.remove("lim");b.remove();return}
-  hid.slice(0,step).forEach(x=>x.classList.remove("xr"));b.textContent=moreLab(hid.length-step)});
+const lessLab=()=>U("Prikaži manje","Show less");
+const moreBtn=(total,n)=>total>n?`<div class="morebar"><button type="button" class="btn ghost morebtn" data-step="${n}">${moreLab(total-n)}</button><button type="button" class="btn ghost lessbtn" hidden>${lessLab()}</button></div>`:"";
+document.addEventListener("click",e=>{
+  const b=e.target.closest(".morebtn,.lessbtn");if(!b||b.dataset.own)return;
+  const w=b.closest(".lim,.limx");if(!w)return;
+  const bar=b.parentElement,more=$(".morebtn",bar),less=$(".lessbtn",bar);
+  if(b===less){ // nazad na početnih n; ako je vrh tabele iznad ekrana, vrati pogled na nju
+    $$(".xm",w).forEach(x=>x.classList.add("xr"));w.classList.add("lim");w.classList.remove("limx");
+    more.hidden=false;more.textContent=more.dataset.step?moreLab($$(".xm",w).length):more.dataset.lab;less.hidden=true;
+    if(w.getBoundingClientRect().top<0)w.scrollIntoView({block:"start"});return}
+  more.dataset.lab=more.dataset.lab||more.textContent; // dugme bez koraka (npr. mandati) zadržava svoj tekst
+  const hid=$$(".xr",w),step=+more.dataset.step||1e9;
+  hid.slice(0,step).forEach(x=>x.classList.remove("xr"));
+  less.hidden=false;
+  if(hid.length<=step){w.classList.remove("lim");w.classList.add("limx");more.hidden=true}
+  else more.textContent=moreLab(hid.length-step)});
 function dataTable(host,id,cols,items,opt={}){
   const ext=!!opt.onSort;
   const st=ext?{key:opt.sort,dir:opt.dir}:(state.tbl[id]||(state.tbl[id]={key:opt.sort||cols[0].id,dir:opt.dir||1}));
@@ -460,18 +473,29 @@ function dataTable(host,id,cols,items,opt={}){
   const plain=c=>c.label.replace(/<[^>]*>/g,"").replace(/"/g,"&quot;");
   const head=cols.map(c=>`<th class="${c.num?"num ":""}${c.nosort?"":"sortable"}" data-k="${c.id}" ${c.nosort?"":`tabindex="0" aria-sort="${c.id===st.key?(st.dir>0?"ascending":"descending"):"none"}"`}>${c.label}<span class="arr">${c.id===st.key?(st.dir>0?"▲":"▼"):""}</span></th>`).join("");
   const lim=opt.limit&&!ext&&!st.all?opt.limit:1e9; // opt.limit: posle sortiranja ostaje „sve“ ako je kliknuto
+  // opt.page: strane od po opt.page redova (velike tabele, npr. 191 opština)
+  const per=opt.page&&!ext?opt.page:0,pages=per?Math.max(1,Math.ceil(arr.length/per)):1;
+  if(per)st.pg=Math.min(st.pg||0,pages-1);
+  const rows=per?arr.slice(st.pg*per,(st.pg+1)*per):arr;
   // redni broj po trenutnom sortiranju, u koloni naziva (opt.offset: strana kod spoljnog straničenja)
-  const rkc=Math.max(0,cols.findIndex(c=>c.ttl)),off=opt.offset||0;
-  const body=arr.map((it,i)=>`<tr class="${opt.onRow?"click":""}${xr(i,lim)}" data-id="${it.id}">${cols.map((c,j)=>`<td class="${c.num?"num ":""}${c.ttl?"ttl ":""}${c.nas?"nas ":""}${c.cls?c.cls+" ":""}${c.hm?"hm":""}" data-l="${plain(c)}">${j===rkc&&!opt.norank?`<span class="rk">${off+i+1}.</span>`:""}${c.render(it)}</td>`).join("")}</tr>`).join("");
+  const rkc=Math.max(0,cols.findIndex(c=>c.ttl)),off=per?st.pg*per:opt.offset||0;
+  const body=rows.map((it,i)=>`<tr class="${opt.onRow?"click":""}${xr(i,lim)}" data-id="${it.id}">${cols.map((c,j)=>`<td class="${c.num?"num ":""}${c.ttl?"ttl ":""}${c.nas?"nas ":""}${c.cls?c.cls+" ":""}${c.hm?"hm":""}" data-l="${plain(c)}">${j===rkc&&!opt.norank?`<span class="rk">${off+i+1}.</span>`:""}${c.render(it)}</td>`).join("")}</tr>`).join("");
   const sortable=cols.filter(c=>!c.nosort&&!c.hm);
   const ms=`<div class="msort"><select aria-label="${U("Sortiraj po","Sort by")}">${sortable.map(c=>`<option value="${c.id}" ${c.id===st.key?"selected":""}>${U("Sortiraj","Sort")}: ${plain(c)}</option>`).join("")}</select><button class="btn ghost" aria-label="${U("Promeni smer sortiranja","Reverse sort order")}">${st.dir>0?"▲":"▼"}</button></div>`;
-  host.innerHTML=ms+`<div class="tw"><table class="cards"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`+moreBtn(arr.length,lim);
+  const pager=per&&pages>1?`<div class="pager"><button type="button" class="btn ghost pgP" ${st.pg===0?"disabled":""}>${U("Prethodna","Previous")}</button><span>${U(`Strana ${st.pg+1} od ${pages}`,`Page ${st.pg+1} of ${pages}`)}</span><button type="button" class="btn ghost pgN" ${st.pg>=pages-1?"disabled":""}>${U("Sledeća","Next")}</button></div>`:"";
+  const showAll=opt.limit&&!ext&&arr.length>opt.limit?`<div class="morebar"><button type="button" class="btn ghost morebtn" data-own="1">${U(`Prikaži sve (${N(arr.length)})`,`Show all (${N(arr.length)})`)}</button><button type="button" class="btn ghost lessbtn" data-own="1">${lessLab()}</button></div>`:"";
+  host.innerHTML=ms+`<div class="tw"><table class="cards"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`+pager+showAll;
   host.classList.toggle("lim",arr.length>lim);
-  const mb=$(".morebtn",host);if(mb){mb.dataset.own=1;mb.onclick=()=>{st.all=true;dataTable(host,id,cols,items,opt)}}
+  const mb=$(".morebtn",host),lb=$(".lessbtn",host);
+  if(mb){mb.hidden=!!st.all;lb.hidden=!st.all;
+    mb.onclick=()=>{st.all=true;dataTable(host,id,cols,items,opt)};
+    lb.onclick=()=>{st.all=false;dataTable(host,id,cols,items,opt);if(host.getBoundingClientRect().top<0)host.scrollIntoView({block:"start"})}}
+  const goPg=d=>{st.pg+=d;dataTable(host,id,cols,items,opt);if(host.getBoundingClientRect().top<0)host.scrollIntoView({block:"start"})};
+  if(pager){$(".pgP",host).onclick=()=>goPg(-1);$(".pgN",host).onclick=()=>goPg(1)}
   const sortBy=k=>{
     if(ext){opt.onSort(k);return}
     if(st.key===k)st.dir*=-1;else{st.key=k;st.dir=cols.find(c=>c.id===k).num?-1:1}
-    dataTable(host,id,cols,items,opt);
+    st.pg=0;dataTable(host,id,cols,items,opt);
   };
   $$("th.sortable",host).forEach(th=>{
     th.onclick=()=>sortBy(th.dataset.k);
@@ -605,7 +629,7 @@ function viewOpstine(){
     const ents=OP.map((o,i)=>({id:i,name:o.name,sub:OK[o.ok].name,a:OP_AGG[i],ok:o.ok}))
       .filter(e=>(state.okF===""||String(e.ok)===state.okF)&&(!q||String(e.id)===q));
     $("#opCount").textContent=U(`Prikazano: ${N(ents.length)} od ${N(OP.length)}`,`Shown: ${N(ents.length)} of ${N(OP.length)}`);
-    dataTable($("#opTbl"),"op2",matrixCols(),ents,{sort:"name",dir:1,limit:LIM(30,12),onRow:e=>{state.opSearch=String(e.id);fillOp();draw();$("#opDetail").scrollIntoView({block:"start"})}});
+    dataTable($("#opTbl"),"op2",matrixCols(),ents,{sort:"name",dir:1,page:LIM(25,10),onRow:e=>{state.opSearch=String(e.id);fillOp();draw();$("#opDetail").scrollIntoView({block:"start"})}});
     const D=$("#opDetail");
     if(state.opSearch!==""){
       const i=+state.opSearch,o=OP[i],a=OP_AGG[i];
@@ -624,7 +648,7 @@ function viewOpstine(){
         {id:"up",label:U("Upisano","Registered"),num:true,get:e=>e.a.up,render:e=>N(e.a.up)},
         {id:"pun",label:U("Punoletnih (2022)","Adults (2022)"),num:true,get:e=>e.pop?e.pop[1]:null,render:e=>e.pop&&e.pop[1]?N(e.pop[1]):"–"},
         {id:"st",label:U("Stanovnika (2022)","Population (2022)"),num:true,get:e=>e.pop?e.pop[0]:null,render:e=>e.pop?N(e.pop[0]):"–"});
-      dataTable($("#opNas"),"opnas",ncols,ents2,{sort:"name",dir:1,limit:LIM(25,10),onRow:e=>{state.m={...state.m,q:"",nas:e.key||NONE,ok:String(o.ok),op:String(i),page:0};go("mesta")}});
+      dataTable($("#opNas"),"opnas",ncols,ents2,{sort:"name",dir:1,page:LIM(25,10),onRow:e=>{state.m={...state.m,q:"",nas:e.key||NONE,ok:String(o.ok),op:String(i),page:0};go("mesta")}});
     }else D.innerHTML="";
   };
   const fillOp=()=>{$("#fOp").innerHTML=`<option value="">${U("Sve opštine","All municipalities")}</option>`+OP.map((o,i)=>({o,i})).filter(x=>state.okF===""||String(x.o.ok)===state.okF).sort((a,b)=>T(a.o.name).localeCompare(T(b.o.name),"sr")).map(x=>`<option value="${x.i}" ${String(x.i)===state.opSearch?"selected":""}>${esc(T(x.o.name))}</option>`).join("")};
@@ -1020,7 +1044,7 @@ function seatsBlock(A){
     <p class="note">${U(`Procena na osnovu dosad unetih mesta: 250 mandata metodom najvećeg količnika (D'Ont). Cenzus je 3% birača koji su glasali (${N(Math.round(thr))} glasova). Liste nacionalnih manjina učestvuju u raspodeli i ispod cenzusa, a tada im se količnici uvećavaju za 35%. Status manjinske liste imaju liste 4, 5, 6, 7, 10, 13, 14, 17 i 18 (rešenja RIK-a). Zvaničnu raspodelu utvrđuje RIK posle konačnih rezultata.`,
       `Estimate from the stations counted so far: 250 seats by the highest-quotient (D'Hondt) method. The threshold is 3% of voters who voted (${N(Math.round(thr))} votes). National minority lists take part below the threshold, with quotients increased by 35%. Lists 4, 5, 6, 7, 10, 13, 14, 17 and 18 have minority status (RIK decisions). RIK sets the official distribution after the final results.`)}</p>
     <div class="seatwrap">${hemicycle(s)}
-    <div class="${nOut?"lim":""}" style="flex:1;min-width:260px"><div class="tw"><table><thead><tr><th>${lab}</th><th class="num">${ml}</th><th class="num">${pl}</th><th>${st}</th></tr></thead><tbody>${body}</tbody></table></div>${nOut?`<button type="button" class="btn ghost morebtn">${U(`Prikaži i liste bez mandata (${N(nOut)})`,`Show lists without seats (${N(nOut)})`)}</button>`:""}</div></div></div>`;
+    <div class="${nOut?"lim":""}" style="flex:1;min-width:260px"><div class="tw"><table><thead><tr><th>${lab}</th><th class="num">${ml}</th><th class="num">${pl}</th><th>${st}</th></tr></thead><tbody>${body}</tbody></table></div>${nOut?`<div class="morebar"><button type="button" class="btn ghost morebtn">${U(`Prikaži i liste bez mandata (${N(nOut)})`,`Show lists without seats (${N(nOut)})`)}</button><button type="button" class="btn ghost lessbtn" hidden>${lessLab()}</button></div>`:""}</div></div></div>`;
 }
 
 /* Test poslednje cifre: kod stvarnih brojeva glasova (bar 100) svaka cifra 0–9 javlja se oko 10%.
@@ -1288,7 +1312,7 @@ function prevHook(){
   if($("#p23Ok"))dataTable($("#p23Ok"),"p23ok",cmpCols(U("Okrug","District")),okE,{sort:"dt",dir:-1,limit:LIM(12,5)});
   const sc=$("#p23Sc");
   if(sc){sc.innerHTML=scatter23(opE)+arrows23(opE);locNode(sc);$$(".pt",sc).forEach(c=>c.onclick=()=>{state.okF="";state.opSearch=c.dataset.op;go("opstine")})}
-  if($("#p23Op"))dataTable($("#p23Op"),"p23op",cmpCols(U("Opština","Municipality")),opE,{sort:"dt",dir:-1,limit:LIM(15,5),onRow:e=>{state.okF="";state.opSearch=String(e.id);go("opstine")}});
+  if($("#p23Op"))dataTable($("#p23Op"),"p23op",cmpCols(U("Opština","Municipality")),opE,{sort:"dt",dir:-1,page:LIM(25,10),onRow:e=>{state.okF="";state.opSearch=String(e.id);go("opstine")}});
 }
 function viewStatistika(){
   const E=ROWS.filter(r=>r.e&&r.up>0&&r.va>0&&inc(r));
