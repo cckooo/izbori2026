@@ -48,7 +48,7 @@ button,select,input{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
 .top-in{max-width:1120px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:0 14px}
-.brand{font-family:Literata,Georgia,serif;font-weight:700;white-space:nowrap;font-size:1rem}
+.brand{font-family:Literata,Georgia,serif;font-weight:700;white-space:nowrap;font-size:1rem;color:inherit;text-decoration:none}
 nav{display:flex;gap:2px;overflow-x:auto;flex:1;scrollbar-width:none}
 nav::-webkit-scrollbar{display:none}
 nav button{background:none;border:0;border-bottom:3px solid transparent;padding:14px 12px 11px;cursor:pointer;white-space:nowrap;color:var(--muted);font-weight:600}
@@ -188,7 +188,7 @@ td.nas details[open] summary{display:none}
 <body>
 <header class="top">
   <div class="top-in">
-    <span class="brand">Izbori 2026</span>
+    <a class="brand" href="./">Izbori 2026</a>
     <nav id="tabs" role="tablist" aria-label="Pregledi">
       <button role="tab" data-tab="pregled">Pregled</button>
       <button role="tab" data-tab="liste">Liste</button>
@@ -1090,6 +1090,7 @@ function chrome(){
   document.documentElement.lang={cyr:"sr-Cyrl",lat:"sr-Latn",en:"en"}[script];
   document.title=S("Izbori 2026: rezultati po biračkim mestima","Serbia 2026 election: results by polling station");
   $(".brand").textContent=U("Izbori 2026","Elections 2026");
+  $(".brand").title=U("Osveži podatke i vrati se na početak","Refresh data and go to the start");
   $("#tabs").setAttribute("aria-label",U("Pregledi","Views"));
   $$("#tabs button").forEach(b=>b.textContent=U(...TABN[b.dataset.tab]));
   $("#lang").setAttribute("aria-label",U("Jezik i pismo","Language"));
@@ -1109,6 +1110,8 @@ function setScript(s){
   if(cur){const y=scrollY;VIEWS[cur]();scrollTo(0,y)}
 }
 $$("#tabs button").forEach(b=>b.onclick=()=>go(b.dataset.tab));
+// klik na naziv sajta: početna strana sa najnovijim podacima (reload proverava ima li nove verzije na serveru)
+$(".brand").onclick=e=>{e.preventDefault();history.replaceState(null,"",location.pathname+location.search);location.reload()};
 $$("#lang button").forEach(b=>b.onclick=()=>setScript(b.dataset.s));
 window.addEventListener("hashchange",()=>show(location.hash.slice(1)));
 chrome();
