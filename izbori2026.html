@@ -86,6 +86,18 @@ canvas{display:block;width:100%;touch-action:pan-y}
 .hist div{flex:1;background:var(--accent);opacity:.85;min-height:1px;border-radius:2px 2px 0 0;position:relative}
 .histx{display:flex;gap:3px;padding:2px 6px 8px;background:var(--surface);border-bottom:1px solid var(--line);color:var(--muted);font-size:.75rem}
 .histx span{flex:1;text-align:center;overflow:hidden}
+.bars{background:var(--surface);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:8px 10px}
+.brow{display:grid;grid-template-columns:minmax(0,240px) minmax(0,1fr) 56px;gap:4px 10px;align-items:center;padding:3px 0;font-size:.88rem}
+.brow+.brow{border-top:1px dashed var(--line)}
+.brow .bl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brow .bv{text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+.brow .sbar{min-width:0;height:14px}
+.brow.head{color:var(--muted);font-size:.8rem;border:0}
+.dev{position:relative;height:14px;background:var(--bar-bg);border-radius:2px}
+.dev:before{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;border-left:1px solid var(--ink)}
+.dev i{position:absolute;top:0;bottom:0;display:block}
+.lgd{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;margin:6px 0}
+@media (max-width:720px){.brow{grid-template-columns:minmax(0,1fr) 56px}.brow .bl{grid-column:1/-1}}
 .pager{display:flex;gap:10px;align-items:center;margin:10px 0}
 dialog{border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);padding:0;width:min(640px,calc(100vw - 20px));max-height:calc(100vh - 40px)}
 dialog::backdrop{background:rgba(5,10,20,.55)}
@@ -540,7 +552,7 @@ function listRows(a){
 }
 
 /* ---------- Biračka mesta ---------- */
-let scatterPts=[],sel=null;
+let sel=null;
 const NONE="-"; // vrednost filtera za mesta bez utvrđenog naselja
 function filteredStations(){
   const m=state.m,q=flat(m.q.trim());
@@ -551,7 +563,7 @@ function viewMesta(){
   const okOpts=`<option value="">${U("Svi okruzi","All districts")}</option>`+OK.map((o,i)=>`<option value="${i}" ${String(i)===m.ok?"selected":""}>${esc(T(o.name))}</option>`).join("");
   $("#mesta").innerHTML=`
    <h2>${U("Biračka mesta","Polling stations")}</h2>
-   <p>${U("Svako biračko mesto je jedna tačka na grafikonu: vodoravno izlaznost, uspravno udeo izabrane liste u važećim glasovima. Boja tačke je lista koja je pobedila na tom mestu.","Each polling station is one dot: turnout horizontally, the chosen list’s share of valid votes vertically. The dot’s colour is the list that won the station.")}</p>
+   <p>${U("Izaberi opštinu ili naselje da vidiš rezultat svakog biračkog mesta, odstupanje od proseka i poređenje naselja.","Choose a municipality or settlement to see each station’s result, deviation from the average and a comparison of settlements.")}</p>
    <div class="ctl">
      <label>${U("Pretraga mesta, naselja, ulice ili opštine","Search station, settlement, street or municipality")}<input type="search" id="mQ" placeholder="${U("npr. OŠ, dom kulture, Zlatibor, selo","e.g. school, Zlatibor, village")}" value="${esc(m.q)}"></label>
      <label>${U("Okrug","District")}<select id="mOk">${okOpts}</select></label>
@@ -561,14 +573,7 @@ function viewMesta(){
      <button class="btn ghost" id="mReset">${U("Poništi filtere","Clear filters")}</button>
    </div>
    <div id="mSum"></div>
-   <div class="grid2 block" style="margin-top:18px">
-     <div><h3>${U("Izlaznost i udeo liste","Turnout and list share")}</h3>
-       <div class="chart"><canvas id="cv" height="360" aria-label="${U("Grafikon biračkih mesta","Polling station chart")}"></canvas><div class="tip" id="tip"></div></div>
-       <p class="note" id="selInfo" style="margin-top:8px"></p></div>
-     <div><h3>${U("Raspodela udela liste po biračkim mestima","Distribution of the list’s share across stations")}</h3>
-       <div class="hist" id="hist"></div><div class="histx" id="histx"></div>
-       <p class="note">${U("Visina stuba je broj biračkih mesta u rasponu udela od 5 procentnih poena.","Bar height is the number of stations in each 5-point share band.")}</p></div>
-   </div>
+   <div id="mCharts"></div>
    <div class="block"><h3>${U("Spisak biračkih mesta","List of polling stations")}</h3><div id="mTbl"></div><div class="pager" id="pager"></div></div>`;
   fillOpOptions();
   $("#mQ").oninput=e=>{m.q=e.target.value;m.page=0;drawMesta()};
@@ -600,8 +605,7 @@ function drawMesta(){
   const rows=filteredStations();
   const a=agg(rows);
   $("#mSum").innerHTML=`<p class="lead" style="margin-bottom:8px">${U(`${N(rows.length)} biračkih mesta, ${N(a.nd)} sa unetim rezultatom.`,`${N(rows.length)} polling stations, ${N(a.nd)} counted.`)} ${a.va?U(`Izlaznost ${P(a.turn)}, lista „${esc(LISTS[L].short)}“ ima ${P(a.v[L]/a.va)}.`,`Turnout ${P(a.turn)}; “${esc(LISTS[L].short)}” has ${P(a.v[L]/a.va)}.`):U("Za izabrani skup nema unetih rezultata.","No results entered for this selection.")}</p>${sbar(a,20)}`;
-  drawScatter(rows);
-  drawHist(rows);
+  drawCharts(rows,a);
   const L0=LISTS[L];
   const cols=[
     {id:"nm",label:U("Biračko mesto","Polling station"),ttl:true,get:r=>opRank[r.op]*1e5+r.n,render:r=>`${bmTitle(r)} <span class="tag">${r.n}</span>`},
@@ -633,52 +637,58 @@ function drawMesta(){
   $("#pNext").onclick=()=>{m.page++;drawMesta();$("#mTbl").scrollIntoView({block:"start"})};
 }
 function cssv(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
-function drawScatter(rows){
-  const cv=$("#cv");if(!cv)return;
-  const L=state.list;
-  const dpr=window.devicePixelRatio||1,W=cv.clientWidth,H=360;
-  cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+"px";
-  const g=cv.getContext("2d");g.scale(dpr,dpr);g.clearRect(0,0,W,H);
-  const pl=54,pr=10,pt=8,pb=34;
-  const X=v=>pl+v*(W-pl-pr),Y=v=>pt+(1-v)*(H-pt-pb);
-  const line=cssv("--line"),mu=cssv("--muted");
-  g.font="12px 'Source Sans 3',sans-serif";g.fillStyle=mu;g.strokeStyle=line;g.lineWidth=1;
-  g.textAlign="right";g.textBaseline="middle";
-  for(let t=0;t<=1.0001;t+=.25){g.beginPath();g.moveTo(pl,Y(t));g.lineTo(W-pr,Y(t));g.stroke();g.fillText(Math.round(t*100)+"%",pl-6,Y(t));}
-  g.textAlign="center";g.textBaseline="top";
-  for(let t=0;t<=1.0001;t+=.25){g.fillText(Math.round(t*100)+"%",X(t),H-pb+6);}
-  g.fillText(S("izlaznost","turnout"),pl+(W-pl-pr)/2,H-16);
-  g.save();g.translate(11,pt+(H-pt-pb)/2);g.rotate(-Math.PI/2);g.textBaseline="middle";g.fillText(S("udeo liste","list share"),0,0);g.restore();
-  scatterPts=[];
-  const rad=rows.length>3000?2.2:3;
-  g.globalAlpha=.55;
-  for(const r of rows){
-    if(!r.e||!r.va||r.up<=0)continue;
-    const x=X(Math.min(1,r.turn)),y=Y(r.v[L]/r.va);
-    scatterPts.push({x,y,r});
-    g.fillStyle=LISTS[r.win].c;g.beginPath();g.arc(x,y,rad,0,6.2832);g.fill();
+/* Grafikoni za izabrani skup mesta: rezultat po mestu, odstupanje izabrane liste od proseka, naselja */
+const MAX_BARS=150,MAX_NAS=80;
+function stackBar(v,va,K){
+  if(!va)return `<div class="sbar"></div>`;
+  let s="",rest=va;
+  for(const i of K){if(!v[i])continue;rest-=v[i];s+=`<i style="width:${v[i]/va*100}%;background:${LISTS[i].c}" title="${esc(LISTS[i].short)}: ${P(v[i]/va)}"></i>`}
+  if(rest>0)s+=`<i style="width:${rest/va*100}%;background:var(--muted);opacity:.45" title="${U("Ostale liste","Other lists")}: ${P(rest/va)}"></i>`;
+  return `<div class="sbar">${s}</div>`;
+}
+function drawCharts(rows,a){
+  const host=$("#mCharts");if(!host)return;
+  const L=state.list,m=state.m;
+  if(!a.va){host.innerHTML="";return}
+  const K=a.rank.slice(0,5).filter(i=>a.v[i]>0);
+  const lgd=`<div class="lgd">${K.map(i=>`<span>${sw(i)}${esc(shortLabel(i))}</span>`).join("")}<span><span class="sw" style="background:var(--muted);opacity:.45"></span>${U("ostale","others")}</span></div>`;
+  const ord=rows.slice().sort((x,y)=>x.op===y.op?x.n-y.n:T(OP[x.op].name).localeCompare(T(OP[y.op].name),"sr"));
+  const multiOp=new Set(rows.map(r=>r.op)).size>1;
+  const lbl=r=>`<span class="tag">${r.n}</span> ${multiOp?`<span class="muted">${esc(T(OP[r.op].name))},</span> `:""}${r.nsl&&!m.nas?`<b>${esc(T(r.nsl))}</b>, `:""}${esc(T(r.nm))}`;
+  const pick=`<p class="note">${U(`Izaberi opštinu, naselje ili suzi pretragu (prikazuje se do ${MAX_BARS} mesta; sada ih je ${N(rows.length)}).`,`Choose a municipality or settlement, or narrow the search (up to ${MAX_BARS} stations are shown; now ${N(rows.length)}).`)}</p>`;
+  let h="";
+  // 1. rezultat po biračkom mestu
+  h+=`<div class="block"><h3>${U("Rezultat po biračkom mestu","Result by polling station")}</h3>`;
+  if(rows.length>MAX_BARS)h+=pick;
+  else h+=lgd+`<div class="bars"><div class="brow head"><span class="bl">${U("Biračko mesto","Polling station")}</span><span>${U("Udeo u važećim glasovima","Share of valid votes")}</span><span class="bv">${U("Izlaz.","Turnout")}</span></div>`+
+    ord.map(r=>`<div class="brow"><span class="bl" title="${esc(T(r.nm))}">${lbl(r)}</span>${r.e&&r.va?stackBar(r.v,r.va,K):`<span class="muted">${U("nije uneto","not counted")}</span>`}<span class="bv">${r.turn==null?"–":P(r.turn)}</span></div>`).join("")+`</div>`;
+  h+=`</div>`;
+  // 2. odstupanje izabrane liste od proseka skupa
+  const base=a.v[L]/a.va;
+  const where=m.nas?U("naselja","settlement"):m.op!==""?U("opštine","municipality"):m.ok!==""?U("okruga","district"):U("izabranih mesta","selected stations");
+  h+=`<div class="block"><h3>${U(`Odstupanje od proseka ${where}`,`Deviation from the ${where} average`)}: ${sw(L)}${esc(LISTS[L].short)}</h3>`;
+  if(rows.length>MAX_BARS)h+=pick;
+  else{
+    const E=ord.filter(r=>r.e&&r.va);
+    const mx=Math.max(.05,...E.map(r=>Math.abs(r.v[L]/r.va-base)));
+    h+=`<p class="note">${U(`Prosek je ${P(base)}. Desno od crte su mesta gde lista ima više od proseka, levo manje; broj je razlika u procentnim poenima. Listu menjaš u polju „Lista za prikaz“.`,`The average is ${P(base)}. Right of the line: stations where the list did better, left: worse; the number is the difference in percentage points. Change the list in “List shown”.`)}</p><div class="bars">`+
+      E.map(r=>{const d=r.v[L]/r.va-base,w=Math.abs(d)/mx*50;
+        return `<div class="brow"><span class="bl" title="${esc(T(r.nm))}">${lbl(r)}</span><div class="dev"><i style="${d>=0?`left:50%;background:${LISTS[L].c}`:`right:50%;background:var(--muted)`};width:${w}%"></i></div><span class="bv">${d>=0?"+":"−"}${(Math.abs(d)*100).toFixed(1).replace(".",",")}</span></div>`}).join("")+`</div>`;
   }
-  g.globalAlpha=1;
-  if(sel&&scatterPts.length){const p=scatterPts.find(p=>p.r===sel);if(p){g.strokeStyle=cssv("--ink");g.lineWidth=2;g.beginPath();g.arc(p.x,p.y,7,0,6.2832);g.stroke();}}
-  const tip=$("#tip");
-  const find=(ev)=>{const b=cv.getBoundingClientRect();const mx=ev.clientX-b.left,my=ev.clientY-b.top;let best=null,bd=144;for(const p of scatterPts){const d=(p.x-mx)**2+(p.y-my)**2;if(d<bd){bd=d;best=p}}return best&&{p:best,mx,my}};
-  cv.onmousemove=ev=>{const f=find(ev);if(!f){tip.style.display="none";return}const r=f.p.r;tip.innerHTML=`<b>${esc(T(r.nm))}</b><br>${r.nsl?esc(T(r.nsl))+", ":""}${esc(T(OP[r.op].name))}<br>${U("izlaznost","turnout")} ${P(r.turn)}, ${esc(LISTS[L].short)} ${P(r.v[L]/r.va)}`;tip.style.display="block";tip.style.left=Math.min(f.mx+14,W-250)+"px";tip.style.top=(f.my+12)+"px"};
-  cv.onmouseleave=()=>{tip.style.display="none"};
-  cv.onclick=ev=>{const f=find(ev);if(!f)return;sel=f.p.r;drawScatter(rows);showSel()};
-  showSel();
-}
-function showSel(){
-  const el=$("#selInfo");if(!el)return;
-  if(!sel){el.textContent=U("Dodirni tačku da vidiš biračko mesto.","Tap a dot to see the polling station.");return}
-  const r=sel;
-  el.innerHTML=`<b>${esc(T(r.nm))}</b> (${r.nsl?esc(T(r.nsl))+", ":""}${esc(T(OP[r.op].name))}): ${U(`upisano ${N(r.up)}, izašlo ${N(r.gl)} (${P(r.turn)}). Prva lista: ${esc(LISTS[r.win].short)} sa ${P(r.v[r.win]/r.va)}.`,`registered ${N(r.up)}, voted ${N(r.gl)} (${P(r.turn)}). Leading list: ${esc(LISTS[r.win].short)} with ${P(r.v[r.win]/r.va)}.`)} ${r.url?`<a href="${esc(encodeURI(r.url))}" target="_blank" rel="noopener">${U("Zapisnik","Record")} (PDF)</a>`:""}`;
-}
-function drawHist(rows){
-  const L=state.list,bins=new Array(20).fill(0);
-  for(const r of rows){if(!r.e||!r.va)continue;const s=r.v[L]/r.va;bins[Math.min(19,Math.floor(s*20))]++}
-  const mx=Math.max(1,...bins);
-  $("#hist").innerHTML=bins.map((b,i)=>`<div style="height:${b/mx*100}%;background:${LISTS[L].c}" title="${i*5}–${i*5+5}%: ${N(b)} ${U("mesta","stations")}"></div>`).join("");
-  $("#histx").innerHTML=bins.map((_,i)=>`<span>${i%4===0?i*5:""}</span>`).join("");
+  h+=`</div>`;
+  // 3. naselja u skupu
+  const g=new Map();for(const r of rows){const k=r.nsl||"";if(!g.has(k))g.set(k,[]);g.get(k).push(r)}
+  if(!m.nas&&g.size>1){
+    h+=`<div class="block"><h3>${U("Poređenje naselja","Settlements compared")}</h3>`;
+    if(g.size>MAX_NAS)h+=`<p class="note">${U(`Izaberi opštinu (sada je ${N(g.size)} naselja).`,`Choose a municipality (now ${N(g.size)} settlements).`)}</p>`;
+    else{
+      const ents=[...g].map(([k,rs])=>({k,rs,a:agg(rs)})).sort((x,y)=>y.a.up-x.a.up);
+      h+=lgd+`<div class="bars"><div class="brow head"><span class="bl">${U("Naselje (biračkih mesta)","Settlement (stations)")}</span><span>${U("Udeo u važećim glasovima","Share of valid votes")}</span><span class="bv">${U("Izlaz.","Turnout")}</span></div>`+
+        ents.map(e=>`<div class="brow"><span class="bl">${e.k?`<b>${esc(T(e.k))}</b>`:`<span class="muted">${U("(naselje nije utvrđeno)","(settlement unknown)")}</span>`} <span class="muted">(${e.rs.length})</span></span>${stackBar(e.a.v,e.a.va,K)}<span class="bv">${e.a.turn==null?"–":P(e.a.turn)}</span></div>`).join("")+`</div>`;
+    }
+    h+=`</div>`;
+  }
+  host.innerHTML=h;
 }
 
 /* ---------- Statistika ---------- */
@@ -762,8 +772,6 @@ function setScript(s){
 $$("#tabs button").forEach(b=>b.onclick=()=>go(b.dataset.tab));
 $$("#lang button").forEach(b=>b.onclick=()=>setScript(b.dataset.s));
 window.addEventListener("hashchange",()=>show(location.hash.slice(1)));
-let rz;window.addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>{if(cur==="mesta")drawScatter(filteredStations())},120)});
-matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{if(cur==="mesta")drawScatter(filteredStations())});
 chrome();
 show(location.hash.slice(1)||"pregled");
 </script>
