@@ -1607,7 +1607,8 @@ function chrome(){
   $("#foot2").innerHTML=[U("Autor: Rako Smiljanić","Author: Rako Smiljanić"),
     BUILD.sajt&&U("Poslednja izmena sajta: ","Site last updated: ")+esc(fmtSnap(BUILD.sajt)),
     BUILD.podaci&&U("Podaci sa RIK-a poslednji put povučeni: ","Data last fetched from RIK: ")+esc(fmtSnap(BUILD.podaci)),
-    U("Kontakt: ","Contact: ")+`<a class="keep" href="mailto:izbori26.rs@gmail.com">izbori26.rs@gmail.com</a>`].filter(Boolean).join(" · "); // keep: adresa se ne preslovljava
+    U("Kontakt: ","Contact: ")+`<a class="keep" href="mailto:izbori26.rs@gmail.com">izbori26.rs@gmail.com</a>`,
+    U("Posete se broje anonimno, bez kolačića (GoatCounter).","Visits are counted anonymously, without cookies (GoatCounter).")].filter(Boolean).join(" · "); // keep: adresa se ne preslovljava
   locNode(document.body);
 }
 function setScript(s){
@@ -1624,6 +1625,13 @@ $$("#lang button").forEach(b=>b.onclick=()=>setScript(b.dataset.s));
 window.addEventListener("hashchange",()=>show(location.hash.slice(1)));
 chrome();
 show(location.hash.slice(1)||"pregled",true);
+// brojanje poseta: GoatCounter (bez kolačića), samo na objavljenom sajtu; svaka kartica i deo (#…) je posebna stranica
+if(location.hostname==="izbori26.rs"){
+  window.goatcounter={path:p=>p+location.hash};
+  const gc=document.createElement("script");gc.async=true;gc.src="https://gc.zgo.at/count.js";
+  gc.dataset.goatcounter="https://izbori26.goatcounter.com/count";document.head.appendChild(gc);
+  window.addEventListener("hashchange",()=>{if(window.goatcounter.count)window.goatcounter.count({path:location.pathname+location.hash})});
+}
 </script>
 </body>
 </html>
