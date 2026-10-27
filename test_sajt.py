@@ -49,15 +49,26 @@ def run(p, width, height, mobile):
                 left = latin_leftovers(pg)
                 if left:
                     info.setdefault("latinica_u_cyr", {})[t] = left[:15]
-        # delovi kartice Statistika (podmeni)
-        for s in pg.evaluate("STAT_SUB.map(x => x[0])"):
-            pg.evaluate(f"go('statistika-{s}')")
+        # podmeniji: delovi Statistike, profila liste i izabrane opštine
+        subs = [f"statistika-{s}" for s in pg.evaluate("STAT_SUB.map(x => x[0])")] + \
+               [f"lista-3-{s}" for s in pg.evaluate("LSUB.map(x => x[0])")]
+        for h in subs:
+            pg.evaluate(f"go('{h}')")
             pg.wait_for_timeout(350)
-            over["statistika-" + s] = pg.evaluate("document.documentElement.scrollWidth - window.innerWidth")
+            over[h] = pg.evaluate("document.documentElement.scrollWidth - window.innerWidth")
             if lang == "cyr":
                 left = latin_leftovers(pg)
                 if left:
-                    info.setdefault("latinica_u_cyr", {})["statistika-" + s] = left[:15]
+                    info.setdefault("latinica_u_cyr", {})[h] = left[:15]
+        for s in pg.evaluate("OSUB.map(x => x[0])"):
+            pg.evaluate(f"state.okF='';state.opSearch='0';state.osub='{s}';go('opstine');viewOpstine()")
+            pg.wait_for_timeout(350)
+            over["opstina-" + s] = pg.evaluate("document.documentElement.scrollWidth - window.innerWidth")
+            if lang == "cyr":
+                left = latin_leftovers(pg)
+                if left:
+                    info.setdefault("latinica_u_cyr", {})["opstina-" + s] = left[:15]
+        pg.evaluate("state.opSearch='';state.osub='rezultati'")
         info[f"overflow_{lang}"] = max(over.values())
     info["tab_en"] = pg.evaluate("document.querySelector('nav button[data-tab=mesta]').textContent")
     pg.click('#lang button[data-s="cyr"]')
@@ -68,6 +79,8 @@ def run(p, width, height, mobile):
                                 return OP.findIndex(o => o.full === k) }""")
     pg.select_option("#fOp", str(op))
     pg.wait_for_timeout(500)
+    pg.click("#opDetail .subnav button[data-sub=naselja]")  # tabela po naseljima je u delu „Po naseljima“
+    pg.wait_for_timeout(400)
     info["naselja_redova"] = pg.locator("#opNas tbody tr").count()
     info["overflow_opstina"] = pg.evaluate("document.documentElement.scrollWidth - window.innerWidth")
     if SHOTS:

@@ -638,9 +638,20 @@ function viewOpstine(){
     const D=$("#opDetail");
     if(state.opSearch!==""){
       const i=+state.opSearch,o=OP[i],a=OP_AGG[i];
-      D.innerHTML=`<div class="block" style="margin-top:20px"><h3>${U("Sve liste","All lists")}: ${esc(T(o.name))}</h3><p class="note">${statusLine(a)} ${U("Udeo je u važećim glasovima.","Shares are of valid votes.")}</p><div class="dlg" style="padding:0;max-height:none;overflow:visible">${listRows(a)}</div><div id="opMap"></div>${op23Block(i)}<h3 style="margin-top:26px">${U("Rezultati po naseljima","Results by settlement")}</h3><p class="note">${U("Rezultati biračkih mesta sabrani po naselju. Klik na naselje otvara njegova biračka mesta. Broj stanovnika i punoletnih je iz Popisa 2022 (RZS); birački spisak se razlikuje (iseljeni, umrli, promene prebivališta).","Polling station results summed by settlement. Click a settlement to see its polling stations. Population and adults are from the 2022 census (RZS); the voter roll differs (emigration, deaths, changes of residence).")}</p><div id="opNas"></div><p style="margin-top:12px"><button class="btn ghost" id="opSt">${U("Sva biračka mesta u opštini","All polling stations in the municipality")}</button></p></div>`;
-      drawOpMap(i);
+      // podmeni izabrane opštine (pamti se dok se bira druga opština)
+      const os=OSUB.some(x=>x[0]===state.osub)?state.osub:"rezultati";
+      const body={
+        rezultati:()=>`<p class="note">${statusLine(a)} ${U("Udeo je u važećim glasovima.","Shares are of valid votes.")}</p><div class="dlg" style="padding:0;max-height:none;overflow:visible">${listRows(a)}</div>`,
+        mapa:()=>`<div id="opMap"></div>`,
+        naselja:()=>`<p class="note">${U("Rezultati biračkih mesta sabrani po naselju. Klik na naselje otvara njegova biračka mesta. Broj stanovnika i punoletnih je iz Popisa 2022 (RZS); birački spisak se razlikuje (iseljeni, umrli, promene prebivališta).","Polling station results summed by settlement. Click a settlement to see its polling stations. Population and adults are from the 2022 census (RZS); the voter roll differs (emigration, deaths, changes of residence).")}</p><div id="opNas"></div>`,
+        p2023:()=>op23Block(i)||`<p class="muted">${U("Podaci za 2023. se učitavaju ili nisu dostupni za ovu opštinu.","2023 data are loading or not available for this municipality.")}</p>`};
+      D.innerHTML=`<div class="block" style="margin-top:20px"><h3>${esc(T(o.name))} <span class="muted" style="font-weight:400">${esc(T(OK[o.ok].name))}</span></h3>
+        <div class="subnav" role="group" aria-label="${U("Delovi opštine","Municipality sections")}">${OSUB.map(([k,sr,en])=>`<button type="button" data-sub="${k}" aria-current="${k===os}">${U(sr,en)}</button>`).join("")}</div>
+        ${body[os]()}<p style="margin-top:12px"><button class="btn ghost" id="opSt">${U("Sva biračka mesta u opštini","All polling stations in the municipality")}</button></p></div>`;
+      $$("#opDetail .subnav button").forEach(b=>b.onclick=()=>{state.osub=b.dataset.sub;const y=scrollY;draw();scrollTo(0,y)});
+      if(os==="mapa")drawOpMap(i);
       $("#opSt").onclick=()=>{state.m={...state.m,q:"",ok:String(o.ok),op:String(i),page:0};go("mesta")};
+      if(os!=="naselja")return;
       const groups=new Map();
       for(const r of BY_OP[i]){const k=r.nsl||"";if(!groups.has(k))groups.set(k,[]);groups.get(k).push(r)}
       const ents2=[...groups].map(([k,rs],j)=>({id:j,key:k,name:k||U("(naselje nije utvrđeno)","(settlement unknown)"),
@@ -939,8 +950,15 @@ function viewListe(){
      <div><b>${N(wonOp)}</b><span>${U("opština u kojima je prva","municipalities where it came first")}</span></div>
      <div><b>${N(zero)}</b><span>${U(`mesta bez ijednog glasa (od ${N(E.length)})`,`stations with no votes (of ${N(E.length)})`)}</span></div>
    </div>
-   ${shareHist(L)}
-   <div class="grid2 block">
+`;
+  // delovi stranice liste (#lista-N-<deo>)
+  const sub=LSUB.some(x=>x[0]===state.lsub)?state.lsub:"osnovno";
+  const SECL={osnovno:()=>`   ${shareHist(L)}
+   <div class="block"><h3>${U("Po okruzima","By district")}</h3>
+    <p class="note">${U(`Okruzi poređani po udelu liste. Crta je prosek Srbije (${PL(A.v[L]/A.va,L)}).`,`Districts sorted by the list’s share. The line is the Serbian average (${PL(A.v[L]/A.va,L)}).`)}</p>
+    ${shareBars(okr,L,U("Okrug","District"))}</div>
+`,
+    top:()=>`   <div class="grid2 block">
     ${opTable(U("Najjače opštine","Strongest municipalities"),minOp,top(opsMain,e=>e.p,-1),L)}
     ${opTable(U("Najslabije opštine","Weakest municipalities"),minOp,top(opsMain,e=>e.p,1),L)}
    </div>
@@ -956,17 +974,16 @@ function viewListe(){
     ${miniTable(U("Najslabija biračka mesta","Weakest polling stations"),U("Biračka mesta sa najmanje 100 važećih glasova.","Polling stations with at least 100 valid votes."),bigMix.slice().sort((a,b)=>share(a)-share(b)||b.va-a.va).slice(0,MORE),U("Udeo","Share"),sv)}
    </div>
    <div class="block">${opTable(U("Opštine sa podeljenim glasanjem","Municipalities with a divided vote"),U("Poređane po udelu liste. Klik na opštinu otvara njene rezultate.","Sorted by the list’s share. Click a municipality for its results."),top(opsMix,e=>e.p,-1),L)}</div>`:""}
-   <div class="block"><h3>${U("Mesta koja najviše odstupaju od svoje opštine","Stations that differ most from their municipality")}</h3>
+`,
+    odstupanja:()=>`   <div class="block"><h3>${U("Mesta koja najviše odstupaju od svoje opštine","Stations that differ most from their municipality")}</h3>
     <p class="note">${U("Udeo liste na biračkom mestu poređen je sa udelom u ostatku iste opštine, bez tog mesta. Redosled uzima u obzir i veličinu mesta, pa mala mesta sa slučajnim odstupanjem ne izlaze na vrh. Mesta sa najmanje 50 važećih glasova, bez inostranstva i zatvora.","The list’s share at a station is compared with its share in the rest of the same municipality, excluding that station. The ranking also accounts for station size, so small stations with random swings do not rise to the top. Stations with at least 50 valid votes, excluding abroad and prisons.")} ${CAVEAT()}</p></div>
    <div class="grid2">
     ${bmTable(U("Mnogo jača nego u opštini","Much stronger than in the municipality"),"",dUp,dcols)}
     ${bmTable(U("Mnogo slabija nego u opštini","Much weaker than in the municipality"),"",dDown,dcols)}
    </div>
    <div class="block">${bmTable(U("Opštine sa podeljenim glasanjem","Municipalities with a divided vote"),mixedNote(),dMix,dcols)}</div>
-   <div class="block"><h3>${U("Po okruzima","By district")}</h3>
-    <p class="note">${U(`Okruzi poređani po udelu liste. Crta je prosek Srbije (${PL(A.v[L]/A.va,L)}).`,`Districts sorted by the list’s share. The line is the Serbian average (${PL(A.v[L]/A.va,L)}).`)}</p>
-    ${shareBars(okr,L,U("Okrug","District"))}</div>
-   <div class="grid2 block">
+`,
+    struktura:()=>`   <div class="grid2 block">
     <div><h3>${U("Grad ili selo","City or village")}</h3>
      <p class="note">${U(`Biračka mesta prema broju stanovnika naselja (Popis 2022); u zagradi je broj mesta. Bez utvrđenog naselja: ${N(noPop)} mesta.`,`Polling stations by settlement population (2022 census); the number of stations is in brackets. Settlement unknown: ${N(noPop)} stations.`)}</p>
      ${shareBars(nasB,L,U("Naselje","Settlement"))}</div>
@@ -978,8 +995,10 @@ function viewListe(){
     <div><h3>${U("Po izlaznosti","By turnout")}</h3>
      <p class="note">${U("Biračka mesta prema izlaznosti; u zagradi je broj mesta. Crta je prosek Srbije.","Polling stations by turnout; the number of stations is in brackets. The line is the Serbian average.")}</p>
      ${shareBars(turnB,L,U("Izlaznost","Turnout"))}</div>
-   </div>`;
-  $("#lList").onchange=e=>{location.hash="lista-"+(+e.target.value+1)};
+   </div>`};
+  $("#liste").insertAdjacentHTML("beforeend",`<div class="subnav" role="group" aria-label="${U("Delovi profila liste","List profile sections")}">${LSUB.map(([k,sr,en])=>`<button type="button" data-sub="${k}" aria-current="${k===sub}">${U(sr,en)}</button>`).join("")}</div>`+SECL[sub]());
+  $$("#liste .subnav button").forEach(b=>b.onclick=()=>go(`lista-${L+1}`+(b.dataset.sub==="osnovno"?"":"-"+b.dataset.sub)));
+  $("#lList").onchange=e=>{location.hash="lista-"+(+e.target.value+1)+(sub==="osnovno"?"":"-"+sub)};
   bezHook();
   $$("#liste tr[data-op]").forEach(tr=>tr.onclick=()=>{state.okF="";state.opSearch=tr.dataset.op;go("opstine")});
 }
@@ -1426,6 +1445,10 @@ function viewStatistika(){
   if(sub==="otisak"){fpHook(E);digHook(E)}
   if(sub==="p2023")prevHook();
 }
+// delovi izabrane opštine na kartici Opštine
+const OSUB=[["rezultati","Rezultati","Results"],["mapa","Mapa naselja","Settlement map"],["naselja","Po naseljima","By settlement"],["p2023","Poređenje sa 2023.","Compared with 2023"]];
+// delovi profila liste (#lista-N-<deo>)
+const LSUB=[["osnovno","Osnovno","Basics"],["top","Najjače i najslabije","Strongest and weakest"],["odstupanja","Odstupanja","Outliers"],["struktura","Grad, selo, izlaznost","City, village, turnout"]];
 // delovi kartice Statistika (#statistika-<deo>)
 const STAT_SUB=[["osnovno","Osnovno","Basics"],["odstupanja","Odstupanja","Outliers"],["otisak","Grafikoni","Charts"],["zapisnici","Zapisnici","Records"],["p2023","Poređenje sa 2023.","Compared with 2023"]];
 
@@ -1552,8 +1575,8 @@ const VIEWS={pregled:viewPregled,mapa:viewMapa,liste:viewListe,okruzi:viewOkruzi
 const TABN={pregled:["Pregled","Overview"],mapa:["Mapa","Map"],liste:["Liste","Lists"],okruzi:["Okruzi","Districts"],opstine:["Opštine","Municipalities"],mesta:["Biračka mesta","Polling stations"],statistika:["Statistika","Statistics"]};
 let cur=null;
 function show(tab,first){ // first: prvi prikaz posle učitavanja (gotov Pregled je već na ekranu)
-  const ln=/^lista-(\d+)$/.exec(tab); // #lista-3: profil liste broj 3
-  if(ln&&+ln[1]>=1&&+ln[1]<=NL){state.list=+ln[1]-1;tab="liste"}
+  const ln=/^lista-(\d+)(?:-(\w+))?$/.exec(tab); // #lista-3: profil liste broj 3; #lista-3-top: deo profila
+  if(ln&&+ln[1]>=1&&+ln[1]<=NL){state.list=+ln[1]-1;state.lsub=ln[2]||"osnovno";tab="liste"}
   const st=/^statistika(?:-(\w+))?$/.exec(tab); // #statistika-zapisnici: deo statistike
   if(st){state.stat=st[1]||"osnovno";tab="statistika"}
   if(!VIEWS[tab])tab="pregled";
