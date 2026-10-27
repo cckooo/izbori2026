@@ -73,32 +73,44 @@ def station_paths(uid: str) -> list:
     return re.findall(r"election_results/(\d+/\d+/[^\"'<>\n]+?\.pdf)", t)
 
 
-def fix_links(rows: list, uids: list):
-    """Dopuni putanje zapisnika (r[9]) pravim prefiksom iz keša ili sa RIK-a."""
+def fix_links(cells: list):
+    """Dopuni putanje PDF-ova pravim prefiksom iz keša ili sa RIK-a.
+    cells: (kontejner, ključ, bm_uid); kontejner[ključ] je putanja relativno na election_results/."""
     cache = json.loads(CACHE.read_text(encoding="utf-8")) if CACHE.exists() else {}
-    todo = [(r, u) for r, u in zip(rows, uids) if r[9] and not r[9].startswith("!") and r[9] not in cache]
+    bad = lambda p: p and not p.startswith("!") and p not in cache and not re.match(r"\d+/\d+/", p)
+    todo = list(dict.fromkeys(u for c, k, u in cells if bad(c[k])))  # jedan upit po biračkom mestu
     done = 0
 
-    def look(item):
-        r, u = item
+    def look(u):
         try:
-            return item, station_paths(u)
+            return station_paths(u)
         except Exception as e:  # noqa
             print(f"Upozorenje: putanja zapisnika za BM {u}: {e}", file=sys.stderr)
-            return item, None
+            return None
     with ThreadPoolExecutor(4) as ex:
-        for (r, u), paths in ex.map(look, todo[:MAX_LOOKUPS]):
+        for paths in ex.map(look, todo[:MAX_LOOKUPS]):
             if paths:
                 for p in paths:
                     cache[p.split("/", 2)[2]] = p
                 done += 1
-    for r in rows:
-        if r[9] in cache:
-            r[9] = cache[r[9]]
+    for c, k, u in cells:
+        if c[k] in cache:
+            c[k] = cache[c[k]]
     if done:
         CACHE.write_text(json.dumps(cache, ensure_ascii=False, sort_keys=True, indent=0), encoding="utf-8")
-    left = sum(1 for r in rows if r[9] and not r[9].startswith("!") and not re.match(r"\d+/\d+/", r[9]))
-    print(f"Putanje zapisnika: {done} novih sa RIK-a, bez prave putanje još {left}")
+    left = sum(1 for c, k, u in cells if bad(c[k]))
+    print(f"Putanje PDF-ova: {done} mesta sa RIK-a, bez prave putanje još {left}")
+
+
+def rik_links(field: str, names: bool = False) -> list:
+    """Putanje iz polja "naziv|url" (može više redova) relativno na election_results/, ili "!"+pun URL.
+    Sa names=True vraća parove [naziv, putanja]."""
+    out = []
+    for n, u in re.findall(r"(?:^|\n)\s*([^|\n]*)\|\s*(https?://\S[^\r\n|]*?)\s*(?=\r?\n|$)", field or ""):
+        u = u.strip()
+        p = u.split(RIK_BASE, 1)[1] if RIK_BASE in u else "!" + u
+        out.append([n.strip(), p] if names else p)
+    return out
 
 
 def build_data(raw: bytes) -> dict:
@@ -108,7 +120,7 @@ def build_data(raw: bytes) -> dict:
         + NUM_COLS + [f"lista_{i}" for i in range(1, NLISTS + 1)]
     if not rows or any(c not in rows[0] for c in need):
         raise ValueError("CSV nema očekivane kolone")
-    okruzi, opstine, ok_idx, op_idx, out = [], [], {}, {}, []
+    okruzi, opstine, ok_idx, op_idx, out, kor, cells = [], [], {}, {}, [], {}, []
     for r in rows:
         ok = r["okrug_region"]
         if ok not in ok_idx:
@@ -120,19 +132,22 @@ def build_data(raw: bytes) -> dict:
             opstine.append([op, ok_idx[ok]])
         uneto = r["vreme_unosa_rezultata"].strip() not in ("-", "")
         # polje može imati više zapisnika ("naziv|url" po redu, npr. ponovljeno glasanje): uzimamo poslednji
-        urls = re.findall(r"\|\s*(https?://\S[^\r\n|]*?)\s*(?=\r?\n|$)", r["zapisnik_link"])
-        link = urls[-1].strip() if urls else ""
-        if RIK_BASE in link:
-            link = link.split(RIK_BASE, 1)[1]
-        elif link:
-            link = "!" + link  # pun URL van RIK_BASE
+        links = rik_links(r["zapisnik_link"])
+        link = links[-1] if links else ""
         nums = [int(r[c] or 0) for c in NUM_COLS]
         votes = [int(r[f"lista_{i}"] or 0) for i in range(1, NLISTS + 1)]
         out.append([ok_idx[ok], op_idx[op], int(r["bm_broj"]), r["bm_naziv"], *nums,
                     1 if uneto else 0, link, *votes])
-    fix_links(out, [r["bm_uid"] for r in rows])
+        cells.append((out[-1], 9, r["bm_uid"]))
+        # rešenja o ispravljanju zapisnika (obrasci RG-7-1..4): {indeks reda u rows: [[naziv, putanja], ...]}
+        k = rik_links(r.get("korekcija_dokument_link", ""), names=True)
+        if k:
+            kor[str(len(out) - 1)] = k
+            cells += [(x, 1, r["bm_uid"]) for x in k]
+    fix_links(cells)
     times = [r["vreme_unosa_rezultata"] for r in rows if r["vreme_unosa_rezultata"].strip() not in ("-", "")]
-    return {"okruzi": okruzi, "opstine": opstine, "rows": out, "snapshot": max(times) if times else ""}
+    return {"okruzi": okruzi, "opstine": opstine, "rows": out, "snapshot": max(times) if times else "",
+            "korekcije": kor}
 
 
 def check(new: dict, old: dict):
