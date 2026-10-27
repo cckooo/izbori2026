@@ -649,7 +649,7 @@ function viewOpstine(){
         naselja:()=>`<p class="note">${U("Rezultati biračkih mesta sabrani po naselju. Klik na naselje otvara njegova biračka mesta. Broj stanovnika i punoletnih je iz Popisa 2022 (RZS); birački spisak se razlikuje (iseljeni, umrli, promene prebivališta).","Polling station results summed by settlement. Click a settlement to see its polling stations. Population and adults are from the 2022 census (RZS); the voter roll differs (emigration, deaths, changes of residence).")}</p><div id="opNas"></div>`,
         p2023:()=>op23Block(i)||`<p class="muted">${U("Podaci za 2023. se učitavaju ili nisu dostupni za ovu opštinu.","2023 data are loading or not available for this municipality.")}</p>`};
       D.innerHTML=`<div class="block" style="margin-top:20px"><h3>${esc(T(o.name))} <span class="muted" style="font-weight:400">${esc(T(OK[o.ok].name))}</span></h3>
-        <p style="margin:2px 0 8px"><button type="button" class="btn ghost" id="opLink">${navigator.share&&MOBILE()?U("Podeli link","Share link"):U("Kopiraj link","Copy link")}</button></p>
+        ${shareBtn("opLink")}
         <div class="subnav" role="group" aria-label="${U("Delovi opštine","Municipality sections")}">${OSUB.map(([k,sr,en])=>`<button type="button" data-sub="${k}" aria-current="${k===os}">${U(sr,en)}</button>`).join("")}</div>
         ${body[os]()}<p style="margin-top:12px"><button class="btn ghost" id="opSt">${U("Sva biračka mesta u opštini","All polling stations in the municipality")}</button></p></div>`;
       $$("#opDetail .subnav button").forEach(b=>b.onclick=()=>{state.osub=b.dataset.sub;const y=scrollY;draw();scrollTo(0,y)});
@@ -949,6 +949,7 @@ function viewListe(){
    <div class="ctl"><label>${U("Izborna lista","Electoral list")}<select id="lList">${opts}</select></label></div>
    ${bezToggle()}
    <h3 class="lhead">${sw(L)}<span>${l.n}. ${esc(l.name)}</span></h3>
+   ${shareBtn("lsLink")}
    <div class="facts">
      <div><b>${N(A.v[L])}</b><span>${U("glasova","votes")}</span></div>
      <div><b>${PL(A.v[L]/A.va,L)}</b><span>${U(`udeo, ${A.rank.indexOf(L)+1}. po broju glasova`,`share, ranked ${A.rank.indexOf(L)+1} by votes`)}</span></div>
@@ -1005,6 +1006,7 @@ function viewListe(){
   $("#liste").insertAdjacentHTML("beforeend",`<div class="subnav" role="group" aria-label="${U("Delovi profila liste","List profile sections")}">${LSUB.map(([k,sr,en])=>`<button type="button" data-sub="${k}" aria-current="${k===sub}">${U(sr,en)}</button>`).join("")}</div>`+SECL[sub]());
   $$("#liste .subnav button").forEach(b=>b.onclick=()=>go(`lista-${L+1}`+(b.dataset.sub==="osnovno"?"":"-"+b.dataset.sub)));
   $("#lList").onchange=e=>{location.hash="lista-"+(+e.target.value+1)+(sub==="osnovno"?"":"-"+sub)};
+  $("#lsLink").onclick=e=>shareLink(siteUrl(`#lista-${L+1}`+(sub==="osnovno"?"":"-"+sub)),LISTS[L].short,e.currentTarget);
   bezHook();
   $$("#liste tr[data-op]").forEach(tr=>tr.onclick=()=>{state.okF="";state.opSearch=tr.dataset.op;go("opstine")});
 }
@@ -1445,15 +1447,19 @@ function viewStatistika(){
    <p>${U("Raspodela izlaznosti, izdvojeni slučajevi i provere zapisnika. Sve brojke se računaju samo na mestima sa unetim rezultatom.","Turnout distribution, outliers and record checks. All figures use only stations with entered results.")}</p>
    ${bezToggle()}
    <div class="subnav" role="group" aria-label="${U("Delovi statistike","Statistics sections")}">${subs}</div>
+   ${shareBtn("stLink")}
    ${SEC[sub]()}`;
   $$("#statistika .subnav button").forEach(b=>b.onclick=()=>go(b.dataset.sub==="osnovno"?"statistika":"statistika-"+b.dataset.sub));
   bezHook();
+  $("#stLink").onclick=e=>{const k=STAT_SUB.find(x=>x[0]===sub);shareLink(siteUrl(sub==="osnovno"?"#statistika":"#statistika-"+sub),S("Statistika","Statistics")+": "+S(k[1],k[2]),e.currentTarget)};
   if(sub==="otisak"){fpHook(E);digHook(E)}
   if(sub==="p2023")prevHook();
   if(sub==="otisak"||sub==="p2023")loadLazy("prethodni"); // poređenje sa 2023.
 }
 // adresa opštine u linku: latinica, mala slova, crtice (npr. grad-cacak, gradska-opstina-palilula-beograd)
 const opSlug=i=>flat(OP[i].full).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+const shareBtn=id=>`<p style="margin:2px 0 8px"><button type="button" class="btn ghost" id="${id}">${navigator.share&&MOBILE()?U("Podeli link","Share link"):U("Kopiraj link","Copy link")}</button></p>`;
+const siteUrl=h=>location.origin+location.pathname+h;
 // deljenje linka: na telefonu sistemski meni za deljenje, inače kopiranje u međuspremnik
 function shareLink(url,title,btn){
   const done=txt=>{const old=btn.textContent;btn.textContent=txt;setTimeout(()=>{btn.textContent=old},2000)};
@@ -1510,13 +1516,14 @@ function viewMapa(){
       :`<span>${f(vals.mn)}</span><span class="grad" style="background:linear-gradient(90deg,color-mix(in srgb,${col} 12%,transparent),${col})"></span><span>${f(vals.mx)}</span>`}
   const bg=MAP.bg.map(d=>`<path d="${d}" style="fill:var(--bar-bg);stroke:var(--surface);stroke-width:.6"/>`).join("");
   const ins=Object.entries(MAP.ins||{}).map(([k,m])=>`<figure class="mapins"><figcaption>${k==="bg"?U("Beograd","Belgrade"):U("Niš","Niš")}</figcaption><svg viewBox="0 0 ${m.w} ${m.h}" role="img" aria-label="${k==="bg"?U("Beograd","Belgrade"):"Niš"}">${mapPaths(m.o,vals,1)}</svg></figure>`).join("");
-  host.innerHTML=`<h2>${U("Mapa po opštinama","Map by municipality")}</h2>
+  host.innerHTML=`<h2>${U("Mapa po opštinama","Map by municipality")}</h2>${shareBtn("mpLink")}
    <p>${U("Klik na opštinu otvara njene rezultate. Gradske opštine Beograda i Niša su uvećane u isečcima. Opštine na Kosovu i Metohiji bez biračkih mesta na ovim izborima su sive; Gora je prikazana granicom današnje opštine Dragaš.","Click a municipality to open its results. The city municipalities of Belgrade and Niš are enlarged in insets. Municipalities in Kosovo and Metohija without polling stations in this election are grey; Gora is drawn with the boundary of today's Dragaš municipality.")}</p>
    <div class="ctl"><label>${U("Prikaz","Show")}<select id="mapMode">${modes}</select></label>${mapMode==="share"?`<label>${U("Lista","List")}<select id="mapList">${lists}</select></label>`:""}</div>
    <div class="lgd maplgd">${legend}</div>
    <div class="mapwrap"><svg class="mapsvg" viewBox="0 0 ${MAP.w} ${MAP.h}" role="img" aria-label="${U("Mapa Srbije po opštinama","Map of Serbia by municipality")}">${bg}${mapPaths(MAP.o,vals,1)}</svg><div class="mapside">${ins}<p id="mapInfo" class="note" style="min-height:2.6em"></p></div></div>
    <p class="note">${U("Granice opština: © <span class='keep'>OpenStreetMap</span> saradnici (<span class='keep'>ODbL</span>), uprošćeno. Udeli su u važećim glasovima, samo za mesta sa unetim rezultatom.","Municipal boundaries: © OpenStreetMap contributors (ODbL), simplified. Shares are of valid votes, counted stations only.")}</p>`;
   $("#mapMode").onchange=e=>{mapMode=e.target.value;viewMapa()};
+  $("#mpLink").onclick=e=>shareLink(siteUrl("#mapa"),S("Mapa po opštinama","Map by municipality"),e.currentTarget);
   if($("#mapList"))$("#mapList").onchange=e=>{mapList=+e.target.value;viewMapa()};
   $$("path[data-op]",host).forEach(p=>{
     p.onclick=()=>{state.okF="";state.opSearch=p.dataset.op;go("opstine")};
