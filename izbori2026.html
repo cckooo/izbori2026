@@ -460,7 +460,9 @@ function dataTable(host,id,cols,items,opt={}){
   const plain=c=>c.label.replace(/<[^>]*>/g,"").replace(/"/g,"&quot;");
   const head=cols.map(c=>`<th class="${c.num?"num ":""}${c.nosort?"":"sortable"}" data-k="${c.id}" ${c.nosort?"":`tabindex="0" aria-sort="${c.id===st.key?(st.dir>0?"ascending":"descending"):"none"}"`}>${c.label}<span class="arr">${c.id===st.key?(st.dir>0?"▲":"▼"):""}</span></th>`).join("");
   const lim=opt.limit&&!ext&&!st.all?opt.limit:1e9; // opt.limit: posle sortiranja ostaje „sve“ ako je kliknuto
-  const body=arr.map((it,i)=>`<tr class="${opt.onRow?"click":""}${xr(i,lim)}" data-id="${it.id}">${cols.map(c=>`<td class="${c.num?"num ":""}${c.ttl?"ttl ":""}${c.nas?"nas ":""}${c.cls?c.cls+" ":""}${c.hm?"hm":""}" data-l="${plain(c)}">${c.render(it)}</td>`).join("")}</tr>`).join("");
+  // redni broj po trenutnom sortiranju, u koloni naziva (opt.offset: strana kod spoljnog straničenja)
+  const rkc=Math.max(0,cols.findIndex(c=>c.ttl)),off=opt.offset||0;
+  const body=arr.map((it,i)=>`<tr class="${opt.onRow?"click":""}${xr(i,lim)}" data-id="${it.id}">${cols.map((c,j)=>`<td class="${c.num?"num ":""}${c.ttl?"ttl ":""}${c.nas?"nas ":""}${c.cls?c.cls+" ":""}${c.hm?"hm":""}" data-l="${plain(c)}">${j===rkc&&!opt.norank?`<span class="rk">${off+i+1}.</span>`:""}${c.render(it)}</td>`).join("")}</tr>`).join("");
   const sortable=cols.filter(c=>!c.nosort&&!c.hm);
   const ms=`<div class="msort"><select aria-label="${U("Sortiraj po","Sort by")}">${sortable.map(c=>`<option value="${c.id}" ${c.id===st.key?"selected":""}>${U("Sortiraj","Sort")}: ${plain(c)}</option>`).join("")}</select><button class="btn ghost" aria-label="${U("Promeni smer sortiranja","Reverse sort order")}">${st.dir>0?"▲":"▼"}</button></div>`;
   host.innerHTML=ms+`<div class="tw"><table class="cards"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`+moreBtn(arr.length,lim);
@@ -723,7 +725,7 @@ function drawMesta(){
   m.page=Math.min(m.page,pages-1);
   const page=sorted.slice(m.page*per,(m.page+1)*per);
   const host=$("#mTbl");
-  dataTable(host,"mesta_page",cols,page,{sort:st.key,dir:st.dir,onSort:k=>{if(st.key===k)st.dir*=-1;else{st.key=k;st.dir=cols.find(c=>c.id===k).num?-1:1}m.page=0;drawMesta()}});
+  dataTable(host,"mesta_page",cols,page,{sort:st.key,dir:st.dir,offset:m.page*per,onSort:k=>{if(st.key===k)st.dir*=-1;else{st.key=k;st.dir=cols.find(c=>c.id===k).num?-1:1}m.page=0;drawMesta()}});
   $("#pager").innerHTML=`<button class="btn ghost" id="pPrev" ${m.page===0?"disabled":""}>${U("Prethodna","Previous")}</button><span>${U(`Strana ${m.page+1} od ${pages}`,`Page ${m.page+1} of ${pages}`)}</span><button class="btn ghost" id="pNext" ${m.page>=pages-1?"disabled":""}>${U("Sledeća","Next")}</button>`;
   $("#pPrev").onclick=()=>{m.page--;drawMesta();$("#mTbl").scrollIntoView({block:"start"})};
   $("#pNext").onclick=()=>{m.page++;drawMesta();$("#mTbl").scrollIntoView({block:"start"})};
