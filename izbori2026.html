@@ -442,9 +442,10 @@ function dataTable(host,id,cols,items,opt={}){
 }
 /* Naselje biračkog mesta, a spisak ulica (i zaseoka) se otvara klikom */
 // naziv mesta: opština, naselje, pa ime biračkog mesta
+// u tabelama Statistike i Listi: mesto (opština, naselje) istaknuto, naziv biračkog mesta ispod, sitnije
 function bmTitle(r){
-  const pre=[OP[r.op].name,r.nsl].filter(Boolean).map(x=>esc(T(x))).join(", ");
-  return `<span class="muted">${pre},</span> <b>${esc(T(r.nm))}</b>`;
+  const pre=[...new Set([OP[r.op].name,r.nsl].filter(Boolean).map(x=>T(x)))].map(esc).join(", ");
+  return `<b>${pre}</b><br><span class="muted" style="font-size:.85rem">${esc(T(r.nm))}</span>`;
 }
 function nslCell(r){
   if(!r.nsl)return `<span class="muted">–</span>`;
