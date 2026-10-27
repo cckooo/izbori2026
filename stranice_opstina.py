@@ -57,11 +57,14 @@ nav a[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)} 
 
 
 def header(app_hash):
-    nav = "".join(f'<a role="tab" href="/#{k}"' + (' aria-selected="true"' if k == "opstine" else "") + f">{n}</a>" for k, n in TABS)
+    # linkovi na glavni sajt nastavljaju na latinici (ovde se čita latinica); ako je posetilac ranije sam izabrao
+    # pismo na glavnom sajtu, mali kod ispod uklanja ?jezik=lat pa ostaje njegov izbor
+    nav = "".join(f'<a role="tab" data-jl href="/?jezik=lat#{k}"' + (' aria-selected="true"' if k == "opstine" else "") + f">{n}</a>" for k, n in TABS)
     lang = (f'<a href="/?jezik=cyr{app_hash}">Ћир</a><a aria-pressed="true" href="#">Lat</a>'
             f'<a href="/?jezik=en{app_hash}">EN</a>')
-    return (f'<header class="top"><div class="top-in"><a class="brand" href="/">Izbori 2026</a>'
-            f'<nav id="tabs" aria-label="Pregledi">{nav}</nav><div class="seg keep" id="lang" role="group">{lang}</div></div></header>')
+    return (f'<header class="top"><div class="top-in"><a class="brand" data-jl href="/?jezik=lat">Izbori 2026</a>'
+            f'<nav id="tabs" aria-label="Pregledi">{nav}</nav><div class="seg keep" id="lang" role="group">{lang}</div></div></header>'
+            '<script>try{if(localStorage.getItem("izbori2026.jezik"))document.querySelectorAll("a[data-jl]").forEach(a=>a.href=a.getAttribute("href").replace("?jezik=lat",""))}catch(e){}</script>')
 
 
 def page(op, css, fonts, snap, map_svg, legend, okr_links):
