@@ -95,6 +95,8 @@ for const in ("DATA", "NASELJA", "STANOVNICI"):
         html = html[:m.start()] + f'const {const}=JSON.parse(document.getElementById("j{const}").textContent);' + html[m.end():]
 i = html.index("<script>\nconst DATA=")
 html = html[:i] + "\n".join(blocks) + "\n" + html[i:]
+for gv in SRC.parent.glob("google*.html"):  # potvrda vlasništva za Google Search Console
+    (OUT / gv.name).write_bytes(gv.read_bytes())
 gc = SRC.with_name("goatcounter.js")  # skripta za brojanje poseta, služi se sa našeg sajta
 if gc.exists():
     (OUT / gc.name).write_bytes(gc.read_bytes())
