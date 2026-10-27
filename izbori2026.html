@@ -269,22 +269,16 @@ const LATMAP={А:"A",Б:"B",В:"V",Г:"G",Д:"D",Ђ:"Đ",Е:"E",Ж:"Ž",З:"Z",�
  а:"a",б:"b",в:"v",г:"g",д:"d",ђ:"đ",е:"e",ж:"ž",з:"z",и:"i",ј:"j",к:"k",л:"l",м:"m",н:"n",о:"o",п:"p",р:"r",с:"s",т:"t",ћ:"ć",у:"u",ф:"f",х:"h",ц:"c",ч:"č",ш:"š"};
 const UPPER=/[А-ЯЂЈЉЊЋЏ]/;
 const cache=new Map();
+const DIG={Љ:["LJ","Lj"],љ:["lj","lj"],Њ:["NJ","Nj"],њ:["nj","nj"],Џ:["DŽ","Dž"],џ:["dž","dž"]};
 function lat(s){
-  if(cache.has(s))return cache.get(s);
-  let o="";
-  for(let i=0;i<s.length;i++){
-    const ch=s[i];
-    if(LATMAP[ch]!==undefined){o+=LATMAP[ch];continue;}
-    const dg={Љ:["LJ","Lj"],љ:["lj","lj"],Њ:["NJ","Nj"],њ:["nj","nj"],Џ:["DŽ","Dž"],џ:["dž","dž"]}[ch];
-    if(dg){
-      const up=ch===ch.toUpperCase()&&ch!==ch.toLowerCase();
-      if(!up){o+=dg[0];continue;}
-      const near=(s[i+1]&&UPPER.test(s[i+1]))||(s[i-1]&&UPPER.test(s[i-1]));
-      o+=near?dg[0]:dg[1];continue;
-    }
-    o+=ch;
-  }
-  cache.set(s,o);return o;
+  let o=cache.get(s);if(o!==undefined)return o;
+  o=s.replace(/[Ѐ-ӿ]/g,(ch,i)=>{
+    const m=LATMAP[ch];if(m!==undefined)return m;
+    const dg=DIG[ch];if(!dg)return ch;
+    if(ch===dg[0].toLowerCase()||ch!==ch.toUpperCase())return dg[0];
+    return (s[i+1]&&UPPER.test(s[i+1]))||(s[i-1]&&UPPER.test(s[i-1]))?dg[0]:dg[1];
+  });
+  if(s.length<200)cache.set(s,o);return o; // dugačke tekstove (pretraga) ne pamti
 }
 /* latinica -> ćirilica; reči koje nisu srpske (Vajdasági, Shqiptar) i oznake poput PDF ostaju */
 const L2C={a:"а",b:"б",c:"ц",č:"ч",ć:"ћ",d:"д",đ:"ђ",e:"е",f:"ф",g:"г",h:"х",i:"и",j:"ј",k:"к",l:"л",m:"м",n:"н",o:"о",p:"п",r:"р",s:"с",š:"ш",t:"т",u:"у",v:"в",z:"з",ž:"ж"};
@@ -343,9 +337,10 @@ for(const r of ROWS){
   r.inv=r.e&&r.lis>0?r.nv/r.lis:null;
   const ns=(NASELJA[OP[r.op].full]||{})[r.n]||["",""];
   r.nsl=ns[0];r.ul=ns[1];
-  r.q=flat(r.nm+" "+OP[r.op].name+" "+OK[r.ok].name+" "+r.nsl+" "+r.ul);
   r.url=r.link?(r.link[0]==="!"?r.link.slice(1):RIK_BASE+r.link):"";
 }
+// tekst za pretragu se pravi tek pri prvoj pretrazi (ubrzava učitavanje)
+const rq=r=>r.q||(r.q=flat(r.nm+" "+OP[r.op].name+" "+OK[r.ok].name+" "+r.nsl+" "+r.ul));
 function agg(rows){
   const a={n:rows.length,nd:0,up:0,upd:0,gl:0,va:0,nv:0,v:new Array(NL).fill(0)};
   for(const r of rows){
@@ -585,7 +580,7 @@ let sel=null;
 const NONE="-"; // vrednost filtera za mesta bez utvrđenog naselja
 function filteredStations(){
   const m=state.m,q=flat(m.q.trim());
-  return ROWS.filter(r=>(m.ok===""||String(r.ok)===m.ok)&&(m.op===""||String(r.op)===m.op)&&(!m.nas||(m.nas===NONE?!r.nsl:r.nsl===m.nas))&&(!q||r.q.includes(q)));
+  return ROWS.filter(r=>(m.ok===""||String(r.ok)===m.ok)&&(m.op===""||String(r.op)===m.op)&&(!m.nas||(m.nas===NONE?!r.nsl:r.nsl===m.nas))&&(!q||rq(r).includes(q)));
 }
 function viewMesta(){
   const m=state.m;
