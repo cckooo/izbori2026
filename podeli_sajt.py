@@ -71,6 +71,21 @@ if n != 1:
 print(line)
 
 OUT.mkdir(parents=True, exist_ok=True)
+# brže otvaranje: putanje zapisnika (trećina stranice), podaci 2023. i mapa opština u posebne fajlove;
+# sajt ih preuzima odmah posle prvog prikaza (LAZY u HTML-u). U HTML-u ostaje null, a putanja zapisnika 0.
+m = re.search(r"^const DATA=(.*);(?=\r?$)", html, re.M)
+data = json.loads(m.group(1))
+(OUT / "zapisnici.json").write_text(json.dumps([r[9] for r in data["rows"]], ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+for r in data["rows"]:
+    if r[9]:
+        r[9] = 0
+line = "const DATA=" + json.dumps(data, ensure_ascii=False, separators=(",", ":")) + ";"
+html = html[:m.start()] + line + html[m.end():]
+for const, fname in (("PRETHODNI", "prethodni.json"), ("MAPA", "mapa.json")):
+    m = re.search(rf"^const {const}=(.*);(?=\r?$)", html, re.M)
+    if m:
+        (OUT / fname).write_text(m.group(1), encoding="utf-8")
+        html = html[:m.start()] + f"const {const}=null;" + html[m.end():]
 nas_map = SRC.with_name("mapa_naselja.json")  # granice naselja (mapa_naselja.py): po fajl za opštinu, preuzima se kad se otvori
 if nas_map.exists():
     nd = OUT / "naselja"

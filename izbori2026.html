@@ -373,6 +373,9 @@ for(const r of ROWS){
   r.nsl=ns[0];r.ul=typeof ns[1]==="string"?ns[1]:"";r.ulx=ns[1]===1; // 1: ulice su u ulice.json (objavljeni sajt)
   r.url=r.link?(r.link[0]==="!"?r.link.slice(1):RIK_BASE+r.link):"";
 }
+// objavljeni sajt: putanje zapisnika su u zapisnici.json (podeli_sajt.py, ovde 0) i stižu posle prvog prikaza
+const ZAPX=DATA.rows.some(r=>r[9]===0);
+const pdfA=(r,txt,stop)=>r.url||(ZAPX&&r.link===0)?`<a href="${r.url?esc(encodeURI(r.url)):"#"}" data-pdf="${r.id}" target="_blank" rel="noopener"${stop?` onclick="event.stopPropagation()"`:""}>${txt}</a>`:"";
 // tekst za pretragu se pravi tek pri prvoj pretrazi (ubrzava učitavanje)
 const rq=r=>r.q||(r.q=flat(r.nm+" "+OP[r.op].name+" "+OK[r.ok].name+" "+r.nsl+" "+r.ul));
 /* Na objavljenom sajtu su ulice izdvojene u ulice.json (podeli_sajt.py) i preuzimaju se tek za pretragu ili spisak ulica */
@@ -735,7 +738,7 @@ function drawMesta(){
     {id:"sel",label:U("Udeo","Share")+": "+esc(L0.short),num:true,get:r=>r.e&&r.va?r.v[L]/r.va:null,render:r=>r.e&&r.va?pctBar(r.v[L]/r.va,L0.c):"–"},
     {id:"win",label:U("Prva lista","Leading list"),get:r=>r.win>=0?r.win:null,render:r=>r.win>=0?`${sw(r.win)}${esc(LISTS[r.win].short)}`:"–"},
     {id:"inv",label:U("Nevažeći","Invalid"),num:true,get:r=>r.inv,render:r=>r.inv==null?"–":P(r.inv)},
-    {id:"lnk",label:U("Zapisnik","Record"),nosort:true,get:r=>0,render:r=>r.url?`<a href="${esc(encodeURI(r.url))}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${U("RIK","RIK")} (PDF)</a>`:"–"}
+    {id:"lnk",label:U("Zapisnik","Record"),nosort:true,get:r=>0,render:r=>pdfA(r,`${U("RIK","RIK")} (PDF)`,true)||"–"}
   ];
   // kolona „Biračko mesto“ se sortira po opštini (abecedno), pa po broju mesta;
   // kad se izabere nova opština, mesta se prikazuju po broju
@@ -843,7 +846,7 @@ function opTable(title,note,ents,L){
 function bmTable(title,note,items,cols){
   const bl=U("Biračko mesto","Polling station"),zl=U("Zapisnik","Record");
   const n=LIM(10,5);
-  const body=items.map((it,i)=>{const r=it.r||it;return `<tr class="${xr(i,n)}"><td class="ttl" data-l="${bl}"><span class="rk">${i+1}.</span>${bmTitle(r)}</td>${cols.map(c=>`<td class="num" data-l="${c.l}">${c.f(it)}</td>`).join("")}<td data-l="${zl}">${r.url?`<a href="${esc(encodeURI(r.url))}" target="_blank" rel="noopener">PDF</a>`:""}</td></tr>`}).join("");
+  const body=items.map((it,i)=>{const r=it.r||it;return `<tr class="${xr(i,n)}"><td class="ttl" data-l="${bl}"><span class="rk">${i+1}.</span>${bmTitle(r)}</td>${cols.map(c=>`<td class="num" data-l="${c.l}">${c.f(it)}</td>`).join("")}<td data-l="${zl}">${pdfA(r,"PDF")}</td></tr>`}).join("");
   return `<div class="${items.length>n?"lim":""}">${title?`<h3>${title}</h3>`:""}<p class="note">${note}</p>${items.length?`<div class="tw"><table class="cards"><thead><tr><th>${bl}</th>${cols.map(c=>`<th class="num">${c.l}</th>`).join("")}<th>${zl}</th></tr></thead><tbody>${body}</tbody></table></div>${moreBtn(items.length,n)}`:`<p class="muted">${U("Nema takvih mesta.","No such stations.")}</p>`}</div>`;
 }
 const SKIP_OP=/Иностранство|Заводи/; // inostranstvo i zatvori nisu opštine sa kojima ima smisla porediti
@@ -983,7 +986,7 @@ function viewListe(){
 function miniTable(title,note,items,valLabel,valFn){
   const bl=U("Biračko mesto","Polling station"),ul=U("Upisano","Registered"),zl=U("Zapisnik","Record");
   const n=LIM(10,3);
-  const body=items.map((r,i)=>`<tr class="${xr(i,n)}"><td class="ttl" data-l="${bl}"><span class="rk">${i+1}.</span>${bmTitle(r)}</td><td class="num" data-l="${ul}">${N(r.up)}</td><td class="num" data-l="${valLabel}"><b>${valFn(r)}</b></td><td data-l="${zl}">${r.url?`<a href="${esc(encodeURI(r.url))}" target="_blank" rel="noopener">PDF</a>`:""}</td></tr>`).join("");
+  const body=items.map((r,i)=>`<tr class="${xr(i,n)}"><td class="ttl" data-l="${bl}"><span class="rk">${i+1}.</span>${bmTitle(r)}</td><td class="num" data-l="${ul}">${N(r.up)}</td><td class="num" data-l="${valLabel}"><b>${valFn(r)}</b></td><td data-l="${zl}">${pdfA(r,"PDF")}</td></tr>`).join("");
   return `<div class="${items.length>n?"lim":""}"><h3>${title}</h3><p class="note">${note}</p><div class="tw"><table class="cards"><thead><tr><th>${bl}</th><th class="num">${ul}</th><th class="num">${valLabel}</th><th>${zl}</th></tr></thead><tbody>${body}</tbody></table></div>${moreBtn(items.length,n)}</div>`;
 }
 /* ---------- Grafikoni (SVG) ---------- */
@@ -1218,10 +1221,10 @@ function korLinks(r){
     return u?`<a href="${esc(encodeURI(u))}" target="_blank" rel="noopener">${lab}</a>`:lab}).join("<br>");
 }
 /* ---------- Poređenje sa izborima 2023. (spoji_2023.py -> PRETHODNI) ---------- */
-const PREV=typeof PRETHODNI!=="undefined"&&PRETHODNI.m?PRETHODNI:{m:{},o:{},liste:[],fp:{}};
+let PREV=typeof PRETHODNI!=="undefined"&&PRETHODNI&&PRETHODNI.m?PRETHODNI:{m:{},o:{},liste:[],fp:{}};
 const p23=r=>{const x=(PREV.m[OP[r.op].full]||{})[r.n];return x&&{up:x[0],gl:x[1],va:x[2],v1:x[3],v2:x[4]}};
 // zbir 2023 za skup opština (indeksi u OP): {up,gl,va,v:{indeks liste 2026: glasovi}}; liste bez naslednika nemaju vrednost
-const L23=PREV.liste;
+let L23=PREV.liste;
 function sum23(ops){
   const s={up:0,gl:0,va:0,v:{}};L23.forEach(k=>s.v[k]=0);
   for(const i of ops){const x=PREV.o[OP[i].full];if(!x)continue;s.up+=x[0];s.gl+=x[1];s.va+=x[2];L23.forEach((k,j)=>s.v[k]+=x[3+j])}
@@ -1425,7 +1428,7 @@ function viewStatistika(){
 const STAT_SUB=[["osnovno","Osnovno","Basics"],["odstupanja","Odstupanja","Outliers"],["otisak","Grafikoni","Charts"],["zapisnici","Zapisnici","Records"],["p2023","Poređenje sa 2023.","Compared with 2023"]];
 
 /* ---------- Mapa opština (mapa_opstina.py -> MAPA; granice © OpenStreetMap, ODbL) ---------- */
-const MAP=typeof MAPA!=="undefined"?MAPA:null;
+let MAP=typeof MAPA!=="undefined"?MAPA:null;
 const OPI=new Map(OP.map((o,i)=>[o.full,i]));
 let mapMode="win",mapList=0;
 const MAP_MODES=[["win","Ko je prvi","Who came first"],["share","Udeo liste","List share"],["turn","Izlaznost","Turnout"],["dturn","Promena izlaznosti od 2023.","Turnout change since 2023"],["dvuc","Promena Vučićeve liste od 2023.","Vučić list change since 2023"]];
@@ -1448,7 +1451,7 @@ function mapPaths(set,vals,scale){
 }
 function viewMapa(){
   const host=$("#mapa");
-  if(!MAP){host.innerHTML=`<h2>${U("Mapa","Map")}</h2><p class="muted">${U("Mapa nije dostupna.","The map is not available.")}</p>`;return}
+  if(!MAP){host.innerHTML=`<h2>${U("Mapa","Map")}</h2><p class="muted">${LAZY.mapa.p?U("Učitava se mapa…","Loading the map…"):U("Mapa nije dostupna.","The map is not available.")}</p>`;return}
   const vals=new Map();OP.forEach((o,i)=>{const v=mapVal(i);if(v)vals.set(i,v)});
   const nums=[...vals.values()].filter(v=>v.v!=null).map(v=>v.v);
   vals.mn=Math.min(...nums);vals.mx=Math.max(...nums);vals.dmx=Math.max(...nums.map(Math.abs),.01);
@@ -1522,6 +1525,26 @@ function drawOpMap(i,m){
       state.m={...state.m,q:keys.size===1?"":n,nas:keys.size===1?[...keys][0]:"",ok:String(OP[i].ok),op:String(i),page:0};go("mesta")};
   });
 }
+/* ---------- Podaci koji stižu posle prvog prikaza (objavljeni sajt, podeli_sajt.py) ---------- */
+// Na objavljenom sajtu su zapisnici, podaci za 2023. i mapa opština izdvojeni u posebne fajlove (null/0 u HTML-u),
+// da bi se stranica brže otvorila. Preuzimaju se odmah posle prvog prikaza; prikaz kome trebaju se tada osveži.
+const LAZY={
+  zapisnici:{need:ZAPX,file:"zapisnici.json",set:j=>{ROWS.forEach((r,i)=>{r.link=j[i]||"";r.url=r.link?(r.link[0]==="!"?r.link.slice(1):RIK_BASE+r.link):""});
+    $$("a[data-pdf]").forEach(a=>{const r=ROWS[+a.dataset.pdf];if(r.url)a.href=encodeURI(r.url)})},redraw:()=>false},
+  prethodni:{need:typeof PRETHODNI!=="undefined"&&PRETHODNI===null,file:"prethodni.json",set:j=>{PREV=j;L23=j.liste},
+    redraw:()=>cur==="statistika"&&["p2023","otisak"].includes(state.stat)||cur==="opstine"&&state.opSearch!==""||cur==="mapa"&&mapMode.startsWith("d")},
+  mapa:{need:typeof MAPA!=="undefined"&&MAPA===null,file:"mapa.json",set:j=>{MAP=j},redraw:()=>cur==="mapa"},
+};
+function loadLazy(){
+  if(location.protocol==="file:")return;
+  for(const [k,x] of Object.entries(LAZY))if(x.need&&!x.p)
+    x.p=fetch(x.file).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(j=>{x.set(j);x.need=false;
+      if(x.redraw()){const y=scrollY;VIEWS[cur]();scrollTo(0,y)}}).catch(()=>{});
+}
+// link ka zapisniku pre nego što stigne zapisnici.json: sačekaj fajl pa otvori
+document.addEventListener("click",e=>{const a=e.target.closest("a[data-pdf]");if(!a)return;const r=ROWS[+a.dataset.pdf];
+  if(r.url){a.href=encodeURI(r.url);return}
+  e.preventDefault();const w=window.open("","_blank");(LAZY.zapisnici.p||Promise.resolve()).then(()=>{if(r.url&&w)w.location=encodeURI(r.url);else if(w)w.close()})},true);
 /* ---------- Navigacija i jezik ---------- */
 const VIEWS={pregled:viewPregled,mapa:viewMapa,liste:viewListe,okruzi:viewOkruzi,opstine:viewOpstine,mesta:viewMesta,statistika:viewStatistika};
 const TABN={pregled:["Pregled","Overview"],mapa:["Mapa","Map"],liste:["Liste","Lists"],okruzi:["Okruzi","Districts"],opstine:["Opštine","Municipalities"],mesta:["Biračka mesta","Polling stations"],statistika:["Statistika","Statistics"]};
@@ -1570,6 +1593,7 @@ $$("#lang button").forEach(b=>b.onclick=()=>setScript(b.dataset.s));
 window.addEventListener("hashchange",()=>show(location.hash.slice(1)));
 chrome();
 show(location.hash.slice(1)||"pregled");
+setTimeout(loadLazy,0); // posle prvog prikaza
 </script>
 </body>
 </html>
