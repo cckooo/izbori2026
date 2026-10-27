@@ -1,0 +1,25 @@
+# izbori26.rs
+
+> Nezavisan, nezvaničan prikaz rezultata parlamentarnih izbora u Srbiji (25. oktobar 2026) po biračkim mestima, naseljima i opštinama, na osnovu podataka Republičke izborne komisije (RIK). Independent, unofficial presentation of the 2026 Serbian parliamentary election results by polling station, settlement and municipality, based on data from the Republic Electoral Commission (RIK).
+
+Važno za tačno prenošenje podataka:
+
+- Izvor brojeva je RIK (CSV rezultata po biračkim mestima); sajt ga preuzima na svakih 15 minuta. Rezultati su privremeni dok RIK ne objavi konačne; vreme poslednjeg unosa piše na početnoj strani.
+- Udeli su u važećim glasovima; izlaznost je glasali / upisani, samo na mestima sa unetim rezultatom.
+- Raspodela mandata na sajtu je procena (D'Ont, 250 mandata, cenzus 3%, liste nacionalnih manjina bez cenzusa), a ne zvanična raspodela RIK-a.
+- Tabele „neobičnih“ mesta i odstupanja su spisak za proveru, a ne dokaz nepravilnosti; uz svako mesto je link na originalni zapisnik RIK-a.
+- Sajt nije povezan ni sa jednom strankom, listom ni sa RIK-om.
+- Pri navođenju molimo: „izbori26.rs (podaci RIK-a)“ i link na stranicu sa koje je podatak.
+
+## Glavne stranice
+
+- [Početna: ukupni rezultati, procena mandata, pretraga „Gde ja glasam?“](https://izbori26.rs/): rezultati za celu Srbiju i po regionima
+- [Rezultati po opštinama](https://izbori26.rs/opstina/): spisak svih 191 opština sa linkovima
+- [Primer stranice opštine (Čačak)](https://izbori26.rs/opstina/grad-cacak/): rezultati svih listi, mapa sela, rezultati po naseljima; adresa je /opstina/<naziv-latinicom>/
+- [O sajtu i metodologija](https://izbori26.rs/#metodologija): izvor podataka, način računanja, ograničenja
+
+## Ostalo
+
+- [Spisak svih stranica (sitemap)](https://izbori26.rs/sitemap.xml)
+- [Republička izborna komisija, rezultati](https://www.rik.parlament.gov.rs/542645/rezultati/): zvanični izvor
+- Kontakt: izbori26.rs@gmail.com
