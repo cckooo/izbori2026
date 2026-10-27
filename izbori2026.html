@@ -980,29 +980,32 @@ function sum23(ops){
 // poređenje 2023 → 2026 za skup opština: izlaznost, Vučić (lista 1), vlast (Vučić + Dačić)
 function cmp23(ops,a){
   const s=sum23(ops);if(!s.up||!s.va||!a.va||!a.upd)return null;
-  return {t0:s.gl/s.up,t1:a.gl/a.upd,v0:s.v[0]/s.va,v1:a.v[0]/a.va,g0:(s.v[0]+s.v[1])/s.va,g1:(a.v[0]+a.v[1])/a.va,s};
+  return {t0:s.gl/s.up,t1:a.gl/a.upd,v0:s.v[0]/s.va,v1:a.v[0]/a.va,g0:(s.v[0]+s.v[1])/s.va,g1:(a.v[0]+a.v[1])/a.va,s,
+    n:{t0:s.gl,t1:a.gl,v0:s.v[0],v1:a.v[0],g0:s.v[0]+s.v[1],g1:a.v[0]+a.v[1]}};
 }
-const arrow23=(a,b)=>`${P(a)} → <b>${P(b)}</b>`;
-const d23=d=>`<b style="color:${d>=0?"inherit":"var(--muted)"}">${signPP(d)}</b>`;
+// procenat 2023 → 2026, a ispod broj birača (glasalih ili glasova za listu)
+const arrow23=(a,b,n0,n1)=>`${P(a)} → <b>${P(b)}</b>${n0!=null?`<br><span class="muted" style="font-size:.82rem">${N(n0)} → ${N(n1)}</span>`:""}`;
+const d23=(d,dn)=>`<b style="color:${d>=0?"inherit":"var(--muted)"}">${signPP(d)}</b>${dn!=null?`<br><span class="muted" style="font-size:.82rem">${dn>=0?"+":"−"}${N(Math.abs(dn))}</span>`:""}`;
 function cmpCols(nameLabel){
   return [
     {id:"name",label:nameLabel,ttl:true,get:e=>flat(e.name),render:e=>`<b>${esc(T(e.name))}</b>${e.sub?`<br><span class="muted" style="font-size:.85rem">${esc(T(e.sub))}</span>`:""}`},
-    {id:"t",label:U("Izlaznost 2023 → 2026","Turnout 2023 → 2026"),num:true,get:e=>e.c.t1,render:e=>arrow23(e.c.t0,e.c.t1)},
-    {id:"dt",label:U("Promena izlaznosti","Turnout change"),num:true,get:e=>e.c.t1-e.c.t0,render:e=>d23(e.c.t1-e.c.t0)},
-    {id:"v",label:U("Vučić 2023 → 2026","Vučić 2023 → 2026"),num:true,get:e=>e.c.v1,render:e=>arrow23(e.c.v0,e.c.v1)},
-    {id:"dv",label:U("Promena Vučić","Vučić change"),num:true,get:e=>e.c.v1-e.c.v0,render:e=>d23(e.c.v1-e.c.v0)},
-    {id:"g",label:U("Vučić + Dačić 2023 → 2026","Vučić + Dačić 2023 → 2026"),num:true,get:e=>e.c.g1,render:e=>arrow23(e.c.g0,e.c.g1)},
-    {id:"dg",label:U("Promena Vučić + Dačić","Vučić + Dačić change"),num:true,get:e=>e.c.g1-e.c.g0,render:e=>d23(e.c.g1-e.c.g0)}];
+    {id:"t",label:U("Izlaznost","Turnout"),num:true,get:e=>e.c.t1,render:e=>arrow23(e.c.t0,e.c.t1,e.c.n.t0,e.c.n.t1)},
+    {id:"dt",label:U("Δ izlaznost","Δ turnout"),num:true,get:e=>e.c.t1-e.c.t0,render:e=>d23(e.c.t1-e.c.t0,e.c.n.t1-e.c.n.t0)},
+    {id:"v",label:"Vučić",num:true,get:e=>e.c.v1,render:e=>arrow23(e.c.v0,e.c.v1,e.c.n.v0,e.c.n.v1)},
+    {id:"dv",label:U("Δ Vučić","Δ Vučić"),num:true,get:e=>e.c.v1-e.c.v0,render:e=>d23(e.c.v1-e.c.v0,e.c.n.v1-e.c.n.v0)},
+    {id:"g",label:U("Vučić + Dačić","Vučić + Dačić"),num:true,get:e=>e.c.g1,render:e=>arrow23(e.c.g0,e.c.g1,e.c.n.g0,e.c.n.g1)},
+    {id:"dg",label:U("Δ Vučić + Dačić","Δ Vučić + Dačić"),num:true,get:e=>e.c.g1-e.c.g0,render:e=>d23(e.c.g1-e.c.g0,e.c.n.g1-e.c.n.g0)}];
 }
 // liste sa naslednikom iz 2023: tabela udela za skup opština
 function lists23(ops,a){
   const s=sum23(ops);if(!s.va||!a.va)return "";
-  const row=(lab,p0,p1)=>`<tr><td class="ttl" data-l="${U("Lista","List")}">${lab}</td><td class="num" data-l="2023">${P(p0)}</td><td class="num" data-l="2026"><b>${P(p1)}</b></td><td class="num" data-l="${U("Promena","Change")}">${d23(p1-p0)}</td></tr>`;
-  const v0=k=>s.v[k]/s.va,v1=k=>a.v[k]/a.va,g0=v0(0)+v0(1),g1=v1(0)+v1(1);
-  const rows=[row(U("Izlaznost","Turnout"),s.gl/s.up,a.gl/a.upd)]
-    .concat(L23.filter(k=>s.v[k]||a.v[k]).map(k=>row(`${sw(k)}${esc(LISTS[k].short)}`,v0(k),v1(k))))
-    .concat([row(`<b>${U("Vučić + Dačić","Vučić + Dačić")}</b>`,g0,g1),row(U("Sve ostale liste","All other lists"),1-g0,1-g1)]);
-  return `<div class="tw"><table class="cards"><thead><tr><th>${U("Lista (2026)","List (2026)")}</th><th class="num">2023</th><th class="num">2026</th><th class="num">${U("Promena","Change")}</th></tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
+  const sm=n=>`<br><span class="muted" style="font-size:.82rem">${N(n)}</span>`;
+  const row=(lab,p0,p1,n0,n1)=>`<tr><td class="ttl" data-l="${U("Lista","List")}">${lab}</td><td class="num" data-l="2023">${P(p0)}${sm(n0)}</td><td class="num" data-l="2026"><b>${P(p1)}</b>${sm(n1)}</td><td class="num" data-l="${U("Promena","Change")}">${d23(p1-p0,n1-n0)}</td></tr>`;
+  const g0n=s.v[0]+s.v[1],g1n=a.v[0]+a.v[1];
+  const rows=[row(`${U("Izlaznost","Turnout")} <span class="muted">(${U("glasalo birača","voters who voted")})</span>`,s.gl/s.up,a.gl/a.upd,s.gl,a.gl)]
+    .concat(L23.filter(k=>s.v[k]||a.v[k]).map(k=>row(`${sw(k)}${esc(LISTS[k].short)}`,s.v[k]/s.va,a.v[k]/a.va,s.v[k],a.v[k])))
+    .concat([row(`<b>${U("Vučić + Dačić","Vučić + Dačić")}</b>`,g0n/s.va,g1n/a.va,g0n,g1n),row(U("Sve ostale liste","All other lists"),1-g0n/s.va,1-g1n/a.va,s.va-g0n,a.va-g1n)]);
+  return `<div class="tw"><table class="cards"><thead><tr><th>${U("Lista (2026)","List (2026)")}</th><th class="num">2023</th><th class="num">2026</th><th class="num">${U("Promena","Change")}</th></tr></thead><tbody>${rows.join("")}</tbody></table></div><p class="note">${U("Ispod procenta je broj glasova (za izlaznost broj birača koji su glasali). 2026. samo mesta sa unetim rezultatom, pa se brojevi mogu povećati.","Below each percentage is the number of votes (for turnout, voters who voted). 2026 covers counted stations only, so numbers may still grow.")}</p>`;
 }
 const LISTS23_NOTE=()=>U("Upoređene su liste koje imaju jasnog naslednika: Vučić (lista 1 na oba izbora), Dačić (2 → 2), Savez vojvođanskih Mađara (6 → 5), Zukorlić (8 → 6), SDA Sandžaka (9 → 10), albanske liste (13 i 18 → 17) i Ruska stranka (16 → 7). Opozicione liste iz 2023. (Srbija protiv nasilja, Mi – glas iz naroda, NADA, Zavetnici–Dveri i druge) nemaju jednog naslednika, pa su sa ostalim listama u zbiru „Sve ostale liste“. Ljajić je 2023. bio na Vučićevoj listi, a 2026. ide samostalno. Udeli su u važećim glasovima; 2026. samo za mesta sa unetim rezultatom.",
   "Lists with a clear successor are compared: Vučić (list 1 in both), Dačić (2 → 2), Alliance of Vojvodina Hungarians (6 → 5), Zukorlić (8 → 6), SDA Sandžak (9 → 10), Albanian lists (13 and 18 → 17) and the Russian Party (16 → 7). The 2023 opposition lists (Serbia Against Violence, We – Voice of the People, NADA, Zavetnici–Dveri and others) have no single successor, so they are in “All other lists”. Ljajić ran on the Vučić list in 2023 and separately in 2026. Shares are of valid votes; 2026 only for counted stations.");
@@ -1010,9 +1013,9 @@ const LISTS23_NOTE=()=>U("Upoređene su liste koje imaju jasnog naslednika: Vuč
 function op23Block(i){
   const a=OP_AGG[i];if(!PREV.o[OP[i].full]||!a.va)return "";
   const M=BY_OP[i].filter(r=>r.e&&r.va>0&&p23(r)).map(r=>({r,o:p23(r)})).filter(e=>e.o.up>0&&e.o.va>0);
-  const cols=[{l:U("Izlaznost 2023 → 2026","Turnout 2023 → 2026"),f:e=>arrow23(e.o.gl/e.o.up,e.r.turn)},
-    {l:U("Vučić 2023 → 2026","Vučić 2023 → 2026"),f:e=>arrow23(e.o.v1/e.o.va,e.r.v[0]/e.r.va)},
-    {l:U("Vučić + Dačić 2023 → 2026","Vučić + Dačić 2023 → 2026"),f:e=>arrow23((e.o.v1+e.o.v2)/e.o.va,(e.r.v[0]+e.r.v[1])/e.r.va)}];
+  const cols=[{l:U("Izlaznost 2023 → 2026 (glasalo)","Turnout 2023 → 2026 (voted)"),f:e=>arrow23(e.o.gl/e.o.up,e.r.turn,e.o.gl,e.r.gl)},
+    {l:U("Vučić 2023 → 2026 (glasova)","Vučić 2023 → 2026 (votes)"),f:e=>arrow23(e.o.v1/e.o.va,e.r.v[0]/e.r.va,e.o.v1,e.r.v[0])},
+    {l:U("Vučić + Dačić 2023 → 2026 (glasova)","Vučić + Dačić 2023 → 2026 (votes)"),f:e=>arrow23((e.o.v1+e.o.v2)/e.o.va,(e.r.v[0]+e.r.v[1])/e.r.va,e.o.v1+e.o.v2,e.r.v[0]+e.r.v[1])}];
   M.sort((x,y)=>x.r.n-y.r.n);
   return `<h3 style="margin-top:26px">${U("Poređenje sa izborima 2023.","Compared with the 2023 election")}</h3><p class="note">${LISTS23_NOTE()}</p>${lists23([i],a)}
     ${M.length?`<details style="margin-top:10px"><summary class="more" style="cursor:pointer;color:var(--accent);font-weight:600">${U(`Po biračkim mestima (${N(M.length)} od ${N(BY_OP[i].length)} spojeno sa 2023)`,`By polling station (${N(M.length)} of ${N(BY_OP[i].length)} matched with 2023)`)}</summary>${bmTable("",U("Mesta su spojena po broju i nazivu; vidi Statistika → Poređenje sa 2023.","Stations matched by number and name; see Statistics → Compared with 2023."),M,cols)}</details>`:""}`;
@@ -1031,16 +1034,15 @@ function prevBlock(){
   for(const e of ok){const d=opD.get(e.r.op);e.dt=e.r.turn-e.o.gl/e.o.up;e.ds=e.r.v[0]/e.r.va-e.o.v1/e.o.va;e.kt=e.dt-d.t;e.ks=e.ds-d.s}
   const topT=ok.slice().sort((a,b)=>b.kt-a.kt).slice(0,20),topS=ok.slice().sort((a,b)=>b.ks-a.ks).slice(0,20);
   const upG=M.filter(e=>e.o.up>=100&&!SKIP_OP.test(OP[e.r.op].full)).map(e=>Object.assign(e,{du:e.r.up/e.o.up-1})).filter(e=>e.du>=.15).sort((a,b)=>b.du-a.du);
-  const arrow=(a,b)=>`${P(a)} → <b>${P(b)}</b>`;
-  const tCols=[{l:U("Izlaznost 2023 → 2026","Turnout 2023 → 2026"),f:e=>arrow(e.o.gl/e.o.up,e.r.turn)},{l:U("Promena (opština)","Change (municipality)"),f:e=>`<b>${signPP(e.dt)}</b> <span class="muted">(${signPP(opD.get(e.r.op).t)})</span>`}];
-  const sCols=[{l:U("Vučićeva lista 2023 → 2026","Vučić list 2023 → 2026"),f:e=>arrow(e.o.v1/e.o.va,e.r.v[0]/e.r.va)},{l:U("Promena (opština)","Change (municipality)"),f:e=>`<b>${signPP(e.ds)}</b> <span class="muted">(${signPP(opD.get(e.r.op).s)})</span>`}];
+  const tCols=[{l:U("Izlaznost 2023 → 2026 (glasalo)","Turnout 2023 → 2026 (voted)"),f:e=>arrow23(e.o.gl/e.o.up,e.r.turn,e.o.gl,e.r.gl)},{l:U("Promena (opština)","Change (municipality)"),f:e=>`<b>${signPP(e.dt)}</b> <span class="muted">(${signPP(opD.get(e.r.op).t)})</span>`}];
+  const sCols=[{l:U("Vučićeva lista 2023 → 2026 (glasova)","Vučić list 2023 → 2026 (votes)"),f:e=>arrow23(e.o.v1/e.o.va,e.r.v[0]/e.r.va,e.o.v1,e.r.v[0])},{l:U("Promena (opština)","Change (municipality)"),f:e=>`<b>${signPP(e.ds)}</b> <span class="muted">(${signPP(opD.get(e.r.op).s)})</span>`}];
   const uCols=[{l:U("Upisano 2023 → 2026","Registered 2023 → 2026"),f:e=>`${N(e.o.up)} → <b>${N(e.r.up)}</b>`},{l:U("Promena","Change"),f:e=>`<b>+${P(e.du)}</b>`},{l:U("Izlaznost 2026","Turnout 2026"),f:e=>e.r.turn==null?"–":P(e.r.turn)}];
   return `<div class="block"><h3>${U("Poređenje sa parlamentarnim izborima 2023.","Comparison with the 2023 parliamentary election")}</h3>
     <p>${U("Rezultati izbora od 17. decembra 2023. su sa sajta RIK-a. Po opštinama i okruzima porede se svi glasovi (GO Vranjska Banja, koja 2026. nema posebne rezultate, pridružena je Vranju); po biračkim mestima samo mesta koja su mogla pouzdano da se spoje.","Results of the 17 December 2023 election are from the RIK website. By municipality and district all votes are compared (Vranjska Banja, which has no separate 2026 results, is merged into Vranje); by polling station only stations that could be reliably matched.")}</p>
     <h3 style="margin-top:22px">${U("Cela Srbija: liste sa naslednikom","All of Serbia: lists with a successor")}</h3>
     <p class="note">${LISTS23_NOTE()}</p>${lists23(OP.map((_,i)=>i),TOTAL)}
     <h3 style="margin-top:26px">${U("Po okruzima","By district")}</h3>
-    <p class="note">${U("Promene su u procentnim poenima. Klik na naslov kolone menja sortiranje.","Changes are in percentage points. Click a column header to sort.")}</p><div id="p23Ok"></div>
+    <p class="note">${U("Kolone pokazuju 2023 → 2026: procenat, a ispod broj birača koji su glasali (izlaznost) ili broj glasova (liste). Δ je promena u procentnim poenima, a ispod promena broja. Klik na naslov kolone menja sortiranje.","Columns show 2023 → 2026: percentage, with voters who voted (turnout) or votes (lists) below. Δ is the change in percentage points, with the change in numbers below. Click a column header to sort.")}</p><div id="p23Ok"></div>
     <h3 style="margin-top:26px">${U("Po opštinama","By municipality")}</h3>
     <p class="note">${U("Klik na opštinu otvara njene rezultate i poređenje po biračkim mestima na kartici Opštine.","Click a municipality to open its results and station-level comparison on the Municipalities tab.")}</p><div id="p23Op"></div>
     <h3 style="margin-top:26px">${U("Po biračkim mestima","By polling station")}</h3>
