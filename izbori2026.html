@@ -97,6 +97,7 @@ tbody tr.click:hover{background:var(--hover)}
 .facts b{display:block;font-family:Literata,Georgia,serif;font-size:1.45rem;line-height:1.2}
 .facts span{color:var(--muted);font-size:.9rem}
 .lim .xr{display:none!important}
+.rk{display:inline-block;min-width:2.1em;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:600}
 .bez{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:10px 0 2px;font-size:.92rem;cursor:pointer}
 .bez input{width:18px;height:18px;margin:0;accent-color:var(--accent)}
 .bez .muted{font-size:.85rem}
@@ -808,14 +809,14 @@ function opTable(title,note,ents,L){
   const mx=Math.max(...ents.map(x=>x.p))||1;
   const n=LIM(10,5);
   const body=ents.map((e,i)=>{const o=OP[e.i],ok=OK[o.ok].name;
-    return `<tr class="click${xr(i,n)}" data-op="${e.i}"><td class="ttl" data-l="${ol}"><b>${esc(T(o.name))}</b>${ok!==o.name?` <span class="muted">${esc(T(ok))}</span>`:""}</td><td class="num" data-l="${sl}"><div class="pctbar"><span class="b" style="width:${Math.max(1,e.p/mx*80)}px;background:${LISTS[L].c}"></span><b>${PL(e.p,L)}</b></div></td><td class="num" data-l="${vl}">${N(e.a.v[L])}</td></tr>`}).join("");
+    return `<tr class="click${xr(i,n)}" data-op="${e.i}"><td class="ttl" data-l="${ol}"><span class="rk">${i+1}.</span><b>${esc(T(o.name))}</b>${ok!==o.name?` <span class="muted">${esc(T(ok))}</span>`:""}</td><td class="num" data-l="${sl}"><div class="pctbar"><span class="b" style="width:${Math.max(1,e.p/mx*80)}px;background:${LISTS[L].c}"></span><b>${PL(e.p,L)}</b></div></td><td class="num" data-l="${vl}">${N(e.a.v[L])}</td></tr>`}).join("");
   return `<div class="${ents.length>n?"lim":""}"><h3>${title}</h3><p class="note">${note}</p><div class="tw"><table class="cards"><thead><tr><th>${ol}</th><th class="num">${sl}</th><th class="num">${vl}</th></tr></thead><tbody>${body}</tbody></table></div>${moreBtn(ents.length,n)}</div>`;
 }
 // tabela biračkih mesta sa proizvoljnim kolonama; stavka je mesto ili {r:mesto,...}
 function bmTable(title,note,items,cols){
   const bl=U("Biračko mesto","Polling station"),zl=U("Zapisnik","Record");
   const n=LIM(10,5);
-  const body=items.map((it,i)=>{const r=it.r||it;return `<tr class="${xr(i,n)}"><td class="ttl" data-l="${bl}">${bmTitle(r)}</td>${cols.map(c=>`<td class="num" data-l="${c.l}">${c.f(it)}</td>`).join("")}<td data-l="${zl}">${r.url?`<a href="${esc(encodeURI(r.url))}" target="_blank" rel="noopener">PDF</a>`:""}</td></tr>`}).join("");
+  const body=items.map((it,i)=>{const r=it.r||it;return `<tr class="${xr(i,n)}"><td class="ttl" data-l="${bl}"><span class="rk">${i+1}.</span>${bmTitle(r)}</td>${cols.map(c=>`<td class="num" data-l="${c.l}">${c.f(it)}</td>`).join("")}<td data-l="${zl}">${r.url?`<a href="${esc(encodeURI(r.url))}" target="_blank" rel="noopener">PDF</a>`:""}</td></tr>`}).join("");
   return `<div class="${items.length>n?"lim":""}">${title?`<h3>${title}</h3>`:""}<p class="note">${note}</p>${items.length?`<div class="tw"><table class="cards"><thead><tr><th>${bl}</th>${cols.map(c=>`<th class="num">${c.l}</th>`).join("")}<th>${zl}</th></tr></thead><tbody>${body}</tbody></table></div>${moreBtn(items.length,n)}`:`<p class="muted">${U("Nema takvih mesta.","No such stations.")}</p>`}</div>`;
 }
 const SKIP_OP=/Иностранство|Заводи/; // inostranstvo i zatvori nisu opštine sa kojima ima smisla porediti
@@ -955,7 +956,7 @@ function viewListe(){
 function miniTable(title,note,items,valLabel,valFn){
   const bl=U("Biračko mesto","Polling station"),ul=U("Upisano","Registered"),zl=U("Zapisnik","Record");
   const n=LIM(10,3);
-  const body=items.map((r,i)=>`<tr class="${xr(i,n)}"><td class="ttl" data-l="${bl}">${bmTitle(r)}</td><td class="num" data-l="${ul}">${N(r.up)}</td><td class="num" data-l="${valLabel}"><b>${valFn(r)}</b></td><td data-l="${zl}">${r.url?`<a href="${esc(encodeURI(r.url))}" target="_blank" rel="noopener">PDF</a>`:""}</td></tr>`).join("");
+  const body=items.map((r,i)=>`<tr class="${xr(i,n)}"><td class="ttl" data-l="${bl}"><span class="rk">${i+1}.</span>${bmTitle(r)}</td><td class="num" data-l="${ul}">${N(r.up)}</td><td class="num" data-l="${valLabel}"><b>${valFn(r)}</b></td><td data-l="${zl}">${r.url?`<a href="${esc(encodeURI(r.url))}" target="_blank" rel="noopener">PDF</a>`:""}</td></tr>`).join("");
   return `<div class="${items.length>n?"lim":""}"><h3>${title}</h3><p class="note">${note}</p><div class="tw"><table class="cards"><thead><tr><th>${bl}</th><th class="num">${ul}</th><th class="num">${valLabel}</th><th>${zl}</th></tr></thead><tbody>${body}</tbody></table></div>${moreBtn(items.length,n)}</div>`;
 }
 /* ---------- Grafikoni (SVG) ---------- */
@@ -1254,7 +1255,9 @@ function prevBlock(){
   const up23=sum(M,e=>e.o.up),up26=sum(M,e=>e.r.up);
   const ok=M.filter(e=>e.r.va>=100&&e.o.va>=100&&!skipOp(e.r.op));
   for(const e of ok){const d=opD.get(e.r.op);e.dt=e.r.turn-e.o.gl/e.o.up;e.ds=e.r.v[0]/e.r.va-e.o.v1/e.o.va;e.kt=e.dt-d.t;e.ks=e.ds-d.s}
-  const topT=ok.slice().sort((a,b)=>b.kt-a.kt).slice(0,MORE),topS=ok.slice().sort((a,b)=>b.ks-a.ks).slice(0,MORE);
+  const okM=ok.filter(e=>!MIXED[e.r.op]),okX=ok.filter(e=>MIXED[e.r.op]); // podeljeno glasanje (npr. bojkot u Preševu 2023) posebno
+  const topT=okM.slice().sort((a,b)=>b.kt-a.kt).slice(0,MORE),topS=okM.slice().sort((a,b)=>b.ks-a.ks).slice(0,MORE);
+  const topTx=okX.slice().sort((a,b)=>b.kt-a.kt).slice(0,MORE),topSx=okX.slice().sort((a,b)=>b.ks-a.ks).slice(0,MORE);
   const upG=M.filter(e=>e.o.up>=100&&!skipOp(e.r.op)).map(e=>Object.assign(e,{du:e.r.up/e.o.up-1})).filter(e=>e.du>=.15).sort((a,b)=>b.du-a.du);
   const tCols=[{l:U("Izlaznost 2023 → 2026 (glasalo)","Turnout 2023 → 2026 (voted)"),f:e=>arrow23(e.o.gl/e.o.up,e.r.turn,e.o.gl,e.r.gl)},{l:U("Promena (opština)","Change (municipality)"),f:e=>`<b>${signPP(e.dt)}</b> <span class="muted">(${signPP(opD.get(e.r.op).t)})</span>`}];
   const sCols=[{l:U("Vučićeva lista 2023 → 2026 (glasova)","Vučić list 2023 → 2026 (votes)"),f:e=>arrow23(e.o.v1/e.o.va,e.r.v[0]/e.r.va,e.o.v1,e.r.v[0])},{l:U("Promena (opština)","Change (municipality)"),f:e=>`<b>${signPP(e.ds)}</b> <span class="muted">(${signPP(opD.get(e.r.op).s)})</span>`}];
@@ -1272,6 +1275,9 @@ function prevBlock(){
       `Results of the 17 December 2023 election by polling station (RIK) were matched with this year's by municipality and station number, when the station name is the same or similar or, if the station moved, when its number of registered voters differs by at most 15%. Stations whose registered voters changed by more than 40% are not compared, as their boundaries probably changed or the number now denotes another station; new and renumbered stations are not compared either. ${N(M.length)} counted stations were matched. At these stations turnout went ${P(t23)} → ${P(t26)}, and the Vučić list (number 1 in both elections) ${P(s23)} → ${P(s26)} of valid votes. Registered voters: ${N(up23)} → ${N(up26)}.`)}</p>
     ${bmTable(U("Najveći rast izlaznosti u odnosu na 2023.","Largest turnout increase since 2023"),U(`Mesta na kojima je izlaznost porasla najviše u odnosu na promenu u celoj opštini (u zagradi); promene su u procentnim poenima. Mesta sa najmanje 100 važećih glasova na oba izbora, bez inostranstva i zatvora. `,`Stations where turnout rose the most relative to the change in the whole municipality (in brackets); changes in percentage points. Stations with at least 100 valid votes in both elections, excluding abroad and prisons. `)+CAVEAT(),topT,tCols)}
     ${bmTable(U("Najveći rast Vučićeve liste u odnosu na 2023.","Largest Vučić list increase since 2023"),U(`Mesta na kojima je udeo Vučićeve liste porastao najviše u odnosu na promenu u celoj opštini (u zagradi). Isti uslovi kao iznad.`,`Stations where the Vučić list share rose the most relative to the change in the whole municipality (in brackets). Same conditions as above.`),topS,sCols)}
+    <h3 style="margin-top:26px">${U("Isto, u opštinama sa podeljenim glasanjem","The same, in municipalities with a divided vote")}</h3><p class="note">${mixedNote()}</p>
+    ${bmTable(U("Najveći rast izlaznosti","Largest turnout increase"),"",topTx,tCols)}
+    ${bmTable(U("Najveći rast Vučićeve liste","Largest Vučić list increase"),"",topSx,sCols)}
     ${bmTable(U("Nagli rast broja upisanih birača","Sharp rise in registered voters"),U(`Mesta na kojima je broj upisanih birača porastao između 15% i 40% od 2023. (mesta sa najmanje 100 upisanih 2023; veći skokovi nisu poređeni, vidi iznad). Takvih mesta ima ${N(upG.length)}; prikazano je do 20. Rast može biti stvaran (nova naselja, promena granica biračkog mesta), ali je i poznat znak upisivanja birača koji tu ne žive.`,`Stations where the number of registered voters rose between 15% and 40% since 2023 (stations with at least 100 registered in 2023; larger jumps are not compared, see above). There are ${N(upG.length)} such stations; up to 20 are shown. The rise may be genuine (new housing, changed station boundaries) but is also a known sign of registering voters who do not live there.`),upG.slice(0,MORE),uCols)}</div>`;
 }
 function prevHook(){
@@ -1286,6 +1292,9 @@ function viewStatistika(){
   const E=ROWS.filter(r=>r.e&&r.up>0&&r.va>0&&inc(r));
   const big=E.filter(r=>r.up>=100);
   const by=(arr,f,d)=>arr.slice().sort((a,b)=>(f(a)-f(b))*d).slice(0,MORE);
+  // opštine sa podeljenim glasanjem zauzmu vrh nekih tabela (niska izlaznost, ubedljive pobede), pa idu posebno
+  const nm=r=>!MIXED[(r.r||r).op];
+  const mixOut=U(" Bez opština sa podeljenim glasanjem (posebno ispod)."," Excluding municipalities with a divided vote (shown separately below).");
   const bins=new Array(20).fill(0);E.forEach(r=>bins[Math.min(19,Math.floor(Math.min(.9999,r.turn)*20))]++);
   const mx=Math.max(...bins);
   const med=(()=>{const a=E.map(r=>r.turn).sort((x,y)=>x-y);return a[Math.floor(a.length/2)]})();
@@ -1340,11 +1349,17 @@ function viewStatistika(){
    </div>
    <div class="grid2 block">
     ${miniTable(U("Najveća izlaznost","Highest turnout"),min100,by(big,r=>r.turn,-1),hTu,r=>P(r.turn))}
-    ${miniTable(U("Najmanja izlaznost","Lowest turnout"),min100,by(big,r=>r.turn,1),hTu,r=>P(r.turn))}
-    ${miniTable(U("Najviše nevažećih listića","Most invalid ballots"),U("Najmanje 100 listića u kutiji.","At least 100 ballots in the box."),by(E.filter(r=>r.lis>=100),r=>r.inv,-1),U("Nevažeći","Invalid"),r=>P(r.inv))}
+    ${miniTable(U("Najmanja izlaznost","Lowest turnout"),min100+mixOut,by(big.filter(nm),r=>r.turn,1),hTu,r=>P(r.turn))}
+    ${miniTable(U("Najviše nevažećih listića","Most invalid ballots"),U("Najmanje 100 listića u kutiji.","At least 100 ballots in the box.")+mixOut,by(E.filter(r=>r.lis>=100&&nm(r)),r=>r.inv,-1),U("Nevažeći","Invalid"),r=>P(r.inv))}
     ${miniTable(U("Najmanja razlika prve dve liste","Closest race between the top two"),U("Najmanje 100 važećih glasova.","At least 100 valid votes."),by(E.filter(r=>r.va>=100),r=>r.margin,1),U("Razlika","Margin"),r=>PP(r.margin))}
     ${miniTable(U("Najveća biračka mesta","Largest polling stations"),U("Po broju upisanih birača.","By number of registered voters."),by(ROWS.filter(inc),r=>r.up,-1),U("Izašlo","Voted"),r=>r.e?N(r.gl):"–")}
-    ${miniTable(U("Najubedljivija pobeda liste","Biggest wins"),U("Najmanje 100 važećih glasova; udeo prve liste.","At least 100 valid votes; share of the leading list."),by(E.filter(r=>r.va>=100),r=>r.v[r.win]/r.va,-1),hWin,r=>`${esc(LISTS[r.win].short)} ${P(r.v[r.win]/r.va,1)}`)}
+    ${miniTable(U("Najubedljivija pobeda liste","Biggest wins"),U("Najmanje 100 važećih glasova; udeo prve liste.","At least 100 valid votes; share of the leading list.")+mixOut,by(E.filter(r=>r.va>=100&&nm(r)),r=>r.v[r.win]/r.va,-1),hWin,r=>`${esc(LISTS[r.win].short)} ${P(r.v[r.win]/r.va,1)}`)}
+   </div>
+   <div class="block"><h3>${U("Isto, u opštinama sa podeljenim glasanjem","The same, in municipalities with a divided vote")}</h3><p class="note">${mixedNote()}</p></div>
+   <div class="grid2">
+    ${miniTable(U("Najmanja izlaznost","Lowest turnout"),min100,by(big.filter(r=>!nm(r)),r=>r.turn,1),hTu,r=>P(r.turn))}
+    ${miniTable(U("Najviše nevažećih listića","Most invalid ballots"),U("Najmanje 100 listića u kutiji.","At least 100 ballots in the box."),by(E.filter(r=>r.lis>=100&&!nm(r)),r=>r.inv,-1),U("Nevažeći","Invalid"),r=>P(r.inv))}
+    ${miniTable(U("Najubedljivija pobeda liste","Biggest wins"),U("Najmanje 100 važećih glasova; udeo prve liste.","At least 100 valid votes; share of the leading list."),by(E.filter(r=>r.va>=100&&!nm(r)),r=>r.v[r.win]/r.va,-1),hWin,r=>`${esc(LISTS[r.win].short)} ${P(r.v[r.win]/r.va,1)}`)}
    </div>${notesBlock()}`;
   SEC.odstupanja=()=>`
    <div class="block">${bmTable(U("Neobično visoka izlaznost i udeo prve liste","Unusually high turnout and leading-list share"),
