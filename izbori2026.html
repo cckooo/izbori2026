@@ -1552,7 +1552,8 @@ function chrome(){
     `Source: Republic Electoral Commission (RIK), results by polling station, entered up to ${esc(fmtSnap())}. List names and order (1–18) follow the RIK consolidated electoral list. Settlements and streets: decisions on polling stations (RIK); settlement names matched to the settlement list and population of the 2022 census (RZS). Provisional, unofficial presentation for analysis.`);
   $("#foot2").innerHTML=[U("Autor: Rako Smiljanić","Author: Rako Smiljanić"),
     BUILD.sajt&&U("Poslednja izmena sajta: ","Site last updated: ")+esc(fmtSnap(BUILD.sajt)),
-    BUILD.podaci&&U("Podaci sa RIK-a poslednji put povučeni: ","Data last fetched from RIK: ")+esc(fmtSnap(BUILD.podaci))].filter(Boolean).join(" · ");
+    BUILD.podaci&&U("Podaci sa RIK-a poslednji put povučeni: ","Data last fetched from RIK: ")+esc(fmtSnap(BUILD.podaci)),
+    U("Kontakt: ","Contact: ")+`<a class="keep" href="mailto:izbori26.rs@gmail.com">izbori26.rs@gmail.com</a>`].filter(Boolean).join(" · "); // keep: adresa se ne preslovljava
   locNode(document.body);
 }
 function setScript(s){
