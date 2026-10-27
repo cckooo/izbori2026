@@ -23,7 +23,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 ARGS = [a for a in sys.argv[1:] if not a.startswith("--")]
 OUT = Path(ARGS[0] if ARGS else "_site")
 SRC = Path(ARGS[1] if len(ARGS) > 1 else Path(__file__).with_name("izbori2026.html"))
-SITE_FILES = ["izbori2026.html", "podeli_sajt.py", "og.png", "ikona.png"]
+SITE_FILES = ["izbori2026.html", "podeli_sajt.py", "prerender.py", "mapa_naselja.json", "og.png", "ikona.png"]
 BOT = "izbori-bot"
 try:
     TZ = ZoneInfo("Europe/Belgrade")
