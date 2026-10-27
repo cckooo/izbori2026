@@ -1667,7 +1667,8 @@ function setScript(s){
 }
 $$("#tabs button").forEach(b=>b.onclick=()=>go(b.dataset.tab));
 // klik na naziv sajta: početna strana sa najnovijim podacima (reload proverava ima li nove verzije na serveru)
-$(".brand").onclick=e=>{e.preventDefault();history.replaceState(null,"",location.pathname+location.search);location.reload()};
+$(".brand").onclick=e=>{e.preventDefault();history.replaceState(null,"",location.pathname+location.search);
+  window.scrollTo(0,0);location.reload()}; // na vrh pre učitavanja: pregledač bi inače vratio staru poziciju skrola
 $$("#lang button").forEach(b=>b.onclick=()=>setScript(b.dataset.s));
 window.addEventListener("hashchange",()=>show(location.hash.slice(1)));
 chrome();
