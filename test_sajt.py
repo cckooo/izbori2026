@@ -19,7 +19,9 @@ FOREIGN = re.compile(r"[qwxyäáàâéèëíïóöőôúüűç]", re.I)
 
 
 def latin_leftovers(pg):
-    txt = pg.evaluate("document.body.innerText")
+    # elementi sa klasom keep (npr. e-mail adresa) se namerno ne preslovljavaju
+    txt = pg.evaluate("(()=>{let t=document.body.innerText;for(const e of document.querySelectorAll('.keep'))"
+                      "t=t.split(e.innerText).join(' ');return t})()")
     words = re.findall(r"[A-Za-zČčĆćĐđŠšŽž][A-Za-zČčĆćĐđŠšŽžÀ-ÿŐőŰű]*", txt)
     # reči sa slovima kojih nema u srpskom (npr. BLANCHARDSTOWN) sajt namerno ne preslovljava (FOREIGN u HTML-u)
     return sorted({w for w in words if not LAT_OK.match(w) and not FOREIGN.search(w)})
