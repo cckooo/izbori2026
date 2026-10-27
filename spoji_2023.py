@@ -5,7 +5,8 @@ i upisuje u izbori2026.html `const PRETHODNI={m, o, liste, fp};`:
 - m: {"opština":{"broj BM":[upisani, glasali, važeći, Vučić, Dačić]}} za spojena biračka mesta;
 - o: {"opština":[upisani, glasali, važeći, glasovi listi-naslednika redom kao `liste`]} za sva mesta iz 2023;
 - liste: indeksi listi 2026 (od 0) koje imaju naslednika iz 2023 (NASLEDNICI ispod);
-- fp: otisak prsta 2023, {"first" | indeks liste: [[polje, broj mesta], ...]}, polje = y*50 + x.
+- fp: otisak prsta 2023, {"first" | indeks liste: [[polje, broj mesta], ...]}, polje = y*50 + x;
+- fpx: isto bez inostranstva, zatvora i Kosova i Metohije.
 
 Mesto 2026. se spaja sa mestom iste opštine i istog broja iz 2023. ako je naziv mesta isti ili sličan, ili,
 kad se naziv promenio (preseljeno biračko mesto), ako se broj upisanih birača razlikuje najviše 15 %.
@@ -68,6 +69,8 @@ ops26 = {o[0] for o in data["opstine"]}
 opagg = {}
 FP_N = 50
 fp = {"first": {}, **{str(k): {} for k in NASLEDNICI}}
+fpx = {k: {} for k in fp}  # isto, bez inostranstva, zatvora i KiM (prekidač na sajtu)
+BEZ = ("Иностранство", "Заводи", "Косово")
 for a in old.values():
     op = SPOJENE_OPSTINE.get(a["opstina"].strip(), a["opstina"].strip())
     if op not in ops26:
@@ -81,17 +84,20 @@ for a in old.values():
     if up > 0 and va > 0:  # otisak prsta 2023: isto polje 2 × 2 p.p. kao na sajtu
         x = min(FP_N - 1, int(min(1, gl / up) * FP_N))
         cell = lambda v: min(FP_N - 1, int(v / va * FP_N)) * FP_N + x
-        c = cell(max(votes.values()))
-        fp["first"][c] = fp["first"].get(c, 0) + 1
-        for k, v in zip(NASLEDNICI, lv):
-            c = cell(v)
-            fp[str(k)][c] = fp[str(k)].get(c, 0) + 1
+        grids = [fp] if any(b in a["region"] for b in BEZ) else [fp, fpx]
+        for grid in grids:
+            c = cell(max(votes.values()))
+            grid["first"][c] = grid["first"].get(c, 0) + 1
+            for k, v in zip(NASLEDNICI, lv):
+                c = cell(v)
+                grid[str(k)][c] = grid[str(k)].get(c, 0) + 1
 fp = {k: [[c, n] for c, n in sorted(v.items())] for k, v in fp.items()}
+fpx = {k: [[c, n] for c, n in sorted(v.items())] for k, v in fpx.items()}
 print("Opština 2023:", len(opagg), "| liste sa naslednikom (indeks 2026 <- broj 2023):", NASLEDNICI)
 
 if "--dry-run" in sys.argv:
     sys.exit(0)
-prev = {"m": out, "o": opagg, "liste": list(NASLEDNICI), "fp": fp}
+prev = {"m": out, "o": opagg, "liste": list(NASLEDNICI), "fp": fp, "fpx": fpx}
 line = "const PRETHODNI=" + json.dumps(prev, ensure_ascii=False, separators=(",", ":")) + ";"
 html, k = re.subn(r"^const PRETHODNI=.*;(?=\r?$)", lambda _: line, html, count=1, flags=re.M)
 if k != 1:  # prvi put: nova linija odmah posle STANOVNICI
