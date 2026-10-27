@@ -1672,10 +1672,10 @@ $$("#lang button").forEach(b=>b.onclick=()=>setScript(b.dataset.s));
 window.addEventListener("hashchange",()=>show(location.hash.slice(1)));
 chrome();
 show(location.hash.slice(1)||"pregled",true);
-// brojanje poseta: GoatCounter (bez kolačića), samo na objavljenom sajtu; svaka kartica i deo (#…) je posebna stranica
+// brojanje poseta: GoatCounter (bez kolačića), samo na objavljenom sajtu (svoje posete isključiš sa #toggle-goatcounter); svaka kartica i deo (#…) je posebna stranica
 if(location.hostname==="izbori26.rs"){
   window.goatcounter={path:p=>p+location.hash};
-  const gc=document.createElement("script");gc.async=true;gc.src="https://gc.zgo.at/count.js";
+  const gc=document.createElement("script");gc.async=true;gc.src="goatcounter.js"; // kopija gc.zgo.at/count.js na našem sajtu (tuđ server ne može da ubaci kod)
   gc.dataset.goatcounter="https://izbori26.goatcounter.com/count";document.head.appendChild(gc);
   window.addEventListener("hashchange",()=>{if(window.goatcounter.count)window.goatcounter.count({path:location.pathname+location.hash})});
 }

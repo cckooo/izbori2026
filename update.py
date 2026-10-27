@@ -179,7 +179,7 @@ def main():
     old = json.loads(m.group(1))
     new = build_data(raw)
     check(new, old)
-    line = "const DATA=" + json.dumps(new, ensure_ascii=False, separators=(",", ":")) + ";"
+    line = "const DATA=" + json.dumps(new, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c") + ";"  # `<` u podacima ne sme da zatvori <script>
     if line == m.group(0):
         print(f"Nema promena (presek {new['snapshot']}).")
         return

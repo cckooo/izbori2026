@@ -675,11 +675,11 @@ def main():
 
     if "--html" in sys.argv:
         html = HTML.read_bytes().decode("utf-8")
-        line = "const NASELJA=" + json.dumps(naselja, ensure_ascii=False, separators=(",", ":")) + ";"
+        line = "const NASELJA=" + json.dumps(naselja, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c") + ";"  # `<` u podacima ne sme da zatvori <script>
         html, n = re.subn(r"^const NASELJA=.*;(?=\r?$)", lambda _: line, html, count=1, flags=re.M)
         if n != 1:
             raise SystemExit("Nema linije `const NASELJA=...;` u HTML-u")
-        line2 = "const STANOVNICI=" + json.dumps(stanovnici, ensure_ascii=False, separators=(",", ":")) + ";"
+        line2 = "const STANOVNICI=" + json.dumps(stanovnici, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c") + ";"  # `<` u podacima ne sme da zatvori <script>
         html, n = re.subn(r"^const STANOVNICI=.*;(?=\r?$)", lambda _: line2, html, count=1, flags=re.M)
         if n != 1:  # prvi put: nova linija odmah posle NASELJA
             html = re.sub(r"^(const NASELJA=.*;)(\r?\n)", lambda m: m.group(1) + m.group(2) + line2 + m.group(2),

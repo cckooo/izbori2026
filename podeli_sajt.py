@@ -23,7 +23,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 ARGS = [a for a in sys.argv[1:] if not a.startswith("--")]
 OUT = Path(ARGS[0] if ARGS else "_site")
 SRC = Path(ARGS[1] if len(ARGS) > 1 else Path(__file__).with_name("izbori2026.html"))
-SITE_FILES = ["izbori2026.html", "podeli_sajt.py", "prerender.py", "mapa_naselja.json", "og.png", "ikona.png"]
+SITE_FILES = ["izbori2026.html", "podeli_sajt.py", "prerender.py", "mapa_naselja.json", "goatcounter.js", "og.png", "ikona.png"]
 BOT = "izbori-bot"
 try:
     TZ = ZoneInfo("Europe/Belgrade")
@@ -59,7 +59,7 @@ for op, mesta in naselja.items():
         if v[1]:
             ulice.setdefault(op, {})[bm] = v[1]
             v[1] = 1
-line = "const NASELJA=" + json.dumps(naselja, ensure_ascii=False, separators=(",", ":")) + ";"
+line = "const NASELJA=" + json.dumps(naselja, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c") + ";"  # `<` u podacima ne sme da zatvori <script>
 html = html[:m.start()] + line + html[m.end():]
 build = {"sajt": site_changed()}
 if "--podaci" in sys.argv:
@@ -79,7 +79,7 @@ data = json.loads(m.group(1))
 for r in data["rows"]:
     if r[9]:
         r[9] = 0
-line = "const DATA=" + json.dumps(data, ensure_ascii=False, separators=(",", ":")) + ";"
+line = "const DATA=" + json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c") + ";"  # `<` u podacima ne sme da zatvori <script>
 html = html[:m.start()] + line + html[m.end():]
 for const, fname in (("PRETHODNI", "prethodni.json"), ("MAPA", "mapa.json")):
     m = re.search(rf"^const {const}=(.*);(?=\r?$)", html, re.M)
@@ -91,10 +91,13 @@ blocks = []
 for const in ("DATA", "NASELJA", "STANOVNICI"):
     m = re.search(rf"^const {const}=(.*);(?=\r?$)", html, re.M)
     if m:
-        blocks.append(f'<script type="application/json" id="j{const}">' + m.group(1).replace("</", "<\\/") + "</script>")
+        blocks.append(f'<script type="application/json" id="j{const}">' + m.group(1).replace("<", "\\u003c") + "</script>")
         html = html[:m.start()] + f'const {const}=JSON.parse(document.getElementById("j{const}").textContent);' + html[m.end():]
 i = html.index("<script>\nconst DATA=")
 html = html[:i] + "\n".join(blocks) + "\n" + html[i:]
+gc = SRC.with_name("goatcounter.js")  # skripta za brojanje poseta, služi se sa našeg sajta
+if gc.exists():
+    (OUT / gc.name).write_bytes(gc.read_bytes())
 nas_map = SRC.with_name("mapa_naselja.json")  # granice naselja (mapa_naselja.py): po fajl za opštinu, preuzima se kad se otvori
 if nas_map.exists():
     nd = OUT / "naselja"

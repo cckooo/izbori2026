@@ -137,7 +137,7 @@ def main():
             sw = 300 / ((max(p[0] for p in pts) * k) - ox)
             res["ins"][key] = {"w": 300, "h": round((max(-p[1] for p in pts) - oy) * sw),
                                "o": {n: path(G[pick[n][0]], sw, ox, oy, TOL) for n in ins_ops}}
-    line = "const MAPA=" + json.dumps(res, ensure_ascii=False, separators=(",", ":")) + ";"
+    line = "const MAPA=" + json.dumps(res, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c") + ";"  # `<` u podacima ne sme da zatvori <script>
     html, n = re.subn(r"^const MAPA=.*;(?=\r?$)", lambda _: line, html, count=1, flags=re.M)
     if n != 1:
         html, n = re.subn(r"^(const PRETHODNI=.*;)(\r?\n)", lambda m: m.group(1) + m.group(2) + line + m.group(2), html, count=1, flags=re.M)

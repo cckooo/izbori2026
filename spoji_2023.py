@@ -98,7 +98,7 @@ print("Opština 2023:", len(opagg), "| liste sa naslednikom (indeks 2026 <- broj
 if "--dry-run" in sys.argv:
     sys.exit(0)
 prev = {"m": out, "o": opagg, "liste": list(NASLEDNICI), "fp": fp, "fpx": fpx}
-line = "const PRETHODNI=" + json.dumps(prev, ensure_ascii=False, separators=(",", ":")) + ";"
+line = "const PRETHODNI=" + json.dumps(prev, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c") + ";"  # `<` u podacima ne sme da zatvori <script>
 html, k = re.subn(r"^const PRETHODNI=.*;(?=\r?$)", lambda _: line, html, count=1, flags=re.M)
 if k != 1:  # prvi put: nova linija odmah posle STANOVNICI
     html, k = re.subn(r"^(const STANOVNICI=.*;)(\r?\n)", lambda m: m.group(1) + m.group(2) + line + m.group(2), html, count=1, flags=re.M)
