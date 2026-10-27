@@ -1,11 +1,11 @@
 IZVEŠTAJ O SPAJANJU ODLUKA O BIRAČKIM MESTIMA SA REZULTATIMA
 Ukupno biračkih mesta u CSV-u: 8392
-Spojeno (naselja upisana): 8385 (99.9%), od toga samo po broju uz potvrđenu numeraciju: 154, po nazivu između potvrđenih suseda (broj nije pročitan): 92, ručno prepisano sa strane odluke (rucno_naselja.csv): 201
+Spojeno (naselja upisana): 8387 (99.9%), od toga samo po broju uz potvrđenu numeraciju: 154, po nazivu između potvrđenih suseda (broj nije pročitan): 92, ručno prepisano sa strane odluke (rucno_naselja.csv): 203
 Opština bez odluke ili bez pročitanih redova: 0 mesta
-Mesto nije nađeno u odluci (OCR nije pročitao broj ili red): 4
-Odbijeno zbog nepoklapanja naziva: 3
+Mesto nije nađeno u odluci (OCR nije pročitao broj ili red): 3
+Odbijeno zbog nepoklapanja naziva: 2
 Provera položaja u odluci (red nije između susednih mesta): 5 slučajeva, od toga ostavljeno prazno: 4
-Naselje prema spisku RZS (Popis 2022): potvrđeno 7176, od toga OCR ispravki 77; gradsko naselje opštine 1017; nepotvrđeno 11; bez spiska (Kosovo, inostranstvo, zavodi) 181
+Naselje prema spisku RZS (Popis 2022): potvrđeno 7178, od toga OCR ispravki 77; gradsko naselje opštine 1017; nepotvrđeno 11; bez spiska (Kosovo, inostranstvo, zavodi) 181
 
 DOKUMENTI (način čitanja, opštine, broj pročitanih mesta):
   ocr  Ада / Odluka o određivanju biračkih mesta za izbor narodnih poslanika raspisanih za 25 oktobar 2026..pdf: Ада; zapisa 29, sa brojem 29
@@ -360,9 +360,8 @@ PO OPŠTINAMA:
     BM 38: spojeno po broju (numeracija potvrđena 95%), naziv se razlikuje: odluka „МОМ НУПТАНЕ РАДИЧЕВИЋ“ / CSV „ЦДОМ КУЛТУРЕ“
 [36/36] Врбас
     BM 2: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „"ОВА = БДАРЕ“ / CSV „НОВА АМБУЛАНТА "СТАРИ ВРБАС"“
-[30/31] Жабаљ
+[31/31] Жабаљ
     BM 17: spojeno po broju (numeracija potvrđena 97%), naziv se razlikuje: odluka „“ / CSV „СШ "22.ОКТОБАР"“
-    BM 21 (ОШ "ЂУРА ЈАКШИЋ" - СТАРА ЗГРАДА): nije nađeno u odluci
 [220/221] Град Нови Сад
     BM 35 (МЗ "ЈУЖНИ ТЕЛЕП"): odbijeno, naziv u odluci „АТИЛА"“ (sličnost 24, potvrda numeracije 94%)
     BM 111: spojeno po broju (numeracija potvrđena 94%), naziv se razlikuje: odluka „ОШВУВАЈАЛИЋ“ / CSV „ОШ "ЂУРА ЈАКШИЋ"“
@@ -437,8 +436,7 @@ PO OPŠTINAMA:
 [28/28] Ариље
     BM 1: spojeno po broju (numeracija potvrđena 85%), naziv se razlikuje: odluka „“ / CSV „СПОРТСКА ХАЛА“
     BM 2: spojeno po broju (numeracija potvrđena 85%), naziv se razlikuje: odluka „ЗАНАТСКИ ДОМ“ / CSV „СОКОЛСКИ ДОМ“
-[51/52] Бајина Башта
-    BM 19 (НОВА ШКОЛА): odbijeno, naziv u odluci „АМБУЛАНТА-ВЕЖАЊА“ (sličnost 32, potvrda numeracije 98%)
+[52/52] Бајина Башта
 [29/29] Косјерић
     BM 22: spojeno po broju (numeracija potvrđena 93%), naziv se razlikuje: odluka „“ / CSV „КУЋА РАДОВАНОВИЋ ДРАГИШЕ“
     BM 25: spojeno po broju (numeracija potvrđena 93%), naziv se razlikuje: odluka „КЈП ходник и канцеларија“ / CSV „ПРОСТОРИЈЕ КЈП "ЕЛАН"“
