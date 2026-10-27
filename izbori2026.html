@@ -1496,7 +1496,7 @@ function drawOpMap(i,m){
   const fill=v=>{if(!v)return ["var(--bar-bg)",1];const a=v.a;
     if(nasMode==="win"){const s=a.v[a.win]/a.va;return [LISTS[a.win].c,.35+.65*Math.min(1,Math.max(0,(s-.3)/.5))]}
     const x=nasMode==="turn"?a.turn:sh(a);return [nasMode==="turn"?"var(--accent)":LISTS[L].c,.12+.88*Math.max(0,(x-mn)/((mx-mn)||1))]};
-  const tip=(n,v)=>`${T(n)}: `+(!v?U("nema rezultata","no results"):nasMode==="win"?`${LISTS[v.a.win].short} ${P(v.a.v[v.a.win]/v.a.va)}`:nasMode==="turn"?`${U("izlaznost","turnout")} ${P(v.a.turn)}`:`${LISTS[L].short} ${PL(sh(v.a),L)}`)+` (${N(v.rs.length||0)} ${U("bir. mesta","stations")})`;
+  const tip=(n,v)=>`${T(n)}: `+(!v?U("nema rezultata","no results"):nasMode==="win"?`${LISTS[v.a.win].short} ${P(v.a.v[v.a.win]/v.a.va)}`:nasMode==="turn"?`${U("izlaznost","turnout")} ${P(v.a.turn)}`:`${LISTS[L].short} ${PL(sh(v.a),L)}`)+(v?` (${N(v.rs.length)} ${U("bir. mesta","stations")})`:""); // naselje sa granicom, ali bez biračkog mesta
   const paths=Object.entries(m.n).map(([n,d])=>{const v=vals.get(n),[c,o]=fill(v);
     return `<path d="${d}" data-n="${esc(n)}" style="fill:${c};fill-opacity:${o.toFixed(2)};stroke:var(--surface);stroke-width:.8"><title>${esc(tip(n,v))}</title></path>`}).join("");
   const noP=[...new Set(rows.flatMap(r=>(r.nsl||"").split(/, | и /)).filter(n=>n&&!m.n[n]))];
