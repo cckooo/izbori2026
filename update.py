@@ -21,12 +21,19 @@ import json
 import re
 import sys
 import time
+import urllib.parse
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 URL = "https://www.rik.parlament.gov.rs/export-results/680072/2"
+# Linkovi zapisnika u CSV-u nemaju dva broja iz prave putanje (…/election_results/815/417/<hash>/…pdf),
+# pa vraćaju 404. Pravu putanju daje get_results za svako biračko mesto; čuvamo je u kešu.
+API = "https://www.rik.parlament.gov.rs/get_results/"
 HERE = Path(__file__).resolve().parent
 HTML = HERE / "izbori2026.html"
+CACHE = HERE / "zapisnici_putanje.json"
+MAX_LOOKUPS = 600  # najviše upita po pokretanju (ostatak u sledećem)
 RIK_BASE = "election_results/"
 NLISTS = 18
 NUM_COLS = ["upisani_biraci", "glasali_biraci", "vazeci_glasovi", "nevazeci_listici"]
@@ -47,6 +54,51 @@ def fetch(url: str, tries: int = 4) -> bytes:
             if i == tries - 1:
                 raise
             time.sleep(5 * (i + 1))
+
+
+def station_paths(uid: str) -> list:
+    """Sve putanje PDF-ova (relativno na election_results/) koje RIK prikazuje za biračko mesto."""
+    body = urllib.parse.urlencode({"should_update_pies": 1, "type": 2, "election_round": 680072,
+                                   "region": 0, "municipality": 0, "election_station": uid}).encode()
+    req = urllib.request.Request(API, data=body, headers={
+        "User-Agent": "Mozilla/5.0 (izbori2026 update.py)", "X-Requested-With": "XMLHttpRequest",
+        "Content-Type": "application/x-www-form-urlencoded"})
+    with urllib.request.urlopen(req, timeout=60) as r:
+        t = r.read().decode("utf-8")
+    try:
+        t = json.dumps(json.loads(t), ensure_ascii=False)  # П, \/ -> obični znakovi
+    except ValueError:
+        pass
+    t = t.replace("\\/", "/")
+    return re.findall(r"election_results/(\d+/\d+/[^\"'<>\n]+?\.pdf)", t)
+
+
+def fix_links(rows: list, uids: list):
+    """Dopuni putanje zapisnika (r[9]) pravim prefiksom iz keša ili sa RIK-a."""
+    cache = json.loads(CACHE.read_text(encoding="utf-8")) if CACHE.exists() else {}
+    todo = [(r, u) for r, u in zip(rows, uids) if r[9] and not r[9].startswith("!") and r[9] not in cache]
+    done = 0
+
+    def look(item):
+        r, u = item
+        try:
+            return item, station_paths(u)
+        except Exception as e:  # noqa
+            print(f"Upozorenje: putanja zapisnika za BM {u}: {e}", file=sys.stderr)
+            return item, None
+    with ThreadPoolExecutor(4) as ex:
+        for (r, u), paths in ex.map(look, todo[:MAX_LOOKUPS]):
+            if paths:
+                for p in paths:
+                    cache[p.split("/", 2)[2]] = p
+                done += 1
+    for r in rows:
+        if r[9] in cache:
+            r[9] = cache[r[9]]
+    if done:
+        CACHE.write_text(json.dumps(cache, ensure_ascii=False, sort_keys=True, indent=0), encoding="utf-8")
+    left = sum(1 for r in rows if r[9] and not r[9].startswith("!") and not re.match(r"\d+/\d+/", r[9]))
+    print(f"Putanje zapisnika: {done} novih sa RIK-a, bez prave putanje još {left}")
 
 
 def build_data(raw: bytes) -> dict:
@@ -78,6 +130,7 @@ def build_data(raw: bytes) -> dict:
         votes = [int(r[f"lista_{i}"] or 0) for i in range(1, NLISTS + 1)]
         out.append([ok_idx[ok], op_idx[op], int(r["bm_broj"]), r["bm_naziv"], *nums,
                     1 if uneto else 0, link, *votes])
+    fix_links(out, [r["bm_uid"] for r in rows])
     times = [r["vreme_unosa_rezultata"] for r in rows if r["vreme_unosa_rezultata"].strip() not in ("-", "")]
     return {"okruzi": okruzi, "opstine": opstine, "rows": out, "snapshot": max(times) if times else ""}
 

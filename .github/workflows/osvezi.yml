@@ -34,7 +34,7 @@ jobs:
           if git diff --quiet izbori2026.html; then echo "Nema promena"; exit 0; fi
           git config user.name "izbori-bot"
           git config user.email "izbori-bot@users.noreply.github.com"
-          git add izbori2026.html
+          git add izbori2026.html zapisnici_putanje.json
           git commit -m "Rezultati: $(grep -o '"snapshot":"[^"]*"' izbori2026.html | cut -d'"' -f4)"
           git push
       - name: Pripremi sajt
