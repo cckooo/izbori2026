@@ -34,24 +34,9 @@ JS_OP = r"""i => {
   const g=new Map();for(const r of rows){const k=r.nsl||"";if(!g.has(k))g.set(k,[]);g.get(k).push(r)}
   const nas=[...g].map(([k,rs])=>{const x=agg(rs);return {name:k?T(k):"(naselje nije utvrđeno)",n:rs.length,up:x.up,
     turn:x.turn,win:x.va?x.win:-1,sh:x.va?x.v[x.win]/x.va:null}}).sort((p,q)=>q.up-p.up);
-  // sažetak u rečenicama (jedinstven tekst za svaku opštinu); bez promene padeža naziva („u gradu Čačak“)
+  // zbirni tekst: ista funkcija kao u interaktivnom prikazu (opSum u izbori2026.html)
   const bareC=o.full.replace(/^(Градска општина|Град|Општина) /,""),bare=T(bareC); // „Чачак“ bez „Град“
-  const loc=/^Градска општина /.test(o.full)?"u gradskoj opštini "+bare:/^Град /.test(o.full)?"u gradu "+bare:
-    /Иностранство/.test(o.full)?"u inostranstvu":/Заводи/.test(o.full)?"u zavodima za izvršenje krivičnih sankcija":"u opštini "+bare;
-  let sum="";
-  if(a.va){
-    const r=a.rank,Lq=k=>`„${LISTS[k].short}“ (${P(a.v[k]/a.va)})`;
-    sum=`Na parlamentarnim izborima 25. oktobra 2026. ${loc} najviše glasova dobila je lista ${Lq(r[0])}`+(a.v[r[1]]?`, ispred liste ${Lq(r[1])}`:"")+(a.v[r[2]]?`, a treća je ${Lq(r[2])}`:"")+
-      `. Izlaznost je bila ${P(a.turn)} (glasalo je ${N(a.gl)} od ${N(a.upd)} upisanih birača)`;
-    const c=cmp23([i],a);
-    if(c){const d=c.t1-c.t0;sum+=Math.abs(d)>=.005?`, što je ${PP(Math.abs(d))} ${d>0?"više":"manje"} nego na izborima 2023. (${P(c.t0)})`:", približno kao na izborima 2023.";
-      sum+=`. Lista Aleksandra Vučića dobila je ${P(c.v1)} glasova, prema ${P(c.v0)} na izborima 2023`}
-    sum+=".";
-    const w=new Map();for(const e of nas)if(e.name&&e.win>=0&&e.name!=="(naselje nije utvrđeno)")w.set(e.win,(w.get(e.win)||0)+1);
-    const nn=[...w.values()].reduce((s,x)=>s+x,0),ws=[...w].sort((x,y)=>y[1]-x[1]);
-    if(nn>1&&!/Иностранство|Заводи/.test(o.full))sum+=` Od ${N(nn)} naselja, lista „${LISTS[ws[0][0]].short}“ je bila prva u ${N(ws[0][1])}`+(ws[1]?`, a „${LISTS[ws[1][0]].short}“ u ${N(ws[1][1])}`:"")+".";
-    if(a.nd<a.n)sum+=` Rezultati su privremeni: obrađeno je ${N(a.nd)} od ${N(a.n)} biračkih mesta.`;
-  }
+  const sum=opSum(i);
   return {slug:opSlug(i),name:T(o.name),full:T(o.full),bare,bareC,nameC:o.name,fullC:o.full,okrug:T(OK[o.ok].name),status:statusLine(a),sum,sumC:cyr(sum),
     rows:listRows(a),nas:nas.map(e=>({...e,lst:e.win>=0?LISTS[e.win].short:"",c:e.win>=0?LISTS[e.win].c:"",
       shs:e.sh==null?"–":P(e.sh),ts:e.turn==null?"–":P(e.turn),ups:N(e.up)})),
