@@ -245,6 +245,24 @@ def official(name, cands, cut=88):
     return None
 
 
+def village_hint(adresa, area, op, ref):
+    """Selo iz adrese ili područja kad je mesto pripisano sedištu opštine: "МЗ Раковац у улицама …",
+    "БАТАЛАГЕ КАРАЂОРЂЕВА БР. 3", "Ужички пут 16, Кашице". Poštanski broj + ime (31263 Варда) se ne računa,
+    jer pošta pokriva više sela. Vraća zvanično ime samo ako je pogodak jednoznačan."""
+    cands = ref.get(op_key(op)) or []
+    m = re.search(r"\bМЗ\s+[„\"]?([А-ЯЂЈЉЊЋЏ][\wЂЈЉЊЋЏђјљњћџ ]{2,30}?)[“\"]?\s+(?:у\s+улиц|улиц|:)", area, re.I)
+    if m:
+        hit = official(m.group(1).strip(), cands)
+        if hit:
+            return hit
+    a = re.sub(r"\b\d{5}\s+[^\d,]+", " ", adresa)  # poštanski broj i ime pošte
+    a = " " + asc(a) + " "
+    hits = {c[1] for c in cands if len(c[1]) > 3 and re.search(rf"(?<![\w-]){re.escape(asc(c[1]))}(?![\w-])", a)}
+    # "Горња Љубовиђа" sadrži i "Љубовиђа": zadržavamo najduže
+    hits = {h for h in hits if not any(h != o and asc(h) in asc(o) for o in hits)}
+    return hits.pop() if len(hits) == 1 else None
+
+
 def canon_naselje(nas, op, ref, stats, area=""):
     """Ime naselja iz odluke -> zvanično ime iz popisa (ili isto, ako se ne može potvrditi)."""
     cands = ref.get(op_key(op))
@@ -596,6 +614,14 @@ def main():
             src, r, s, how = acc[k]
             nas, ul = split_area(r["naselja"], r["adresa"], op)
             nas = canon_naselje(nas, op, ref, stats, r["naselja"])
+            # mesto pripisano sedištu opštine (ili gradskom naselju), a adresa ili MZ kaže drugo selo
+            seat = {c[1] for c in ref.get(op_key(op)) or [] if c[2] or asc(c[1]) == asc(re.sub(
+                r"^(Градска општина|Општина|Град)\s+|\s*\(.*\)$", "", op))}
+            if not nas or nas in seat:
+                hint = village_hint(r["adresa"], r["naselja"], op, ref)
+                if hint and hint not in seat:
+                    nas = hint
+                    stats["naselje_iz_adrese"] += 1
             naselja.setdefault(op, {})[str(k)] = [nas, ul]
             detalji.append({"opstina": op, "bm": k, "csv_naziv": nm, "naziv": r["naziv"], "slicnost": round(s),
                             "izvor": src.as_posix(), "strana": r["str"], "naselje": nas, "naselja": r["naselja"],
