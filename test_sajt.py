@@ -14,13 +14,14 @@ HTML = Path(sys.argv[1] if len(sys.argv) > 1 else Path(__file__).with_name("izbo
 SHOTS = Path(sys.argv[2]) if len(sys.argv) > 2 else None
 TABS = ["pregled", "mapa", "liste", "okruzi", "opstine", "mesta", "statistika"]
 # latinične reči koje smeju da ostanu u ćiriličnom prikazu (nesrpska imena, oznake)
-LAT_OK = re.compile(r"^(PDF|Lat|EN|Vajdasági|Magyar|Szövetség|Pásztor|Bálint|Shqiptar|[A-Za-z]{1,2})$")
+LAT_OK = re.compile(r"^(PDF|CSV|Lat|EN|Vajdasági|Magyar|Szövetség|Pásztor|Bálint|Shqiptar|[A-Za-z]{1,2})$")
 FOREIGN = re.compile(r"[qwxyäáàâéèëíïóöőôúüűç]", re.I)
 
 
 def latin_leftovers(pg):
     # elementi sa klasom keep (npr. e-mail adresa) se namerno ne preslovljavaju
-    txt = pg.evaluate("(()=>{let t=document.body.innerText;for(const e of document.querySelectorAll('.keep'))"
+    # duži tekstovi prvo (npr. e-mail pre samog naziva sajta, koji je njegov deo)
+    txt = pg.evaluate("(()=>{let t=document.body.innerText;for(const e of [...document.querySelectorAll('.keep')].sort((a,b)=>b.innerText.length-a.innerText.length))"
                       "t=t.split(e.innerText).join(' ');return t})()")
     words = re.findall(r"[A-Za-zČčĆćĐđŠšŽž][A-Za-zČčĆćĐđŠšŽžÀ-ÿŐőŰű]*", txt)
     # reči sa slovima kojih nema u srpskom (npr. BLANCHARDSTOWN) sajt namerno ne preslovljava (FOREIGN u HTML-u)
@@ -51,7 +52,7 @@ def run(p, width, height, mobile):
                     info.setdefault("latinica_u_cyr", {})[t] = left[:15]
         # podmeniji: delovi Statistike, profila liste i izabrane opštine
         subs = [f"statistika-{s}" for s in pg.evaluate("STAT_SUB.map(x => x[0])")] + \
-               [f"lista-3-{s}" for s in pg.evaluate("LSUB.map(x => x[0])")]
+               [f"lista-3-{s}" for s in pg.evaluate("LSUB.map(x => x[0])")] + ["metodologija"]
         for h in subs:
             pg.evaluate(f"go('{h}')")
             pg.wait_for_timeout(350)

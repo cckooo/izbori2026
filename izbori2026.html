@@ -238,6 +238,7 @@ td.nas details[open] summary{display:none}
    <noscript><p>Za prikaz rezultata potreban je JavaScript.</p></noscript>
   </section>
   <section id="mapa" hidden></section>
+  <section id="metodologija" hidden></section>
   <section id="liste" hidden></section>
   <section id="okruzi" hidden></section>
   <section id="opstine" hidden></section>
@@ -1497,7 +1498,7 @@ function viewMapa(){
    <div class="ctl"><label>${U("Prikaz","Show")}<select id="mapMode">${modes}</select></label>${mapMode==="share"?`<label>${U("Lista","List")}<select id="mapList">${lists}</select></label>`:""}</div>
    <div class="lgd maplgd">${legend}</div>
    <div class="mapwrap"><svg class="mapsvg" viewBox="0 0 ${MAP.w} ${MAP.h}" role="img" aria-label="${U("Mapa Srbije po opštinama","Map of Serbia by municipality")}">${bg}${mapPaths(MAP.o,vals,1)}</svg><div class="mapside">${ins}<p id="mapInfo" class="note" style="min-height:2.6em"></p></div></div>
-   <p class="note">${U("Granice opština: © OpenStreetMap saradnici (ODbL), uprošćeno. Udeli su u važećim glasovima, samo za mesta sa unetim rezultatom.","Municipal boundaries: © OpenStreetMap contributors (ODbL), simplified. Shares are of valid votes, counted stations only.")}</p>`;
+   <p class="note">${U("Granice opština: © <span class='keep'>OpenStreetMap</span> saradnici (<span class='keep'>ODbL</span>), uprošćeno. Udeli su u važećim glasovima, samo za mesta sa unetim rezultatom.","Municipal boundaries: © OpenStreetMap contributors (ODbL), simplified. Shares are of valid votes, counted stations only.")}</p>`;
   $("#mapMode").onchange=e=>{mapMode=e.target.value;viewMapa()};
   if($("#mapList"))$("#mapList").onchange=e=>{mapList=+e.target.value;viewMapa()};
   $$("path[data-op]",host).forEach(p=>{
@@ -1541,7 +1542,7 @@ function drawOpMap(i,m){
     <div class="ctl"><label>${U("Prikaz","Show")}<select id="nmMode">${modes}</select></label>${nasMode==="share"?`<label>${U("Lista","List")}<select id="nmList">${LISTS.map((l,k)=>`<option value="${k}" ${k===L?"selected":""}>${l.n}. ${esc(l.short)}</option>`).join("")}</select></label>`:""}</div>
     <div class="lgd maplgd">${legend}</div>
     <div class="mapwrap"><svg class="mapsvg" viewBox="0 0 ${m.w} ${m.h}" role="img" aria-label="${U("Mapa naselja","Settlement map")}" style="max-width:520px">${(()=>{const v=rest&&vals.get(rest),[c,o]=fill(v);return `<path d="${m.o}" ${rest?`data-n="${esc(rest)}"`:""} style="fill:${rest?c:"var(--bar-bg)"};fill-opacity:${rest?o.toFixed(2):1};stroke:var(--line)">${rest?`<title>${esc(tip(rest,v))}</title>`:""}</path>`})()}${paths}</svg><p id="nmInfo" class="note" style="flex:1 1 200px;min-height:2.6em"></p></div>
-    <p class="note">${U(`Klik na naselje otvara njegova biračka mesta. Gradsko naselje sa više biračkih mesta je jedno polje, jer granice područja biračkih mesta nisu javne.${noPoly?` Bez granice na mapi: ${N(noPoly)} naselja.`:""} Granice: © OpenStreetMap saradnici (ODbL).`,
+    <p class="note">${U(`Klik na naselje otvara njegova biračka mesta. Gradsko naselje sa više biračkih mesta je jedno polje, jer granice područja biračkih mesta nisu javne.${noPoly?` Bez granice na mapi: ${N(noPoly)} naselja.`:""} Granice: © <span class='keep'>OpenStreetMap</span> saradnici (<span class='keep'>ODbL</span>).`,
       `Click a settlement to see its polling stations. An urban settlement with many stations is a single area, as polling-station area boundaries are not public.${noPoly?` Settlements without a boundary: ${N(noPoly)}.`:""} Boundaries: © OpenStreetMap contributors (ODbL).`)}</p>`;
   locNode(host);
   $("#nmMode").onchange=e=>{nasMode=e.target.value;drawOpMap(i,m)};
@@ -1576,8 +1577,54 @@ document.addEventListener("click",e=>{const a=e.target.closest("a[data-pdf]");if
   e.preventDefault();const w=window.open("","_blank");loadLazy("zapisnici").then(()=>{if(r.url&&w)w.location=encodeURI(r.url);else if(w)w.close()})},true);
 // spisak zapisnika počinje da se preuzima čim prst ili miš dodirne link, pa je obično stigao pre samog klika
 document.addEventListener("pointerdown",e=>{if(e.target.closest("a[data-pdf]"))loadLazy("zapisnici")},true);
-/* ---------- Navigacija i jezik ---------- */
-const VIEWS={pregled:viewPregled,mapa:viewMapa,liste:viewListe,okruzi:viewOkruzi,opstine:viewOpstine,mesta:viewMesta,statistika:viewStatistika};
+/* ---------- O sajtu i metodologija (#metodologija; link u podnožju) ---------- */
+function viewMetodologija(){
+  const sec=(h,ps)=>`<div class="block"><h3>${h}</h3>${ps.map(p=>`<p>${p}</p>`).join("")}</div>`;
+  const mnl=[...MANJINSKE].sort((a,b)=>a-b).map(i=>LISTS[i].n).join(", ");
+  $("#metodologija").innerHTML=`<h2>${U("O sajtu i metodologija","About and methodology")}</h2>
+   <p>${U("<span class='keep'>izbori26.rs</span> je nezavisan, nezvaničan prikaz rezultata parlamentarnih izbora od 25. oktobra 2026. po biračkim mestima, napravljen radi lakše analize. Sajt nije povezan sa Republičkom izbornom komisijom (RIK) ni sa jednom strankom ili listom.",
+     "Izbori26.rs is an independent, unofficial presentation of the results of the 25 October 2026 parliamentary election by polling station, made to make analysis easier. It is not affiliated with the Republic Electoral Commission (RIK) or with any party or list.")}</p>
+   ${sec(U("Izvor podataka","Data source"),[
+     U(`Rezultati su iz CSV fajla koji RIK objavljuje na svom sajtu (rezultati po biračkim mestima). Sajt ga preuzima automatski na svakih 15 minuta; vreme poslednjeg unosa je u uvodu na Pregledu, a vreme poslednjeg preuzimanja u podnožju. Rezultati su privremeni dok RIK ne unese sva mesta i ne objavi konačne rezultate.`,
+       `Results come from the CSV file RIK publishes on its website (results by polling station). The site downloads it automatically every 15 minutes; the time of the latest entry is in the Overview introduction and the time of the latest download in the footer. Results are provisional until RIK enters all stations and publishes final results.`),
+     U(`Uz svako biračko mesto je link na zapisnik o radu biračkog odbora (PDF) i, gde postoji, na rešenje o ispravljanju zapisnika, sa sajta RIK-a, pa se svaki broj može proveriti.`,
+       `Each polling station links to the polling board record (PDF) and, where it exists, to the decision correcting the record, on the RIK website, so every figure can be checked.`)])}
+   ${sec(U("Kako se računa","How figures are calculated"),[
+     U(`Udeo liste je udeo u važećim glasovima. Izlaznost je broj birača koji su glasali podeljen brojem upisanih, i računa se samo na mestima sa unetim rezultatom. Mesta bez unetog rezultata se ne uračunavaju ni u jedan prosek.`,
+       `A list's share is its share of valid votes. Turnout is the number of voters who voted divided by registered voters, counted only at stations with entered results. Stations without results are left out of all averages.`),
+     U(`Raspodela mandata je procena: 250 mandata metodom najvećeg količnika (D'Ont), cenzus 3% birača koji su glasali; liste nacionalnih manjina učestvuju i ispod cenzusa, uz količnike uvećane za 35%. Status manjinske liste (liste ${mnl}) je preuzet iz izveštaja medija o rešenjima RIK-a. Zvaničnu raspodelu utvrđuje RIK.`,
+       `The seat distribution is an estimate: 250 seats by the highest-quotient (D'Hondt) method, threshold 3% of voters who voted; national minority lists take part below the threshold with quotients increased by 35%. Minority status (lists ${mnl}) is taken from media reports of RIK decisions. RIK sets the official distribution.`)])}
+   ${sec(U("Naselja i ulice","Settlements and streets"),[
+     U(`Naselja i ulice po biračkim mestima su pročitani iz odluka opštinskih izbornih komisija o određivanju biračkih mesta (mnoge su skenirani dokumenti, pa je korišćeno automatsko čitanje teksta). Nazivi naselja su usklađeni sa spiskom naselja i brojem stanovnika iz Popisa 2022 (RZS). Moguće su sitne greške u nazivima i kućnim brojevima; gde mesto nije moglo sigurno da se poveže, naselje je ostavljeno prazno.`,
+       `Settlements and streets per polling station were read from the municipal electoral commissions' decisions on polling stations (many are scanned documents, so automatic text recognition was used). Settlement names were matched to the settlement list and population of the 2022 census (RZS). Minor errors in names and house numbers are possible; where a station could not be matched reliably, the settlement is left blank.`)])}
+   ${sec(U("Izdvojeni slučajevi i provere","Outliers and checks"),[
+     U(`Tabele „najjači“, „odstupanja“ i slične su spisak za proveru, a ne dokaz nepravilnosti: zatvori, bolnice, domovi za stare i naselja sa drugačijim sastavom stanovništva legitimno glasaju drugačije od okoline.`,
+       `Tables of “strongest”, “outliers” and the like are lists for checking, not evidence of irregularities: prisons, hospitals, care homes and settlements with a different population legitimately vote differently from their surroundings.`),
+     U(`Odstupanje od opštine: udeo liste na mestu poredi se sa udelom u ostatku iste opštine (bez tog mesta), a redosled uzima u obzir veličinu mesta i uobičajeno rasipanje među mestima, da mala mesta sa slučajnim odstupanjem ne izađu na vrh. „Neobično visoka izlaznost i udeo prve liste“ znači da su oba bar 10 procentnih poena iznad ostatka opštine.`,
+       `Deviation from the municipality: a list's share at a station is compared with its share in the rest of the same municipality (excluding the station); the ranking accounts for station size and normal spread between stations, so small stations with random swings do not rise to the top. “Unusually high turnout and leading-list share” means both are at least 10 percentage points above the rest of the municipality.`),
+     U(`Opštine sa podeljenim glasanjem su one u kojima liste manjina i sandžačke liste (${MIX_LISTS.map(shortLabel).join(", ")}) zajedno imaju bar 8%. U njima pojedina sela glasaju sasvim drugačije od ostatka opštine iz poznatih razloga, pa se prikazuju u posebnim tabelama.`,
+       `Municipalities with a divided vote are those where minority and Sandžak lists (${MIX_LISTS.map(shortLabel).join(", ")}) together have at least 8%. Some villages there vote very differently from the rest of the municipality for known reasons, so they are shown in separate tables.`),
+     U(`Prekidač „Bez inostranstva, zatvora i Kosova i Metohije“ (uključen od početka) izostavlja ta mesta iz tabela i grafikona, jer glasaju sasvim drugačije i zaklanjaju ostale slučajeve; ukupni rezultati i mandati ih uvek uključuju.`,
+       `The “Excluding abroad, prisons and Kosovo” switch (on by default) leaves these stations out of tables and charts, as they vote very differently and hide other cases; totals and seats always include them.`),
+     U(`Otisak prsta izbora je grafik izlaznosti i udela liste po biračkim mestima (metoda Klimek i saradnika, <span class='keep'>PNAS</span> 2012). Test poslednje cifre proverava da li se cifre 0–9 na kraju broja glasova (bar 100) javljaju podjednako; meri se χ² testom sa 9 stepeni slobode (granica 16,9 za p = 0,05).`,
+       `The election fingerprint is a chart of turnout and list share by polling station (method of Klimek et al., PNAS 2012). The last-digit test checks whether digits 0–9 at the end of vote counts (at least 100) occur equally often, using a χ² test with 9 degrees of freedom (threshold 16.9 for p = 0.05).`)])}
+   ${sec(U("Poređenje sa izborima 2023.","Comparison with the 2023 election"),[
+     U(`Rezultati parlamentarnih izbora od 17. decembra 2023. su preuzeti sa sajta RIK-a po biračkim mestima. Po opštinama i okruzima se porede svi glasovi (GO Vranjska Banja je pridružena Vranju). Biračka mesta su spojena po opštini i broju kada je naziv isti ili sličan, ili kad se broj upisanih razlikuje najviše 15%; mesta kojima se broj upisanih promenio više od 40% nisu poređena (verovatno su im promenjene granice).`,
+       `Results of the 17 December 2023 parliamentary election were downloaded from the RIK website by polling station. By municipality and district all votes are compared (Vranjska Banja is merged into Vranje). Stations were matched by municipality and number when the name is the same or similar, or when registered voters differ by at most 15%; stations whose registered voters changed by more than 40% are not compared (their boundaries probably changed).`),
+     U(`Upoređene su samo liste sa jasnim naslednikom (Vučić, Dačić, SVM, Zukorlić, SDA Sandžaka, albanske liste, Ruska stranka); opozicione liste iz 2023. nemaju jednog naslednika, pa su u zbiru „Sve ostale liste“.`,
+       `Only lists with a clear successor are compared (Vučić, Dačić, SVM, Zukorlić, SDA Sandžak, Albanian lists, Russian Party); the 2023 opposition lists have no single successor, so they are in “All other lists”.`)])}
+   ${sec(U("Mape","Maps"),[
+     U(`Granice opština i naselja su iz <span class='keep'>OpenStreetMap</span>-a (© <span class='keep'>OpenStreetMap</span> saradnici, licenca <span class='keep'>ODbL</span>), uprošćene za prikaz. Granicu na mapi ima oko 98% naselja; ostala su siva. Gradsko naselje sa mnogo biračkih mesta je jedno polje, jer granice područja biračkih mesta nisu javne. Opština Gora je prikazana granicom današnje opštine Dragaš.`,
+       `Municipal and settlement boundaries are from OpenStreetMap (© OpenStreetMap contributors, ODbL licence), simplified for display. About 98% of settlements have a boundary; the rest are grey. An urban settlement with many polling stations is one area, as polling-station area boundaries are not public. Gora is drawn with the boundary of today's Dragaš municipality.`)])}
+   ${sec(U("Privatnost","Privacy"),[
+     U(`Posete se broje anonimno pomoću servisa <span class='keep'>GoatCounter</span>, bez kolačića i bez čuvanja IP adresa ili drugih podataka po kojima bi se posetilac mogao prepoznati; beleži se samo zbirno koje stranice se gledaju i odakle posetioci dolaze. Izbor pisma i nekoliko podešavanja prikaza čuvaju se samo u vašem pregledaču.`,
+       `Visits are counted anonymously with GoatCounter, without cookies and without storing IP addresses or other data that could identify a visitor; only aggregate page views and referrers are recorded. Your choice of script and a few display settings are stored only in your browser.`)])}
+   ${sec(U("Autor i kontakt","Author and contact"),[
+     U(`Autor: Rako Smiljanić. Greške, predlozi i pitanja: <a class="keep" href="mailto:izbori26.rs@gmail.com">izbori26.rs@gmail.com</a>.`,
+       `Author: Rako Smiljanić. Errors, suggestions and questions: <a class="keep" href="mailto:izbori26.rs@gmail.com">izbori26.rs@gmail.com</a>.`)])}`;
+}
+
+const VIEWS={metodologija:viewMetodologija,pregled:viewPregled,mapa:viewMapa,liste:viewListe,okruzi:viewOkruzi,opstine:viewOpstine,mesta:viewMesta,statistika:viewStatistika};
 const TABN={pregled:["Pregled","Overview"],mapa:["Mapa","Map"],liste:["Liste","Lists"],okruzi:["Okruzi","Districts"],opstine:["Opštine","Municipalities"],mesta:["Biračka mesta","Polling stations"],statistika:["Statistika","Statistics"]};
 let cur=null;
 function show(tab,first){ // first: prvi prikaz posle učitavanja (gotov Pregled je već na ekranu)
@@ -1608,7 +1655,7 @@ function chrome(){
     BUILD.sajt&&U("Poslednja izmena sajta: ","Site last updated: ")+esc(fmtSnap(BUILD.sajt)),
     BUILD.podaci&&U("Podaci sa RIK-a poslednji put povučeni: ","Data last fetched from RIK: ")+esc(fmtSnap(BUILD.podaci)),
     U("Kontakt: ","Contact: ")+`<a class="keep" href="mailto:izbori26.rs@gmail.com">izbori26.rs@gmail.com</a>`,
-    U("Posete se broje anonimno, bez kolačića (GoatCounter).","Visits are counted anonymously, without cookies (GoatCounter).")].filter(Boolean).join(" · "); // keep: adresa se ne preslovljava
+    `<a href="#metodologija">${U("O sajtu i metodologija","About and methodology")}</a>`].filter(Boolean).join(" · "); // keep: adresa se ne preslovljava
   locNode(document.body);
 }
 function setScript(s){
