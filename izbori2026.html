@@ -99,6 +99,11 @@ tbody tr.click:hover{background:var(--hover)}
 .facts b{display:block;font-family:Literata,Georgia,serif;font-size:1.45rem;line-height:1.2}
 .facts span{color:var(--muted);font-size:.9rem}
 .lim .xr{display:none!important}
+.gde .gdeq{width:100%;max-width:560px;font:inherit;font-size:1.05rem;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.gdehit{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.3fr) auto;gap:6px 16px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.gdehit:first-child{margin-top:8px;border-top:1px solid var(--line)}
+.gdeb{display:flex;gap:6px;flex-wrap:wrap}
+@media (max-width:720px){.gdehit{grid-template-columns:1fr}}
 .rk{display:inline-block;min-width:2.1em;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:600}
 .bez{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:10px 0 2px;font-size:.92rem;cursor:pointer}
 .bez input{width:18px;height:18px;margin:0;accent-color:var(--accent)}
@@ -553,6 +558,10 @@ function viewPregled(){
    <h1>${U("Parlamentarni izbori 2026: rezultati po biračkim mestima","2026 parliamentary election in Serbia: results by polling station")}</h1>
    <p class="lead">${U(`Do ${esc(fmtSnap())} uneti su rezultati sa <b>${N(A.nd)}</b> od ${N(A.n)} biračkih mesta (${P(A.nd/A.n)}). Na obrađenim mestima izašlo je <b>${N(A.gl)}</b> birača, ${P(A.turn)} upisanih. Najviše glasova ima lista „${esc(LISTS[top].short)}“ (${P(A.v[top]/A.va)}), pa „${esc(LISTS[sec].short)}“ (${P(A.v[sec]/A.va)}).`,
      `As of ${esc(fmtSnap())}, results have been entered for <b>${N(A.nd)}</b> of ${N(A.n)} polling stations (${P(A.nd/A.n)}). At the counted stations <b>${N(A.gl)}</b> voters turned out, ${P(A.turn)} of those registered. The list “${esc(LISTS[top].short)}” leads (${P(A.v[top]/A.va)}), followed by “${esc(LISTS[sec].short)}” (${P(A.v[sec]/A.va)}).`)}${emptyNote}</p>
+   <div class="block gde"><h2>${U("Gde ja glasam?","Where do I vote?")}</h2>
+     <p class="note">${U("Upiši ulicu, selo ili naziv biračkog mesta (npr. škole); može i više reči, npr. „Karađorđeva Čačak“.","Type a street, village or polling station name (e.g. a school); several words work too.")}</p>
+     <input type="search" id="gdeQ" class="gdeq" autocomplete="off" placeholder="${U("Ulica, selo ili biračko mesto…","Street, village or polling station…")}" aria-label="${U("Pretraga biračkog mesta","Polling station search")}">
+     <div id="gdeRes" aria-live="polite"></div></div>
    <div class="ribbon" role="img" aria-label="${U("Udeo listi u važećim glasovima","Share of valid votes by list")}">${ribbon}</div>
    <p class="note">${U("Širina odgovara udelu u važećim glasovima. Prikazane su liste koje imaju bar jedan glas; oznake su samo na većim segmentima.","Width is the share of valid votes. Lists with at least one vote are shown; labels appear only on larger segments.")}</p>
    <div class="facts">
@@ -568,6 +577,7 @@ function viewPregled(){
    <div class="block"><h2>${U("Rezultati po regionima","Results by region")}</h2>
    <p class="note">${U("Prikazano je šest listi sa najviše glasova, ostale su zbirno. Klik na red otvara sve liste.","The six largest lists are shown, the rest combined. Click a row for all lists.")}</p>
    <div id="regTbl"></div></div>`;
+  const gq=$("#gdeQ");gq.oninput=gdeSearch;gq.onfocus=()=>{if(!ulOk)loadUlice().catch(()=>{})}; // ulice stižu čim se klikne u polje
   dataTable($("#resTbl"),"res",cols,items,{sort:"v",dir:-1,limit:8,onRow:l=>{location.hash="lista-"+l.n}});
   const ents=REGIONS.map((g,i)=>({id:i,name:g,a:REG_AGG[i]}));
   const tl=A.rank.slice(0,6);
@@ -690,6 +700,31 @@ function listRows(a){
   }).join("");
 }
 
+/* ---------- „Gde ja glasam?“ na Pregledu: sve reči moraju da se nađu u nazivu mesta, naselju, opštini ili ulicama ---------- */
+const GDE_MAX=8;
+function gdeSearch(){
+  const inp=$("#gdeQ"),host=$("#gdeRes");if(!inp||!host)return;
+  const q=flat(inp.value.trim()),words=q.split(/\s+/).filter(Boolean);
+  if(q.length<3){host.innerHTML="";return}
+  if(!ulOk)loadUlice().then(()=>{if($("#gdeQ")===inp)gdeSearch()}).catch(()=>{});
+  const hits=ROWS.filter(r=>{const s=rq(r);return words.every(w=>s.includes(w))});
+  // prvo mesta čije naselje ili naziv sadrži upit, pa ostala (npr. pogodak samo u ulicama)
+  const score=r=>flat(r.nsl+" "+r.nm).includes(q)?0:1;
+  hits.sort((a,b)=>score(a)-score(b)||T(OP[a.op].name).localeCompare(T(OP[b.op].name),"sr")||a.n-b.n);
+  // ulica se prikazuje samo za reči koje nisu već u nazivu mesta, naselju ili opštini (npr. „os“ ne traži „Njegoševa“)
+  const street=r=>{if(!r.ul)return "";const rest=words.filter(w=>!flat(r.nm+" "+r.nsl+" "+OP[r.op].name+" "+OK[r.ok].name).includes(w));if(!rest.length)return "";
+    const it=r.ul.split(/[,;]\s*/).find(x=>rest.every(w=>flat(x).includes(w)));return it?`<br><span class="muted">${U("Ulica","Street")}: ${esc(T(it.trim()))}</span>`:""};
+  const res=r=>r.e&&r.va?`${sw(r.win)}<b>${esc(shortLabel(r.win))}</b> ${P(r.v[r.win]/r.va)} · ${U("izlaznost","turnout")} ${P(r.turn)}`:`<span class="muted">${U("rezultat još nije unet","not counted yet")}</span>`;
+  host.innerHTML=!hits.length?`<p class="muted">${U("Nema takvog mesta. Pokušaj sa delom naziva ulice ili sela.","No such place. Try part of the street or village name.")}${ulOk?"":" "+U("(spisak ulica se još učitava)","(street list still loading)")}</p>`:
+    hits.slice(0,GDE_MAX).map(r=>`<div class="gdehit"><div class="gdet"><b>${esc(T(r.nsl||OP[r.op].name))}</b> <span class="muted">${esc(T(OP[r.op].name))}</span><br>${U("Biračko mesto","Polling station")} ${r.n}: ${esc(T(r.nm))}${street(r)}</div>
+      <div class="gder">${res(r)}</div>
+      <div class="gdeb"><button type="button" class="btn ghost" data-r="${r.id}">${U("Sve liste","All lists")}</button><button type="button" class="btn ghost" data-o="${r.op}">${U("Opština","Municipality")}</button></div></div>`).join("")+
+    (hits.length>GDE_MAX?`<p><button type="button" class="btn ghost" id="gdeAll">${U(`Prikaži svih ${N(hits.length)} na kartici Biračka mesta`,`Show all ${N(hits.length)} on the Polling stations tab`)}</button></p>`:"");
+  $$("button[data-r]",host).forEach(b=>b.onclick=()=>{const r=ROWS[+b.dataset.r];
+    openAgg({id:-1,name:r.nm,sub:[OP[r.op].name,r.nsl].filter(Boolean).join(", "),a:agg([r])})});
+  $$("button[data-o]",host).forEach(b=>b.onclick=()=>go("opstina/"+opSlug(+b.dataset.o)));
+  const all=$("#gdeAll");if(all)all.onclick=()=>{state.m={q:inp.value.trim(),ok:"",op:"",nas:"",sort:"turn",dir:-1,page:0};go("mesta")};
+}
 /* ---------- Biračka mesta ---------- */
 let sel=null;
 const NONE="-"; // vrednost filtera za mesta bez utvrđenog naselja
