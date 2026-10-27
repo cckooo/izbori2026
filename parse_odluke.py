@@ -287,14 +287,31 @@ def canon_naselje(nas, op, ref, stats, area=""):
     if inside:
         stats["naselje_potvrdjeno"] += 1
         return max(inside, key=lambda c: len(c[1]))[1]
-    # nije zvanično naselje (ime opštine iz adrese, ulica): najveće gradsko naselje opštine
-    # (Vождовац -> Београд, Ада -> Ада); to su gradska biračka mesta čije područje odluka daje samo ulicama
+    # ime opštine iz adrese, ulica ili nečitljiv OCR ostatak: najveće gradsko naselje opštine
+    # (Вождовац -> Београд, Ада -> Ада); to su gradska biračka mesta čije područje odluka daje samo ulicama
+    opn = re.sub(r"^(Градска општина|Општина|Град)\s+|\s*\(.*\)$", "", op)
+    streetlike = re.search(r"(ска|чка|шка|цка|ића|ић|ина|ова|ева|ског|ских|ата|ника)$|\bбб\b|\bпут\b|улиц|трг|\d",
+                           nas.strip(" |.,'\""), re.I) or len(nas.split()) >= 2 and re.search(r"(е|и|ља)$", nas.split()[0]) \
+        or not re.search(r"[а-яђјљњћџ]{4}", nas, re.I)
+    if not streetlike:
+        # OCR greška u imenu sela ("Кобишнишџа" -> Кобишница): slabiji prag, ali jednoznačno
+        sc = sorted(((fuzz.ratio(full, asc(c[1])), c) for c in cands), key=lambda x: -x[0])
+        if sc and sc[0][0] >= 75 and (len(sc) == 1 or sc[0][0] - sc[1][0] >= 8):
+            stats["naselje_ispravljeno"] += 1
+            return sc[0][1][1]
     urban = sorted((c for c in cands if c[2]), key=lambda c: -(c[3] or 0))
-    if urban:
+    if urban and (asc(nas) == asc(opn) or streetlike):
         stats["naselje_gradsko"] += 1
         return urban[0][1]
+    # zaselak koji nije u popisu (Росуље, Даутовац): ostaje ime iz odluke, ne pripisuje se gradu;
+    # ako se ime ponavlja i u području (adresa i područje se čitaju odvojeno, pa OCR ostatak teško prođe);
+    # naziv ustanove ("Основна школа", "Дом културе") ili nepotvrđen OCR ostatak: prazno
     stats["naselje_nepotvrdjeno"] += 1
-    return nas
+    clean = re.fullmatch(r"[А-ЯЂЈЉЊЋЏ][а-яђјљњћџ]+(?:[ -][А-ЯЂЈЉЊЋЏа-яђјљњћџ][а-яђјљњћџ]+){0,2}", nas.strip())
+    inst = re.search(r"школ|\bдом\b|заједниц|кућа|локал|мотел|ресторан|\bош\b|\bмз\b|^село$|ић\s", nas, re.I) or \
+        re.fullmatch(r"(Горњ|Доњ|Велик|Мал|Нов|Стар|Бачк|Војвод|Четрдесет|Анастас)\w*", nas.strip(), re.I)
+    seen = re.search(rf"\b{re.escape(asc(nas.strip()))}\b", asc(area))
+    return nas.strip() if clean and not inst and seen else ""
 
 
 def nice(s):
