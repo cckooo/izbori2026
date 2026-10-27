@@ -96,6 +96,8 @@ tbody tr.click:hover{background:var(--hover)}
 .facts div:last-child{border-right:0}
 .facts b{display:block;font-family:Literata,Georgia,serif;font-size:1.45rem;line-height:1.2}
 .facts span{color:var(--muted);font-size:.9rem}
+.lim .xr{display:none!important}
+.morebtn{margin-top:8px}
 .subnav{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 4px}
 .subnav button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 13px;font:inherit;font-size:.9rem;cursor:pointer}
 .subnav button:hover{background:var(--hover)}
@@ -411,6 +413,12 @@ function listSelect(id){
 function sw(i){return `<span class="sw" style="background:${LISTS[i].c}"></span>`}
 
 /* Generička tabela sa sortiranjem */
+// duge tabele i spiskovi: prvih n redova, ostali (klasa xr) posle klika na „Prikaži sve“
+const MOBILE=()=>innerWidth<=720;
+const LIM=(desk,mob)=>MOBILE()?mob:desk;
+const xr=(i,n)=>i>=n?" xr":"";
+const moreBtn=(total,n)=>total>n?`<button type="button" class="btn ghost morebtn">${U(`Prikaži sve (${N(total)})`,`Show all (${N(total)})`)}</button>`:"";
+document.addEventListener("click",e=>{const b=e.target.closest(".morebtn");if(!b||b.dataset.own)return;const w=b.closest(".lim");if(w){w.classList.remove("lim");b.remove()}});
 function dataTable(host,id,cols,items,opt={}){
   const ext=!!opt.onSort;
   const st=ext?{key:opt.sort,dir:opt.dir}:(state.tbl[id]||(state.tbl[id]={key:opt.sort||cols[0].id,dir:opt.dir||1}));
@@ -423,10 +431,13 @@ function dataTable(host,id,cols,items,opt={}){
   });
   const plain=c=>c.label.replace(/<[^>]*>/g,"").replace(/"/g,"&quot;");
   const head=cols.map(c=>`<th class="${c.num?"num ":""}${c.nosort?"":"sortable"}" data-k="${c.id}" ${c.nosort?"":`tabindex="0" aria-sort="${c.id===st.key?(st.dir>0?"ascending":"descending"):"none"}"`}>${c.label}<span class="arr">${c.id===st.key?(st.dir>0?"▲":"▼"):""}</span></th>`).join("");
-  const body=arr.map(it=>`<tr class="${opt.onRow?"click":""}" data-id="${it.id}">${cols.map(c=>`<td class="${c.num?"num ":""}${c.ttl?"ttl ":""}${c.nas?"nas ":""}${c.cls?c.cls+" ":""}${c.hm?"hm":""}" data-l="${plain(c)}">${c.render(it)}</td>`).join("")}</tr>`).join("");
+  const lim=opt.limit&&!ext&&!st.all?opt.limit:1e9; // opt.limit: posle sortiranja ostaje „sve“ ako je kliknuto
+  const body=arr.map((it,i)=>`<tr class="${opt.onRow?"click":""}${xr(i,lim)}" data-id="${it.id}">${cols.map(c=>`<td class="${c.num?"num ":""}${c.ttl?"ttl ":""}${c.nas?"nas ":""}${c.cls?c.cls+" ":""}${c.hm?"hm":""}" data-l="${plain(c)}">${c.render(it)}</td>`).join("")}</tr>`).join("");
   const sortable=cols.filter(c=>!c.nosort&&!c.hm);
   const ms=`<div class="msort"><select aria-label="${U("Sortiraj po","Sort by")}">${sortable.map(c=>`<option value="${c.id}" ${c.id===st.key?"selected":""}>${U("Sortiraj","Sort")}: ${plain(c)}</option>`).join("")}</select><button class="btn ghost" aria-label="${U("Promeni smer sortiranja","Reverse sort order")}">${st.dir>0?"▲":"▼"}</button></div>`;
-  host.innerHTML=ms+`<div class="tw"><table class="cards"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+  host.innerHTML=ms+`<div class="tw"><table class="cards"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`+moreBtn(arr.length,lim);
+  host.classList.toggle("lim",arr.length>lim);
+  const mb=$(".morebtn",host);if(mb){mb.dataset.own=1;mb.onclick=()=>{st.all=true;dataTable(host,id,cols,items,opt)}}
   const sortBy=k=>{
     if(ext){opt.onSort(k);return}
     if(st.key===k)st.dir*=-1;else{st.key=k;st.dir=cols.find(c=>c.id===k).num?-1:1}
@@ -494,7 +505,7 @@ function viewPregled(){
    <div class="block"><h2>${U("Rezultati po regionima","Results by region")}</h2>
    <p class="note">${U("Prikazano je šest listi sa najviše glasova, ostale su zbirno. Klik na red otvara sve liste.","The six largest lists are shown, the rest combined. Click a row for all lists.")}</p>
    <div id="regTbl"></div></div>`;
-  dataTable($("#resTbl"),"res",cols,items,{sort:"v",dir:-1,onRow:l=>{location.hash="lista-"+l.n}});
+  dataTable($("#resTbl"),"res",cols,items,{sort:"v",dir:-1,limit:LIM(18,8),onRow:l=>{location.hash="lista-"+l.n}});
   const ents=REGIONS.map((g,i)=>({id:i,name:g,a:REG_AGG[i]}));
   const tl=A.rank.slice(0,6);
   const rcols=[
@@ -542,7 +553,7 @@ function viewOkruzi(){
   $("#lvOk").onclick=()=>{state.lvl="ok";viewOkruzi()};
   const ents=reg?REGIONS.map((g,i)=>({id:i,name:g,a:REG_AGG[i]}))
                 :OK.map((o,i)=>({id:i,name:o.name,sub:o.region,a:OK_AGG[i]}));
-  dataTable($("#okTbl"),"ok"+state.lvl,matrixCols(),ents,{sort:"name",dir:1,onRow:e=>openAgg(e,reg?null:()=>{state.okF=String(e.id);state.opSearch="";go("opstine")})});
+  dataTable($("#okTbl"),"ok"+state.lvl,matrixCols(),ents,{sort:"name",dir:1,limit:LIM(40,12),onRow:e=>openAgg(e,reg?null:()=>{state.okF=String(e.id);state.opSearch="";go("opstine")})});
 }
 
 /* ---------- Opštine ---------- */
@@ -563,7 +574,7 @@ function viewOpstine(){
     const ents=OP.map((o,i)=>({id:i,name:o.name,sub:OK[o.ok].name,a:OP_AGG[i],ok:o.ok}))
       .filter(e=>(state.okF===""||String(e.ok)===state.okF)&&(!q||String(e.id)===q));
     $("#opCount").textContent=U(`Prikazano: ${N(ents.length)} od ${N(OP.length)}`,`Shown: ${N(ents.length)} of ${N(OP.length)}`);
-    dataTable($("#opTbl"),"op2",matrixCols(),ents,{sort:"name",dir:1,onRow:e=>{state.opSearch=String(e.id);fillOp();draw();$("#opDetail").scrollIntoView({block:"start"})}});
+    dataTable($("#opTbl"),"op2",matrixCols(),ents,{sort:"name",dir:1,limit:LIM(30,12),onRow:e=>{state.opSearch=String(e.id);fillOp();draw();$("#opDetail").scrollIntoView({block:"start"})}});
     const D=$("#opDetail");
     if(state.opSearch!==""){
       const i=+state.opSearch,o=OP[i],a=OP_AGG[i];
@@ -582,7 +593,7 @@ function viewOpstine(){
         {id:"up",label:U("Upisano","Registered"),num:true,get:e=>e.a.up,render:e=>N(e.a.up)},
         {id:"pun",label:U("Punoletnih (2022)","Adults (2022)"),num:true,get:e=>e.pop?e.pop[1]:null,render:e=>e.pop&&e.pop[1]?N(e.pop[1]):"–"},
         {id:"st",label:U("Stanovnika (2022)","Population (2022)"),num:true,get:e=>e.pop?e.pop[0]:null,render:e=>e.pop?N(e.pop[0]):"–"});
-      dataTable($("#opNas"),"opnas",ncols,ents2,{sort:"name",dir:1,onRow:e=>{state.m={...state.m,q:"",nas:e.key||NONE,ok:String(o.ok),op:String(i),page:0};go("mesta")}});
+      dataTable($("#opNas"),"opnas",ncols,ents2,{sort:"name",dir:1,limit:LIM(25,10),onRow:e=>{state.m={...state.m,q:"",nas:e.key||NONE,ok:String(o.ok),op:String(i),page:0};go("mesta")}});
     }else D.innerHTML="";
   };
   const fillOp=()=>{$("#fOp").innerHTML=`<option value="">${U("Sve opštine","All municipalities")}</option>`+OP.map((o,i)=>({o,i})).filter(x=>state.okF===""||String(x.o.ok)===state.okF).sort((a,b)=>T(a.o.name).localeCompare(T(b.o.name),"sr")).map(x=>`<option value="${x.i}" ${String(x.i)===state.opSearch?"selected":""}>${esc(T(x.o.name))}</option>`).join("")};
@@ -676,7 +687,7 @@ function drawMesta(){
   const st=state.tbl.mesta||(state.tbl.mesta={key:"turn",dir:-1});
   const col=cols.find(c=>c.id===st.key)||cols[0];
   const sorted=rows.slice().sort((x,y)=>{const p=col.get(x),q=col.get(y);if(p==null&&q==null)return 0;if(p==null)return 1;if(q==null)return -1;const c=typeof p==="string"?p.localeCompare(q,"sr"):p-q;return c*st.dir});
-  const per=50,pages=Math.max(1,Math.ceil(sorted.length/per));
+  const per=LIM(50,10),pages=Math.max(1,Math.ceil(sorted.length/per));
   m.page=Math.min(m.page,pages-1);
   const page=sorted.slice(m.page*per,(m.page+1)*per);
   const host=$("#mTbl");
@@ -706,34 +717,36 @@ function drawCharts(rows,a){
   const lbl=r=>`<span class="tag">${r.n}</span> ${multiOp?`<span class="muted">${esc(T(OP[r.op].name))},</span> `:""}${r.nsl&&!m.nas?`<b>${esc(T(r.nsl))}</b>, `:""}${esc(T(r.nm))}`;
   const pick=`<p class="note">${U(`Izaberi opštinu, naselje ili suzi pretragu (prikazuje se do ${MAX_BARS} mesta; sada ih je ${N(rows.length)}).`,`Choose a municipality or settlement, or narrow the search (up to ${MAX_BARS} stations are shown; now ${N(rows.length)}).`)}</p>`;
   let h="";
+  const nb=LIM(30,12); // redova pre „Prikaži sve“
   // 1. rezultat po biračkom mestu
-  h+=`<div class="block"><h3>${U("Rezultat po biračkom mestu","Result by polling station")}</h3>`;
+  h+=`<div class="block${ord.length>nb&&rows.length<=MAX_BARS?" lim":""}"><h3>${U("Rezultat po biračkom mestu","Result by polling station")}</h3>`;
   if(rows.length>MAX_BARS)h+=pick;
   else h+=lgd+`<div class="bars"><div class="brow head"><span class="bl">${U("Biračko mesto","Polling station")}</span><span>${U("Udeo u važećim glasovima","Share of valid votes")}</span><span class="bv">${U("Izlaz.","Turnout")}</span></div>`+
-    ord.map(r=>`<div class="brow"><span class="bl" title="${esc(T(r.nm))}">${lbl(r)}</span>${r.e&&r.va?stackBar(r.v,r.va,K):`<span class="muted">${U("nije uneto","not counted")}</span>`}<span class="bv">${r.turn==null?"–":P(r.turn)}</span></div>`).join("")+`</div>`;
+    ord.map((r,i)=>`<div class="brow${xr(i,nb)}"><span class="bl" title="${esc(T(r.nm))}">${lbl(r)}</span>${r.e&&r.va?stackBar(r.v,r.va,K):`<span class="muted">${U("nije uneto","not counted")}</span>`}<span class="bv">${r.turn==null?"–":P(r.turn)}</span></div>`).join("")+`</div>`+moreBtn(ord.length,nb);
   h+=`</div>`;
   // 2. odstupanje izabrane liste od proseka skupa
   const base=a.v[L]/a.va;
   const where=m.nas?U("naselja","settlement"):m.op!==""?U("opštine","municipality"):m.ok!==""?U("okruga","district"):U("izabranih mesta","selected stations");
-  h+=`<div class="block"><h3>${U(`Odstupanje od proseka ${where}`,`Deviation from the ${where} average`)}: ${sw(L)}${esc(LISTS[L].short)}</h3>`;
+  const nE=rows.filter(r=>r.e&&r.va).length;
+  h+=`<div class="block${nE>nb&&rows.length<=MAX_BARS?" lim":""}"><h3>${U(`Odstupanje od proseka ${where}`,`Deviation from the ${where} average`)}: ${sw(L)}${esc(LISTS[L].short)}</h3>`;
   if(rows.length>MAX_BARS)h+=pick;
   else{
     const E=ord.filter(r=>r.e&&r.va);
     const mx=Math.max(.05,...E.map(r=>Math.abs(r.v[L]/r.va-base)));
     h+=`<p class="note">${U(`Prosek je ${P(base)}. Desno od crte su mesta gde lista ima više od proseka, levo manje; broj je razlika u procentnim poenima. Listu menjaš u polju „Lista za prikaz“.`,`The average is ${P(base)}. Right of the line: stations where the list did better, left: worse; the number is the difference in percentage points. Change the list in “List shown”.`)}</p><div class="bars">`+
-      E.map(r=>{const d=r.v[L]/r.va-base,w=Math.abs(d)/mx*50;
-        return `<div class="brow"><span class="bl" title="${esc(T(r.nm))}">${lbl(r)}</span><div class="dev"><i style="${d>=0?`left:50%;background:${LISTS[L].c}`:`right:50%;background:var(--muted)`};width:${w}%"></i></div><span class="bv">${d>=0?"+":"−"}${(Math.abs(d)*100).toFixed(1).replace(".",",")}</span></div>`}).join("")+`</div>`;
+      E.map((r,i)=>{const d=r.v[L]/r.va-base,w=Math.abs(d)/mx*50;
+        return `<div class="brow${xr(i,nb)}"><span class="bl" title="${esc(T(r.nm))}">${lbl(r)}</span><div class="dev"><i style="${d>=0?`left:50%;background:${LISTS[L].c}`:`right:50%;background:var(--muted)`};width:${w}%"></i></div><span class="bv">${d>=0?"+":"−"}${(Math.abs(d)*100).toFixed(1).replace(".",",")}</span></div>`}).join("")+`</div>`+moreBtn(E.length,nb);
   }
   h+=`</div>`;
   // 3. naselja u skupu
   const g=new Map();for(const r of rows){const k=r.nsl||"";if(!g.has(k))g.set(k,[]);g.get(k).push(r)}
   if(!m.nas&&g.size>1){
-    h+=`<div class="block"><h3>${U("Poređenje naselja","Settlements compared")}</h3>`;
+    h+=`<div class="block${g.size>nb&&g.size<=MAX_NAS?" lim":""}"><h3>${U("Poređenje naselja","Settlements compared")}</h3>`;
     if(g.size>MAX_NAS)h+=`<p class="note">${U(`Izaberi opštinu (sada je ${N(g.size)} naselja).`,`Choose a municipality (now ${N(g.size)} settlements).`)}</p>`;
     else{
       const ents=[...g].map(([k,rs])=>({k,rs,a:agg(rs)})).sort((x,y)=>y.a.up-x.a.up);
       h+=lgd+`<div class="bars"><div class="brow head"><span class="bl">${U("Naselje (biračkih mesta)","Settlement (stations)")}</span><span>${U("Udeo u važećim glasovima","Share of valid votes")}</span><span class="bv">${U("Izlaz.","Turnout")}</span></div>`+
-        ents.map(e=>`<div class="brow"><span class="bl">${e.k?`<b>${esc(T(e.k))}</b>`:`<span class="muted">${U("(naselje nije utvrđeno)","(settlement unknown)")}</span>`} <span class="muted">(${e.rs.length})</span></span>${stackBar(e.a.v,e.a.va,K)}<span class="bv">${e.a.turn==null?"–":P(e.a.turn)}</span></div>`).join("")+`</div>`;
+        ents.map((e,i)=>`<div class="brow${xr(i,nb)}"><span class="bl">${e.k?`<b>${esc(T(e.k))}</b>`:`<span class="muted">${U("(naselje nije utvrđeno)","(settlement unknown)")}</span>`} <span class="muted">(${e.rs.length})</span></span>${stackBar(e.a.v,e.a.va,K)}<span class="bv">${e.a.turn==null?"–":P(e.a.turn)}</span></div>`).join("")+`</div>`+moreBtn(ents.length,nb);
     }
     h+=`</div>`;
   }
@@ -755,22 +768,24 @@ const PL=(x,L)=>P(x,TOTAL.v[L]/TOTAL.va<.02?2:1);
 function shareBars(items,L,head){
   const base=TOTAL.v[L]/TOTAL.va,P=x=>PL(x,L);
   const sh=e=>e.a.va?e.a.v[L]/e.a.va:null;
-  const mx=Math.max(base,...items.map(e=>sh(e)||0))||1;
-  return `<div class="bars"><div class="brow head"><span class="bl">${head}</span><span>${U("Udeo u važećim glasovima","Share of valid votes")}</span><span class="bv">${U("Udeo","Share")}</span></div>`+
-    items.map(e=>{const p=sh(e);return `<div class="brow"><span class="bl">${e.lab}</span>${p==null?`<span class="muted">${U("nije uneto","not counted")}</span>`:`<div class="shr"><i style="width:${p/mx*100}%;background:${LISTS[L].c}"></i><b style="left:${base/mx*100}%"></b></div>`}<span class="bv">${p==null?"–":P(p)}</span></div>`}).join("")+`</div>`;
+  const mx=Math.max(base,...items.map(e=>sh(e)||0))||1,n=LIM(40,12);
+  return `<div class="${items.length>n?"lim":""}"><div class="bars"><div class="brow head"><span class="bl">${head}</span><span>${U("Udeo u važećim glasovima","Share of valid votes")}</span><span class="bv">${U("Udeo","Share")}</span></div>`+
+    items.map((e,i)=>{const p=sh(e);return `<div class="brow${xr(i,n)}"><span class="bl">${e.lab}</span>${p==null?`<span class="muted">${U("nije uneto","not counted")}</span>`:`<div class="shr"><i style="width:${p/mx*100}%;background:${LISTS[L].c}"></i><b style="left:${base/mx*100}%"></b></div>`}<span class="bv">${p==null?"–":P(p)}</span></div>`}).join("")+`</div>${moreBtn(items.length,n)}</div>`;
 }
 function opTable(title,note,ents,L){
   const ol=U("Opština","Municipality"),sl=U("Udeo","Share"),vl=U("Glasova","Votes");
   const mx=Math.max(...ents.map(x=>x.p))||1;
-  const body=ents.map(e=>{const o=OP[e.i],ok=OK[o.ok].name;
-    return `<tr class="click" data-op="${e.i}"><td class="ttl" data-l="${ol}"><b>${esc(T(o.name))}</b>${ok!==o.name?` <span class="muted">${esc(T(ok))}</span>`:""}</td><td class="num" data-l="${sl}"><div class="pctbar"><span class="b" style="width:${Math.max(1,e.p/mx*80)}px;background:${LISTS[L].c}"></span><b>${PL(e.p,L)}</b></div></td><td class="num" data-l="${vl}">${N(e.a.v[L])}</td></tr>`}).join("");
-  return `<div><h3>${title}</h3><p class="note">${note}</p><div class="tw"><table class="cards"><thead><tr><th>${ol}</th><th class="num">${sl}</th><th class="num">${vl}</th></tr></thead><tbody>${body}</tbody></table></div></div>`;
+  const n=LIM(15,6);
+  const body=ents.map((e,i)=>{const o=OP[e.i],ok=OK[o.ok].name;
+    return `<tr class="click${xr(i,n)}" data-op="${e.i}"><td class="ttl" data-l="${ol}"><b>${esc(T(o.name))}</b>${ok!==o.name?` <span class="muted">${esc(T(ok))}</span>`:""}</td><td class="num" data-l="${sl}"><div class="pctbar"><span class="b" style="width:${Math.max(1,e.p/mx*80)}px;background:${LISTS[L].c}"></span><b>${PL(e.p,L)}</b></div></td><td class="num" data-l="${vl}">${N(e.a.v[L])}</td></tr>`}).join("");
+  return `<div class="${ents.length>n?"lim":""}"><h3>${title}</h3><p class="note">${note}</p><div class="tw"><table class="cards"><thead><tr><th>${ol}</th><th class="num">${sl}</th><th class="num">${vl}</th></tr></thead><tbody>${body}</tbody></table></div>${moreBtn(ents.length,n)}</div>`;
 }
 // tabela biračkih mesta sa proizvoljnim kolonama; stavka je mesto ili {r:mesto,...}
 function bmTable(title,note,items,cols){
   const bl=U("Biračko mesto","Polling station"),zl=U("Zapisnik","Record");
-  const body=items.map(it=>{const r=it.r||it;return `<tr><td class="ttl" data-l="${bl}">${bmTitle(r)}</td>${cols.map(c=>`<td class="num" data-l="${c.l}">${c.f(it)}</td>`).join("")}<td data-l="${zl}">${r.url?`<a href="${esc(encodeURI(r.url))}" target="_blank" rel="noopener">PDF</a>`:""}</td></tr>`}).join("");
-  return `<div>${title?`<h3>${title}</h3>`:""}<p class="note">${note}</p>${items.length?`<div class="tw"><table class="cards"><thead><tr><th>${bl}</th>${cols.map(c=>`<th class="num">${c.l}</th>`).join("")}<th>${zl}</th></tr></thead><tbody>${body}</tbody></table></div>`:`<p class="muted">${U("Nema takvih mesta.","No such stations.")}</p>`}</div>`;
+  const n=LIM(15,5);
+  const body=items.map((it,i)=>{const r=it.r||it;return `<tr class="${xr(i,n)}"><td class="ttl" data-l="${bl}">${bmTitle(r)}</td>${cols.map(c=>`<td class="num" data-l="${c.l}">${c.f(it)}</td>`).join("")}<td data-l="${zl}">${r.url?`<a href="${esc(encodeURI(r.url))}" target="_blank" rel="noopener">PDF</a>`:""}</td></tr>`}).join("");
+  return `<div class="${items.length>n?"lim":""}">${title?`<h3>${title}</h3>`:""}<p class="note">${note}</p>${items.length?`<div class="tw"><table class="cards"><thead><tr><th>${bl}</th>${cols.map(c=>`<th class="num">${c.l}</th>`).join("")}<th>${zl}</th></tr></thead><tbody>${body}</tbody></table></div>${moreBtn(items.length,n)}`:`<p class="muted">${U("Nema takvih mesta.","No such stations.")}</p>`}</div>`;
 }
 const SKIP_OP=/Иностранство|Заводи/; // inostranstvo i zatvori nisu opštine sa kojima ima smisla porediti
 const signPP=d=>(d>=0?"+":"−")+PP(Math.abs(d));
@@ -882,8 +897,9 @@ function viewListe(){
 /* ---------- Statistika ---------- */
 function miniTable(title,note,items,valLabel,valFn){
   const bl=U("Biračko mesto","Polling station"),ul=U("Upisano","Registered"),zl=U("Zapisnik","Record");
-  const body=items.map(r=>`<tr><td class="ttl" data-l="${bl}">${bmTitle(r)}</td><td class="num" data-l="${ul}">${N(r.up)}</td><td class="num" data-l="${valLabel}"><b>${valFn(r)}</b></td><td data-l="${zl}">${r.url?`<a href="${esc(encodeURI(r.url))}" target="_blank" rel="noopener">PDF</a>`:""}</td></tr>`).join("");
-  return `<div><h3>${title}</h3><p class="note">${note}</p><div class="tw"><table class="cards"><thead><tr><th>${bl}</th><th class="num">${ul}</th><th class="num">${valLabel}</th><th>${zl}</th></tr></thead><tbody>${body}</tbody></table></div></div>`;
+  const n=LIM(10,3);
+  const body=items.map((r,i)=>`<tr class="${xr(i,n)}"><td class="ttl" data-l="${bl}">${bmTitle(r)}</td><td class="num" data-l="${ul}">${N(r.up)}</td><td class="num" data-l="${valLabel}"><b>${valFn(r)}</b></td><td data-l="${zl}">${r.url?`<a href="${esc(encodeURI(r.url))}" target="_blank" rel="noopener">PDF</a>`:""}</td></tr>`).join("");
+  return `<div class="${items.length>n?"lim":""}"><h3>${title}</h3><p class="note">${note}</p><div class="tw"><table class="cards"><thead><tr><th>${bl}</th><th class="num">${ul}</th><th class="num">${valLabel}</th><th>${zl}</th></tr></thead><tbody>${body}</tbody></table></div>${moreBtn(items.length,n)}</div>`;
 }
 /* ---------- Otisak prsta izbora: izlaznost × udeo liste po biračkim mestima ---------- */
 // Na čistim izborima mesta čine jedan oblak; dopisivanje glasova i izlaznosti daje gomilu u gornjem desnom uglu
@@ -1005,7 +1021,7 @@ function lists23(ops,a){
   const rows=[row(`${U("Izlaznost","Turnout")} <span class="muted">(${U("glasalo birača","voters who voted")})</span>`,s.gl/s.up,a.gl/a.upd,s.gl,a.gl)]
     .concat(L23.filter(k=>s.v[k]||a.v[k]).map(k=>row(`${sw(k)}${esc(LISTS[k].short)}`,s.v[k]/s.va,a.v[k]/a.va,s.v[k],a.v[k])))
     .concat([row(`<b>${U("Vučić + Dačić","Vučić + Dačić")}</b>`,g0n/s.va,g1n/a.va,g0n,g1n),row(U("Sve ostale liste","All other lists"),1-g0n/s.va,1-g1n/a.va,s.va-g0n,a.va-g1n)]);
-  return `<div class="tw"><table class="cards"><thead><tr><th>${U("Lista (2026)","List (2026)")}</th><th class="num">2023</th><th class="num">2026</th><th class="num">${U("Promena","Change")}</th></tr></thead><tbody>${rows.join("")}</tbody></table></div><p class="note">${U("Ispod procenta je broj glasova (za izlaznost broj birača koji su glasali). 2026. samo mesta sa unetim rezultatom, pa se brojevi mogu povećati.","Below each percentage is the number of votes (for turnout, voters who voted). 2026 covers counted stations only, so numbers may still grow.")}</p>`;
+  return `<div class="tw"><table><thead><tr><th>${U("Lista (2026)","List (2026)")}</th><th class="num">2023</th><th class="num">2026</th><th class="num">${U("Promena","Change")}</th></tr></thead><tbody>${rows.join("")}</tbody></table></div><p class="note">${U("Ispod procenta je broj glasova (za izlaznost broj birača koji su glasali). 2026. samo mesta sa unetim rezultatom, pa se brojevi mogu povećati.","Below each percentage is the number of votes (for turnout, voters who voted). 2026 covers counted stations only, so numbers may still grow.")}</p>`;
 }
 const LISTS23_NOTE=()=>U("Upoređene su liste koje imaju jasnog naslednika: Vučić (lista 1 na oba izbora), Dačić (2 → 2), Savez vojvođanskih Mađara (6 → 5), Zukorlić (8 → 6), SDA Sandžaka (9 → 10), albanske liste (13 i 18 → 17) i Ruska stranka (16 → 7). Opozicione liste iz 2023. (Srbija protiv nasilja, Mi – glas iz naroda, NADA, Zavetnici–Dveri i druge) nemaju jednog naslednika, pa su sa ostalim listama u zbiru „Sve ostale liste“. Ljajić je 2023. bio na Vučićevoj listi, a 2026. ide samostalno. Udeli su u važećim glasovima; 2026. samo za mesta sa unetim rezultatom.",
   "Lists with a clear successor are compared: Vučić (list 1 in both), Dačić (2 → 2), Alliance of Vojvodina Hungarians (6 → 5), Zukorlić (8 → 6), SDA Sandžak (9 → 10), Albanian lists (13 and 18 → 17) and the Russian Party (16 → 7). The 2023 opposition lists (Serbia Against Violence, We – Voice of the People, NADA, Zavetnici–Dveri and others) have no single successor, so they are in “All other lists”. Ljajić ran on the Vučić list in 2023 and separately in 2026. Shares are of valid votes; 2026 only for counted stations.");
@@ -1055,8 +1071,8 @@ function prevBlock(){
 function prevHook(){
   const okE=OK.map((o,i)=>({id:i,name:o.name,sub:o.region,c:cmp23(OP.map((p,j)=>j).filter(j=>OP[j].ok===i),OK_AGG[i])})).filter(e=>e.c);
   const opE=OP.map((o,i)=>({id:i,name:o.name,sub:OK[o.ok].name,c:cmp23([i],OP_AGG[i])})).filter(e=>e.c);
-  if($("#p23Ok"))dataTable($("#p23Ok"),"p23ok",cmpCols(U("Okrug","District")),okE,{sort:"dt",dir:-1});
-  if($("#p23Op"))dataTable($("#p23Op"),"p23op",cmpCols(U("Opština","Municipality")),opE,{sort:"dt",dir:-1,onRow:e=>{state.okF="";state.opSearch=String(e.id);go("opstine")}});
+  if($("#p23Ok"))dataTable($("#p23Ok"),"p23ok",cmpCols(U("Okrug","District")),okE,{sort:"dt",dir:-1,limit:LIM(12,5)});
+  if($("#p23Op"))dataTable($("#p23Op"),"p23op",cmpCols(U("Opština","Municipality")),opE,{sort:"dt",dir:-1,limit:LIM(15,5),onRow:e=>{state.okF="";state.opSearch=String(e.id);go("opstine")}});
 }
 function viewStatistika(){
   const E=ROWS.filter(r=>r.e&&r.up>0&&r.va>0);
