@@ -42,7 +42,7 @@ h1,h2,h3{font-family:Literata,Georgia,"Times New Roman",serif;font-weight:700;le
 h1{font-size:clamp(1.7rem,4.6vw,2.6rem);line-height:1.15}
 h2{font-size:1.4rem;line-height:1.25;margin-bottom:.35rem}
 h3{font-size:1.05rem;margin-bottom:.25rem}
-p{margin:.3rem 0 .9rem;max-width:68ch}
+p{margin:.3rem 0 .9rem}
 a{color:var(--accent)}
 button,select,input{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
@@ -831,14 +831,14 @@ function viewListe(){
     ${miniTable(U("Najjača biračka mesta","Strongest polling stations"),min100,top(big,share,-1),U("Udeo","Share"),sv)}
     ${low}
    </div>
-   ${zeroBig>=10?`<div class="grid2 block">${most}</div>`:""}
+   ${zeroBig>=10?`<div class="block">${most}</div>`:""}
    <div class="block"><h3>${U("Mesta koja najviše odstupaju od svoje opštine","Stations that differ most from their municipality")}</h3>
     <p class="note">${U("Udeo liste na biračkom mestu poređen je sa udelom u ostatku iste opštine, bez tog mesta. Redosled uzima u obzir i veličinu mesta, pa mala mesta sa slučajnim odstupanjem ne izlaze na vrh. Mesta sa najmanje 50 važećih glasova, bez inostranstva i zatvora.","The list’s share at a station is compared with its share in the rest of the same municipality, excluding that station. The ranking also accounts for station size, so small stations with random swings do not rise to the top. Stations with at least 50 valid votes, excluding abroad and prisons.")} ${CAVEAT()}</p></div>
    <div class="grid2">
     ${bmTable(U("Mnogo jača nego u opštini","Much stronger than in the municipality"),"",dUp,dcols)}
     ${bmTable(U("Mnogo slabija nego u opštini","Much weaker than in the municipality"),"",dDown,dcols)}
    </div>
-   <div class="grid2 block">${bmTable(U("Opštine sa podeljenim glasanjem","Municipalities with a divided vote"),mixedNote(),dMix,dcols)}</div>
+   <div class="block">${bmTable(U("Opštine sa podeljenim glasanjem","Municipalities with a divided vote"),mixedNote(),dMix,dcols)}</div>
    <div class="block"><h3>${U("Po okruzima","By district")}</h3>
     <p class="note">${U(`Okruzi poređani po udelu liste. Crta je prosek Srbije (${PL(A.v[L]/A.va,L)}).`,`Districts sorted by the list’s share. The line is the Serbian average (${PL(A.v[L]/A.va,L)}).`)}</p>
     ${shareBars(okr,L,U("Okrug","District"))}</div>
@@ -850,7 +850,7 @@ function viewListe(){
      <p class="note">${U("Prema broju upisanih birača; u zagradi je broj mesta. Crta je prosek Srbije.","By registered voters; the number of stations is in brackets. The line is the Serbian average.")}</p>
      ${shareBars(sizeB,L,U("Upisanih","Registered"))}</div>
    </div>
-   <div class="grid2 block">
+   <div class="block">
     <div><h3>${U("Po izlaznosti","By turnout")}</h3>
      <p class="note">${U("Biračka mesta prema izlaznosti; u zagradi je broj mesta. Crta je prosek Srbije.","Polling stations by turnout; the number of stations is in brackets. The line is the Serbian average.")}</p>
      ${shareBars(turnB,L,U("Izlaznost","Turnout"))}</div>
