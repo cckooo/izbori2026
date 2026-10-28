@@ -1459,14 +1459,15 @@ function odlBlock(){
     if(x.t==="pon")return r&&r.e?U("Glasanje poništeno, ponovljeno; rezultat je unet","Vote annulled and repeated; result entered"):U("Glasanje poništeno; rezultat još nije unet (čeka se ponovno glasanje)","Vote annulled; no result yet (awaiting repeat vote)");
     if(x.t==="odb")return /ОДБАЦ/.test(u)?U("Zahtev za poništenje glasanja odbačen","Request to annul the vote dismissed"):U("Zahtev za poništenje glasanja odbijen","Request to annul the vote rejected");
     return /УСВАЈ/.test(u)?U("Prigovor usvojen","Objection upheld"):/ОДБАЦ/.test(u)?U("Prigovor odbačen","Objection dismissed"):/ОДБИЈ/.test(u)?U("Prigovor odbijen","Objection rejected"):U("Rešenje po prigovoru","Decision on an objection")};
+  // link: ODLUKE su već kodirane (odluke_rik.py), rešenja o ispravci (KOR) nisu, pa se kodiraju ovde (inače %20 -> %2520)
   const items=ODL.map(x=>({o:x.o,n:x.n,r:rowOf(x.o,x.n),txt:opis(x),link:x.link,v:x.vreme,ord:{pon:0,odb:1,pri:2}[x.t]}))
-    .concat(ROWS.filter(ponovljeno).filter(r=>!PON_BM.has(r.op+"|"+r.n)).map(r=>{const k=(KOR[r.id]||[]).find(k=>/поновно/.test(k[0]));
-      return {o:r.op,n:r.n,r,txt:U("Ponovljeno glasanje; rezultat je unet","Repeat vote; result entered"),link:korUrl(k[1]),v:0,ord:0}}))
+    .concat(ROWS.filter(ponovljeno).filter(r=>!PON_BM.has(r.op+"|"+r.n)).map(r=>{const k=(KOR[r.id]||[]).find(k=>/поновно/.test(k[0])),u=korUrl(k[1]);
+      return {o:r.op,n:r.n,r,txt:U("Ponovljeno glasanje; rezultat je unet","Repeat vote; result entered"),link:u?encodeURI(u):"",v:0,ord:0}}))
     .sort((a,b)=>a.ord-b.ord||b.v-a.v);
   if(!items.length)return "";
   const ol=U("Opština, biračko mesto","Municipality, polling station"),dl=U("Odluka","Decision"),tl=U("Objavljeno","Published"),rl=U("Rešenje","Decision");
   const body=items.map(x=>`<tr><td class="ttl" data-l="${ol}"><b>${esc(T(OP[x.o].name))}</b>${x.n?`, ${U("BM","PS")} ${x.n}`:""}${x.r?`<br><span class="muted" style="font-size:.85rem">${esc(T(x.r.nm))}</span>`:""}</td>
-    <td data-l="${dl}" style="white-space:normal">${x.txt}</td><td data-l="${tl}">${x.v?dt(x.v):"–"}</td><td data-l="${rl}">${x.link?`<a href="${esc(encodeURI(x.link))}" target="_blank" rel="noopener">PDF</a>`:"–"}</td></tr>`).join("");
+    <td data-l="${dl}" style="white-space:normal">${x.txt}</td><td data-l="${tl}">${x.v?dt(x.v):"–"}</td><td data-l="${rl}">${x.link?`<a href="${esc(x.link)}" target="_blank" rel="noopener">PDF</a>`:"–"}</td></tr>`).join("");
   return `<div class="block"><h3>${U("Poništenja i prigovori","Annulments and objections")}</h3>
     <p class="note">${U("Rešenja opštinskih izbornih komisija objavljena na sajtu RIK-a: poništeno glasanje na biračkom mestu, zahtevi za poništenje i prigovori, i mesta na kojima je glasanje ponovljeno. Osvežava se sa podacima.","Decisions of municipal electoral commissions published on the RIK website: annulled votes at polling stations, requests for annulment, objections, and stations where voting was repeated. Updated with the data.")}</p>
     <div class="tw"><table class="cards"><thead><tr><th>${ol}</th><th>${dl}</th><th>${tl}</th><th>${rl}</th></tr></thead><tbody>${body}</tbody></table></div></div>`;
