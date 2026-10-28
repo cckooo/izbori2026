@@ -129,14 +129,21 @@ def main():
     res["bg"] = [path(G[e["id"]], s, minx, miny, TOL) for e in kosovo if e["id"] not in used and G.get(e["id"])]
     # uvećani isečci za Beograd i Niš (gradske opštine su premale na glavnoj mapi)
     okrug = {n: data["okruzi"][o] for n, o in data["opstine"]}
+    # oba isečka u istoj razmeri (Beograd širok 300 px), da Niš ne izgleda veliko kao Beograd;
+    # pk = piksela po kilometru (1° geografske širine ≈ 111,2 km), za crtu razmere na sajtu
+    ins = {}
     for key, word in (("bg", "Београд"), ("ni", "Нишав")):
         ins_ops = [n for n in pick if n.startswith("Градска општина") and pick[n] and word in okrug[n]]
         pts = [p for n in ins_ops for r in G[pick[n][0]] for p in r]
         if pts:
+            ins[key] = (ins_ops, pts)
+    if "bg" in ins:
+        pts = ins["bg"][1]
+        sw = 300 / (max(p[0] for p in pts) * k - min(p[0] for p in pts) * k)
+        for key, (ins_ops, pts) in ins.items():
             ox, oy = min(p[0] for p in pts) * k, min(-p[1] for p in pts)
-            sw = 300 / ((max(p[0] for p in pts) * k) - ox)
-            res["ins"][key] = {"w": 300, "h": round((max(-p[1] for p in pts) - oy) * sw),
-                               "o": {n: path(G[pick[n][0]], sw, ox, oy, TOL) for n in ins_ops}}
+            res["ins"][key] = {"w": round((max(p[0] for p in pts) * k - ox) * sw), "h": round((max(-p[1] for p in pts) - oy) * sw),
+                               "pk": round(sw / 111.2, 4), "o": {n: path(G[pick[n][0]], sw, ox, oy, TOL) for n in ins_ops}}
     line = "const MAPA=" + json.dumps(res, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c") + ";"  # `<` u podacima ne sme da zatvori <script>
     html, n = re.subn(r"^const MAPA=.*;(?=\r?$)", lambda _: line, html, count=1, flags=re.M)
     if n != 1:
