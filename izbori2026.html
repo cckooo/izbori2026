@@ -1625,9 +1625,10 @@ function viewMapa(){
     legend=mapMode.startsWith("d")?`<span><span class="sw" style="background:#c2410c"></span>${U("pad","decrease")} (${f(-vals.dmx)})</span><span><span class="sw" style="background:#1f9e89"></span>${U("rast","increase")} (${f(vals.dmx)})</span>`
       :`<span>${f(vals.mn)}</span><span class="grad" style="background:linear-gradient(90deg,color-mix(in srgb,${col} 12%,transparent),${col})"></span><span>${f(vals.mx)}</span>`}
   const bg=MAP.bg.map(d=>`<path d="${d}" style="fill:var(--bar-bg);stroke:var(--surface);stroke-width:.6"/>`).join("");
-  const ins=Object.entries(MAP.ins||{}).map(([k,m])=>`<figure class="mapins"><figcaption>${k==="bg"?U("Beograd","Belgrade"):U("Niš","Niš")}</figcaption><svg viewBox="0 0 ${m.w} ${m.h}" role="img" aria-label="${k==="bg"?U("Beograd","Belgrade"):"Niš"}">${mapPaths(m.o,vals,1)}</svg></figure>`).join("");
+  const ins=Object.entries(MAP.ins||{}).map(([k,m])=>`<figure class="mapins"><figcaption>${k==="bg"?U("Beograd","Belgrade"):U("Niš","Niš")}</figcaption><svg viewBox="0 0 ${m.w} ${m.h}" role="img" aria-label="${k==="bg"?U("Beograd","Belgrade"):"Niš"}">${mapPaths(m.o,vals,1)}</svg></figure>`).join("")+
+    (location.protocol==="file:"?"":`<figure class="mapins" id="abIns"><figcaption>${U("Inostranstvo (Evropa)","Abroad (Europe)")}</figcaption></figure>`); // popunjava abroadInset
   host.innerHTML=`<h2>${U("Mapa po opštinama","Map by municipality")}</h2>${shareBtn("mpLink")}
-   <p>${U("Klik na opštinu otvara njene rezultate. Gradske opštine Beograda i Niša su uvećane u isečcima. Opštine na Kosovu i Metohiji bez biračkih mesta na ovim izborima su sive; Gora je prikazana granicom današnje opštine Dragaš.","Click a municipality to open its results. The city municipalities of Belgrade and Niš are enlarged in insets. Municipalities in Kosovo and Metohija without polling stations in this election are grey; Gora is drawn with the boundary of today's Dragaš municipality.")}</p>
+   <p>${U("Klik na opštinu otvara njene rezultate. Gradske opštine Beograda i Niša su uvećane u isečcima, a gradovi sa biračkim mestima u inostranstvu (Evropa) su u posebnom isečku. Opštine na Kosovu i Metohiji bez biračkih mesta na ovim izborima su sive; Gora je prikazana granicom današnje opštine Dragaš.","Click a municipality to open its results. The city municipalities of Belgrade and Niš are enlarged in insets, and cities with polling stations abroad (Europe) have their own inset. Municipalities in Kosovo and Metohija without polling stations in this election are grey; Gora is drawn with the boundary of today's Dragaš municipality.")}</p>
    <div class="ctl"><label>${U("Prikaz","Show")}<select id="mapMode">${modes}</select></label>${mapMode==="share"?`<label>${U("Lista","List")}<select id="mapList">${lists}</select></label>`:""}</div>
    <div class="lgd maplgd">${legend}</div>
    <div class="mapwrap"><svg class="mapsvg" viewBox="0 0 ${MAP.w} ${MAP.h}" role="img" aria-label="${U("Mapa Srbije po opštinama","Map of Serbia by municipality")}">${bg}${mapPaths(MAP.o,vals,1)}</svg><div class="mapside">${ins}<p id="mapInfo" class="note" style="min-height:2.6em"></p></div></div>
@@ -1639,6 +1640,27 @@ function viewMapa(){
     p.onclick=()=>{state.okF="";state.opSearch=p.dataset.op;go("opstine")};
     p.onmouseenter=()=>{$("#mapInfo").textContent=p.querySelector("title").textContent};
   });
+  loadAbroad().then(m=>{if(m&&cur==="mapa")abroadInset(m,vals)});
+}
+// isečak „Inostranstvo“ na mapi Srbije: gradovi u Evropi, ista boja i skala kao opštine; promena od 2023. postoji
+// samo za inostranstvo u celini, pa su tada svi krugovi u toj boji
+function abroadInset(m,vals){
+  const fig=$("#abIns");if(!fig)return;
+  const ai=OP.findIndex((o,i)=>ABROAD(i)),vb=m.vb.evropa,k=vb[2]/340,whole=vals.get(ai);
+  const cs=abroadGroups(ai,io=>io[0]+"|"+io[1]).filter(c=>c.io[3]>=vb[0]&&c.io[3]<=vb[0]+vb[2]&&c.io[4]>=vb[1]&&c.io[4]<=vb[1]+vb[3]);
+  const mxg=Math.max(1,...cs.map(c=>c.a.gl||0)),cl=x=>Math.min(1,Math.max(0,x));
+  const val=a=>{if(!a.va)return null;
+    if(mapMode==="win"){const s=a.v[a.win]/a.va;return {c:LISTS[a.win].c,o:.35+.65*cl((s-.3)/.5),t:`${LISTS[a.win].short} ${P(s)}`}}
+    if(mapMode==="share"){const s=a.v[mapList]/a.va;return {c:LISTS[mapList].c,o:.12+.88*cl((s-vals.mn)/((vals.mx-vals.mn)||1)),t:`${LISTS[mapList].short} ${PL(s,mapList)}`}}
+    if(mapMode==="turn")return {c:"var(--accent)",o:.12+.88*cl((a.turn-vals.mn)/((vals.mx-vals.mn)||1)),t:`${U("izlaznost","turnout")} ${P(a.turn)}`};
+    return whole?{c:whole.v>=0?"#1f9e89":"#c2410c",o:Math.min(1,.12+Math.abs(whole.v)/vals.dmx*.88),t:U("inostranstvo ukupno: ","abroad total: ")+whole.t}:null};
+  const circ=cs.sort((p,q)=>(q.a.gl||0)-(p.a.gl||0)).map(c=>{const v=val(c.a),r=(c.a.va?2.5+7*Math.sqrt(c.a.gl/mxg):2.5)*k;
+    return `<circle cx="${c.io[3]}" cy="${c.io[4]}" r="${r.toFixed(1)}" style="fill:${v?v.c:"var(--surface)"};fill-opacity:${v?v.o.toFixed(2):1};stroke:${v?"var(--surface)":"var(--muted)"};stroke-width:${(k*.8).toFixed(2)}"><title>${esc(T(c.io[1])+" ("+T(c.io[0])+"): "+(v?T(v.t):U("rezultat još nije unet","not yet counted")))}</title></circle>`}).join("");
+  fig.innerHTML=`<figcaption>${U("Inostranstvo (Evropa)","Abroad (Europe)")}</figcaption><svg viewBox="${vb.join(" ")}" role="img" aria-label="${U("Inostranstvo","Abroad")}" style="cursor:pointer">
+    <path d="${m.land}" style="fill:var(--bar-bg);stroke:var(--surface);stroke-width:${(k*.6).toFixed(2)}"></path><path d="${m.home}" style="fill:var(--muted);fill-opacity:.45"></path>${circ}</svg>`;
+  locNode(fig);
+  $("svg",fig).onclick=()=>{state.okF="";state.opSearch=String(ai);state.osub="rezultati";go("opstine")};
+  $$("circle",fig).forEach(c=>c.onmouseenter=()=>{$("#mapInfo").textContent=c.querySelector("title").textContent});
 }
 
 /* ---------- Mapa naselja izabrane opštine (mapa_naselja.py; podeli_sajt.py -> naselja/<opština>.json, preuzima se kad zatreba) ---------- */
