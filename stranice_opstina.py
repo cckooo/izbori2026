@@ -16,6 +16,7 @@ Ako nešto ne uspe, objava ide dalje bez ovih stranica.
 import functools
 import html as H
 import http.server
+import json
 import re
 import sys
 import threading
@@ -41,13 +42,17 @@ JS_OP = r"""i => {
   const nas=[...g].map(([k,rs])=>{const x=agg(rs),pp=popOf(k);return {name:k?T(k):"(naselje nije utvrđeno)",n:rs.length,up:x.up,pop:pp&&pp>=x.up?pp:null,
     turn:x.turn,win:x.va?x.win:-1,sh:x.va?x.v[x.win]/x.va:null}}).sort((p,q)=>q.up-p.up);
   const c=cmp23([i],a);
+  // opis za pretragu: brojke na početku (Google prikaže ~155 znakova), pa 2023. i popis
+  const bareT=T(o.full.replace(/^(Градска општина|Град|Општина) /,"")),Ls=k=>`${LISTS[a.rank[k]].short} ${P(a.v[a.rank[k]]/a.va)}`;
+  const d0=a.va?`${bareT}, izbori 2026: ${Ls(0)}, ${Ls(1)}. Izlaznost ${P(a.turn)}${c?` (2023: ${P(c.t0)})`:""}.${popAll?` Popis 2022: ${N(popAll)} stanovnika.`:""} Poređenje sa 2023. i rezultati po selima.`:"";
+  const desc=script==="cyr"?cyr(d0):d0;
   // zbirni tekst: ista funkcija kao u interaktivnom prikazu (opSum u izbori2026.html)
   const bareC=o.full.replace(/^(Градска општина|Град|Општина) /,""),bare=lat(bareC); // „Чачак“ bez „Град“
   const sum=opSum(i);
   return {slug:opSlug(i),name:T(o.name),full:T(o.full),bare,bareC,okrug:T(OK[o.ok].name),status:statusLine(a),sum,sumC:cyr(sum),
     rows:listRows(a),nas:nas.map(e=>({...e,lst:e.win>=0?LISTS[e.win].short:"",c:e.win>=0?LISTS[e.win].c:"",
       shs:e.sh==null?"–":P(e.sh),ts:e.turn==null?"–":P(e.turn),ups:N(e.up),pops:e.pop?N(e.pop):"–"})),
-    pop:popAll?N(popAll):"",c23:c?{t0:P(c.t0),t1:P(c.t1),v0:P(c.v0),v1:P(c.v1),nt0:N(c.n.t0),nt1:N(c.n.t1),nv0:N(c.n.v0),nv1:N(c.n.v1)}:null,
+    pop:popAll?N(popAll):"",desc,c23:c?{t0:P(c.t0),t1:P(c.t1),v0:P(c.v0),v1:P(c.v1),nt0:N(c.n.t0),nt1:N(c.n.t1),nv0:N(c.n.v0),nv1:N(c.n.v1)}:null,
     top:a.va?a.rank.slice(0,4).map(k=>({n:cyr(LISTS[k].short),c:LISTS[k].c,p:a.v[k]/a.va,ps:P(a.v[k]/a.va)})):[],
     turn:a.turn==null?"–":P(a.turn),nd:a.nd,n:a.n,win:a.win>=0?LISTS[a.win].short:"",
     winp:a.win>=0&&a.va?P(a.v[a.win]/a.va):""};
@@ -98,11 +103,11 @@ def page(op, s, css, fonts, snap, map_svg, legend, okr_links):
     url = BASE + path + ("lat/" if s == "lat" else "")
     if s == "cyr":
         title = f"Резултати избора 2026: {op['bareC']} ({op['bare']}) – по бирачким местима и селима"
-        desc = (op["sumC"].split(". Излазност")[0] + ". Поређење са 2023, попис 2022, мапа села и резултати по насељима.") if op["sumC"] else \
+        desc = op["desc"] or \
             f"Парламентарни избори 2026, {op['full']} ({op['okrug']}): резултати по насељима и бирачким местима."
     else:
         title = f"Rezultati izbora 2026: {op['bare']} ({op['bareC']}) – po biračkim mestima i selima"
-        desc = (op["sum"].split(". Izlaznost")[0] + ". Poređenje sa 2023, popis 2022, mapa sela i rezultati po naseljima.") if op["sum"] else \
+        desc = op["desc"] or \
             f"Parlamentarni izbori 2026, {op['full']} ({op['okrug']}): rezultati po naseljima i biračkim mestima."
     nas_rows = "".join(
         f'<tr><td class="ttl" data-l="Naselje"><b>{e(x["name"])}</b></td><td class="num" data-l="Biračkih mesta">{x["n"]}</td>'
@@ -118,6 +123,17 @@ def page(op, s, css, fonts, snap, map_svg, legend, okr_links):
            '</tbody></table></div><p class="note">U zagradi je broj glasalih, odnosno glasova za listu. Izvor za 2023: RIK, rezultati po biračkim mestima. '
            f'Više u delu <a data-jl href="/?jezik={s}#opstina/{op["slug"]}/p2023">Poređenje sa 2023.</a></p></div>') if c else ""
     pop = f" Po popisu 2022. ima {op['pop']} stanovnika." if op["pop"] else ""
+    # strukturisani podaci za Google: skup podataka (izbori 2026, poređenje sa 2023, popis 2022)
+    ld = json.dumps({"@context": "https://schema.org", "@type": "Dataset", "name": title, "description": desc, "url": url,
+                     "inLanguage": "sr-Cyrl" if s == "cyr" else "sr-Latn",
+                     "keywords": [f"izbori 2026 {op['bare']}", f"rezultati izbora {op['bare']}", "rezultati po selima", "biračka mesta",
+                                  "izbori 2023", "popis stanovništva 2022"],
+                     "temporalCoverage": "2023/2026", "spatialCoverage": {"@type": "Place", "name": f"{op['full']}, Srbija"},
+                     "variableMeasured": ["izlaznost", "glasovi po izbornim listama", "izlaznost i rezultati 2023.", "broj stanovnika (popis 2022)"],
+                     "isBasedOn": ["https://www.rik.parlament.gov.rs/542645/rezultati/", "https://www.stat.gov.rs/"],
+                     "isPartOf": {"@type": "WebSite", "name": "izbori26.rs", "url": BASE + "/"},
+                     "creator": {"@type": "Organization", "name": "izbori26.rs", "url": BASE + "/"}},
+                    ensure_ascii=False).replace("<", "\\u003c")
     app_hash = f"#opstina/{op['slug']}"
     app = f"/?jezik={s}{app_hash}"
     home = "/opstina/" + ("lat/" if s == "lat" else "")
@@ -144,6 +160,7 @@ def page(op, s, css, fonts, snap, map_svg, legend, okr_links):
 <title>{e(title)}</title>
 <meta name="description" content="{e(desc)}">
 <link rel="canonical" href="{url}">{alt_links(path)}
+<script type="application/ld+json">{ld}</script>
 <meta property="og:type" content="article"><meta property="og:site_name" content="izbori26.rs"><meta property="og:locale" content="sr_RS">
 <meta property="og:url" content="{url}"><meta property="og:title" content="{e(title)}"><meta property="og:description" content="{e(desc)}">
 <meta property="og:image" content="{BASE}{path}og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">

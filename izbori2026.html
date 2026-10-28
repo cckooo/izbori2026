@@ -4,14 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Izbori 2026: rezultati po biračkim mestima i selima</title>
-<meta name="description" content="Rezultati parlamentarnih izbora u Srbiji 2026. za 8.392 biračka mesta: svih 18 lista, izlaznost po selima, poređenje sa izborima 2023, popis stanovništva 2022 i zapisnici RIK-a.">
+<meta name="description" content="Rezultati izbora 2026. po biračkim mestima i selima, sa poređenjem sa izborima 2023. i popisom stanovništva 2022: izlaznost, svih 18 lista, mapa i zapisnici RIK-a.">
 <link rel="canonical" href="https://izbori26.rs/">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Dataset","name":"Rezultati parlamentarnih izbora u Srbiji 2026. po biračkim mestima i selima","alternateName":"Izbori 2026: rezultati po biračkim mestima","description":"Rezultati parlamentarnih izbora u Srbiji održanih 25. oktobra 2026. za 8.392 biračka mesta: glasovi svih 18 izbornih lista, izlaznost, nevažeći listići i zapisnici RIK-a, sabrano po selima (naseljima), opštinama i okruzima. Uz to poređenje sa parlamentarnim izborima 2023. i broj stanovnika po popisu 2022.","url":"https://izbori26.rs/","inLanguage":["sr-Cyrl","sr-Latn","en"],"keywords":["izbori 2026","rezultati izbora","biračka mesta","rezultati po selima","izbori 2023","popis stanovništva 2022","izlaznost","Srbija"],"temporalCoverage":"2023/2026","spatialCoverage":{"@type":"Place","name":"Srbija"},"variableMeasured":["upisani birači","izlaznost","glasovi po izbornim listama","izlaznost i rezultati 2023.","broj stanovnika (popis 2022)"],"isBasedOn":["https://www.rik.parlament.gov.rs/542645/rezultati/","https://www.stat.gov.rs/"],"creator":{"@type":"Organization","name":"izbori26.rs","url":"https://izbori26.rs/"}}</script>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="izbori26.rs">
 <meta property="og:locale" content="sr_RS">
 <meta property="og:url" content="https://izbori26.rs/">
 <meta property="og:title" content="Izbori 2026: rezultati po biračkim mestima i selima">
-<meta property="og:description" content="Parlamentarni izbori u Srbiji, 25. oktobar 2026. Rezultati svih lista i izlaznost za svako biračko mesto i selo, poređenje sa 2023, popis 2022 i zapisnici RIK-a.">
+<meta property="og:description" content="Rezultati izbora 2026. po biračkim mestima i selima, sa poređenjem sa izborima 2023. i popisom stanovništva 2022.">
 <meta property="og:image" content="https://izbori26.rs/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -577,12 +578,14 @@ function pregledSum(A){
       `. Izlaznost je bila <b>${P(A.turn)}</b> (glasalo je ${N(A.gl)} od ${N(A.upd)} upisanih birača)`+(d!=null?`, što je ${PP(Math.abs(d))} ${d>0?"više":"manje"} nego na izborima 2023. (${P(t0)})`:"")+"."+
       (T23&&T23.va?` Lista Aleksandra Vučića dobila je ${p(0)}, prema ${P(T23.v1/T23.va)} na izborima 2023.`:"")+
       (sw2.length?` Prema proceni raspodele mandata, „${nm(sw2[0])}“ bi imala ${s[sw2[0]]} od ${SEATS} mandata`+(sw2[1]!=null?`, a „${nm(sw2[1])}“ ${s[sw2[1]]}`:"")+(rest>0?`; ostale liste ukupno ${rest}`:"")+".":"")+
-      ` Lista „${nm(r[0])}“ je bila prva u ${N(wo[r[0]])} od ${N(nop)} opština, a „${nm(r[1])}“ u ${N(wo[r[1]])}.`,
+      ` Lista „${nm(r[0])}“ je bila prva u ${N(wo[r[0]])} od ${N(nop)} opština, a „${nm(r[1])}“ u ${N(wo[r[1]])}.`+
+      ` Za svaku opštinu, selo i biračko mesto sajt prikazuje i poređenje sa izborima 2023. i broj stanovnika po popisu 2022.`,
     `In the parliamentary election of 25 October 2026 the list “${nm(r[0])}” won the most votes (<b>${p(r[0])}</b>), ahead of “${nm(r[1])}” (<b>${p(r[1])}</b>)`+(A.v[r[2]]?`, with “${nm(r[2])}” third (${p(r[2])})`:"")+
       `. Turnout was <b>${P(A.turn)}</b> (${N(A.gl)} of ${N(A.upd)} registered voters)`+(d!=null?`, ${PP(Math.abs(d))} ${d>0?"higher":"lower"} than in 2023 (${P(t0)})`:"")+"."+
       (T23&&T23.va?` The Aleksandar Vučić list won ${p(0)}, compared with ${P(T23.v1/T23.va)} in 2023.`:"")+
       (sw2.length?` By the seat estimate, “${nm(sw2[0])}” would have ${s[sw2[0]]} of ${SEATS} seats`+(sw2[1]!=null?` and “${nm(sw2[1])}” ${s[sw2[1]]}`:"")+(rest>0?`; other lists ${rest} in total`:"")+".":"")+
-      ` “${nm(r[0])}” came first in ${N(wo[r[0]])} of ${N(nop)} municipalities and “${nm(r[1])}” in ${N(wo[r[1]])}.`);
+      ` “${nm(r[0])}” came first in ${N(wo[r[0]])} of ${N(nop)} municipalities and “${nm(r[1])}” in ${N(wo[r[1]])}.`+
+      ` For every municipality, settlement and polling station the site also shows a comparison with the 2023 election and the 2022 census population.`);
 }
 function viewPregled(){
   const A=TOTAL;
