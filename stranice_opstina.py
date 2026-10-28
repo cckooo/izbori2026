@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Posebna stranica za svaku opštinu (za Google i za pregled linka na mrežama), na ćirilici (podrazumevano, kao
-glavni sajt) i latinici: _site/opstina/<slug>/index.html i _site/opstina/<slug>/lat/index.html, sa rezultatima
-svih listi, mapom sela i tabelom naselja, plus slika za pregled linka (og.png), spisak svih opština
-(_site/opstina/index.html i _site/opstina/lat/index.html), sitemap.xml i robots.txt.
+Posebna stranica za svaku opštinu (za Google i za pregled linka na mrežama) u tri verzije, kao glavni sajt:
+ćirilica (podrazumevano) _site/opstina/<slug>/, latinica _site/opstina/<slug>/lat/ i engleski
+_site/opstina/<slug>/en/, sa rezultatima svih listi, mapom sela i tabelom naselja, plus slika za pregled linka
+(og.png), spisak svih opština (_site/opstina/, lat/, en/), sitemap.xml i robots.txt.
 
 Sadržaj se uzima iz same objavljene stranice (otvori se u pregledaču, kao u prerender.py), pa su brojevi isti
 kao na sajtu; ćirilična verzija se preslovljava istom funkcijom kao na sajtu (locNode). Interaktivni prikaz
@@ -26,12 +26,19 @@ from pathlib import Path
 SITE = Path(sys.argv[1] if len(sys.argv) > 1 else "_site").resolve()
 BASE = "https://izbori26.rs"
 LAT = str.maketrans({"č": "c", "ć": "c", "š": "s", "ž": "z", "đ": "dj"})
+# verzije stranice: podfolder u odnosu na ćiriličnu
+SFX = {"cyr": "", "lat": "lat/", "en": "en/"}
 
 
 def slug(s):
     return re.sub(r"[^a-z0-9]+", "-", s.lower().translate(LAT)).strip("-")
 
-# podaci za jednu opštinu, iz stranice (na trenutnom pismu); naselja: grupisano po r.nsl kao tabela „Po naseljima“
+
+def tr(s, sr, en):
+    # tekst šablona: srpski latinicom (ćirilica nastaje preslovljavanjem, JS_CYR) ili engleski
+    return en if s == "en" else sr
+
+# podaci za jednu opštinu, iz stranice (na trenutnom pismu/jeziku); naselja: grupisano po r.nsl kao tabela „Po naseljima“
 JS_OP = r"""i => {
   const o=OP[i],a=OP_AGG[i],rows=BY_OP[i];
   const g=new Map();for(const r of rows){const k=r.nsl||"";if(!g.has(k))g.set(k,[]);g.get(k).push(r)}
@@ -39,19 +46,21 @@ JS_OP = r"""i => {
   const sp=STAN[o.full]||{},popOf=k=>{const ps=k?k.split(/, | и /).map(n=>sp[n]):[];return ps.length&&ps.every(Boolean)?ps.reduce((s,p)=>s+p[0],0):null};
   const popAll=Object.values(sp).reduce((s,p)=>s+p[0],0);
   // manje stanovnika nego upisanih: ime naselja u odluci pokriva i deo grada (npr. Љубић u Čačku), broj se ne prikazuje
-  const nas=[...g].map(([k,rs])=>{const x=agg(rs),pp=popOf(k);return {name:k?T(k):"(naselje nije utvrđeno)",n:rs.length,up:x.up,pop:pp&&pp>=x.up?pp:null,
+  const nas=[...g].map(([k,rs])=>{const x=agg(rs),pp=popOf(k);return {name:k?T(k):U("(naselje nije utvrđeno)","(settlement unknown)"),n:rs.length,up:x.up,pop:pp&&pp>=x.up?pp:null,
     turn:x.turn,win:x.va?x.win:-1,sh:x.va?x.v[x.win]/x.va:null}}).sort((p,q)=>q.up-p.up);
   const c=cmp23([i],a);
   // opis za pretragu: brojke na početku (Google prikaže ~155 znakova), pa 2023. i popis
   const bareT=T(o.full.replace(/^(Градска општина|Град|Општина) /,"")),Ls=k=>`${LISTS[a.rank[k]].short} ${P(a.v[a.rank[k]]/a.va)}`;
-  const d0=a.va?`${bareT}, izbori 2026: ${Ls(0)}, ${Ls(1)}. Izlaznost ${P(a.turn)}${c?` (2023: ${P(c.t0)})`:""}.${popAll?` Popis 2022: ${N(popAll)} stanovnika.`:""} Poređenje sa 2023. i rezultati po selima.`:"";
+  const t23=c?` (2023: ${P(c.t0)})`:"";
+  const d0=a.va?U(`${bareT}, izbori 2026: ${Ls(0)}, ${Ls(1)}. Izlaznost ${P(a.turn)}${t23}.${popAll?` Popis 2022: ${N(popAll)} stanovnika.`:""} Poređenje sa 2023. i rezultati po selima.`,
+    `${bareT}, 2026 election: ${Ls(0)}, ${Ls(1)}. Turnout ${P(a.turn)}${t23}.${popAll?` 2022 census: ${N(popAll)} residents.`:""} Comparison with 2023 and results by village.`):"";
   const desc=script==="cyr"?cyr(d0):d0;
   // kratko, za vrh stranice (ceo zbirni tekst je na dnu)
-  const kratko=a.va?`${Ls(0)}, ${Ls(1)}. Izlaznost ${P(a.turn)}${c?` (2023: ${P(c.t0)})`:""}.`:"";
+  const kratko=a.va?`${Ls(0)}, ${Ls(1)}. ${U("Izlaznost","Turnout")} ${P(a.turn)}${t23}.`:"";
   // zbirni tekst: ista funkcija kao u interaktivnom prikazu (opSum u izbori2026.html)
   const bareC=o.full.replace(/^(Градска општина|Град|Општина) /,""),bare=lat(bareC); // „Чачак“ bez „Град“
   const sum=opSum(i);
-  return {slug:opSlug(i),name:T(o.name),full:T(o.full),bare,bareC,okrug:T(OK[o.ok].name),status:statusLine(a),sum,sumC:cyr(sum),
+  return {slug:opSlug(i),name:T(o.name),full:T(o.full),bare,bareC,okrug:T(OK[o.ok].name),status:statusLine(a),sum,
     rows:listRows(a),nas:nas.map(e=>({...e,lst:e.win>=0?LISTS[e.win].short:"",c:e.win>=0?LISTS[e.win].c:"",
       shs:e.sh==null?"–":P(e.sh),ts:e.turn==null?"–":P(e.turn),ups:N(e.up),pops:e.pop?N(e.pop):"–"})),
     pop:popAll?N(popAll):"",desc,kratko,ab:ABROAD(i),c23:c?{t0:P(c.t0),t1:P(c.t1),v0:P(c.v0),v1:P(c.v1),nt0:N(c.n.t0),nt1:N(c.n.t1),nv0:N(c.n.v0),nv1:N(c.n.v1)}:null,
@@ -63,33 +72,37 @@ JS_OP = r"""i => {
 JS_CYR = r"""h => {const d=document.createElement('div');d.innerHTML=h;const s=script;script='cyr';locNode(d);script=s;return d.innerHTML}"""
 
 
-# meni kao na glavnom sajtu: kartice vode na glavni sajt na istom pismu; Ћир/Lat prebacuju između dve verzije
-# ove stranice (i pamte izbor kao na glavnom sajtu), EN otvara istu stranu na glavnom sajtu na engleskom
-TABS = [("pregled", "Pregled"), ("mapa", "Mapa"), ("liste", "Liste"), ("okruzi", "Okruzi"), ("opstine", "Opštine"),
-        ("mesta", "Biračka mesta"), ("statistika", "Statistika")]
+# meni kao na glavnom sajtu: kartice vode na glavni sajt na istom pismu/jeziku; Ћир/Lat/EN prebacuju između tri
+# verzije ove stranice (i pamte izbor kao na glavnom sajtu)
+TABS = [("pregled", "Pregled", "Overview"), ("mapa", "Mapa", "Map"), ("liste", "Liste", "Lists"), ("okruzi", "Okruzi", "Districts"),
+        ("opstine", "Opštine", "Municipalities"), ("mesta", "Biračka mesta", "Polling stations"), ("statistika", "Statistika", "Statistics")]
 MENU_CSS = """nav a{border-bottom:3px solid transparent;padding:14px 12px 11px;white-space:nowrap;color:var(--muted);font-weight:600;text-decoration:none}
-nav a[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)} nav a:hover{color:var(--ink)}
-.seg a{background:var(--surface);padding:5px 10px;color:var(--muted);font-weight:600;text-decoration:none}
-.seg a[aria-pressed="true"]{background:var(--accent);color:var(--surface)} .brand{text-decoration:none;color:inherit}
-@media (max-width:720px){nav a{padding:10px 12px 9px}}"""
+nav a[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)} nav a:hover{color:var(--ink)} .brand{text-decoration:none;color:inherit}
+@media (max-width:720px){nav a{padding:10px 12px 9px} table.cards td[data-l="Leading list"]{grid-column:1/-1}}"""
 SAVE = """onclick="try{localStorage.setItem('izbori2026.jezik','%s')}catch(e){}\""""
 
 
+def rel(s):
+    # put od verzije s do svake od tri verzije iste stranice
+    up = "" if s == "cyr" else "../"
+    return {k: (up + v) or "./" for k, v in SFX.items()}
+
+
 def head_js(s):
-    # posetilac koji je izabrao drugo pismo (ovde ili na glavnom sajtu) odmah dobija svoju verziju
-    other, to = ("lat", "lat/") if s == "cyr" else ("cyr", "../")
-    return f'<script>try{{if(localStorage.getItem("izbori2026.jezik")==="{other}")location.replace("{to}"+location.hash)}}catch(e){{}}</script>'
+    # posetilac koji je izabrao drugo pismo/jezik (ovde ili na glavnom sajtu) odmah dobija svoju verziju
+    return (f'<script>try{{var j=localStorage.getItem("izbori2026.jezik"),m={json.dumps(rel(s))};'
+            f'if(j&&j!=="{s}"&&m[j])location.replace(m[j]+location.hash)}}catch(e){{}}</script>')
 
 
-def header(app_hash, s):
-    nav = "".join(f'<a role="tab" data-jl href="/?jezik={s}#{k}"' + (' aria-selected="true"' if k == "opstine" else "") + f">{n}</a>" for k, n in TABS)
-    cy = '<a aria-pressed="true" href="#">Ћир</a>' if s == "cyr" else f'<a href="../" {SAVE % "cyr"}>Ћир</a>'
-    la = f'<a href="lat/" {SAVE % "lat"}>Lat</a>' if s == "cyr" else '<a aria-pressed="true" href="#">Lat</a>'
-    lang = f'{cy}{la}<a href="/?jezik=en{app_hash}">EN</a>'
-    # ako je pismo već sačuvano, linkovi na glavni sajt bez ?jezik= (ostaje izbor posetioca)
-    return (f'<header class="top"><div class="top-in"><a class="brand" data-jl href="/?jezik={s}">Izbori 2026</a>'
-            f'<nav id="tabs" aria-label="Pregledi">{nav}</nav><div class="seg keep" id="lang" role="group">{lang}</div></div></header>'
-            '<script>try{if(localStorage.getItem("izbori2026.jezik"))document.querySelectorAll("a[data-jl]").forEach(a=>a.href=a.getAttribute("href").replace(/\\?jezik=(lat|cyr)/,""))}catch(e){}'
+def header(s):
+    nav = "".join(f'<a role="tab" data-jl href="/?jezik={s}#{k}"' + (' aria-selected="true"' if k == "opstine" else "") + f">{tr(s, sr, en)}</a>" for k, sr, en in TABS)
+    m = rel(s)
+    lang = "".join(f'<a aria-pressed="true" href="#">{lab}</a>' if k == s else f'<a href="{m[k]}" {SAVE % k}>{lab}</a>'
+                   for k, lab in (("cyr", "Ћир"), ("lat", "Lat"), ("en", "EN")))
+    # ako je izbor već sačuvan, linkovi na glavni sajt bez ?jezik= (ostaje izbor posetioca)
+    return (f'<header class="top"><div class="top-in"><a class="brand" data-jl href="/?jezik={s}">{tr(s, "Izbori 2026", "Elections 2026")}</a>'
+            f'<nav id="tabs" aria-label="{tr(s, "Pregledi", "Views")}">{nav}</nav><div class="seg keep" id="lang" role="group" aria-label="{tr(s, "Jezik i pismo", "Language")}">{lang}</div></div></header>'
+            '<script>try{if(localStorage.getItem("izbori2026.jezik"))document.querySelectorAll("a[data-jl]").forEach(a=>a.href=a.getAttribute("href").replace(/\\?jezik=(lat|cyr|en)/,""))}catch(e){}'
             # kao na glavnom sajtu: izabrana kartica u vidnom polju, bledi prelaz dok ima još kartica sa strane
             '(function(){var n=document.getElementById("tabs"),s=n.querySelector("[aria-selected=true]");'
             'function h(){n.classList.toggle("more-r",n.scrollLeft+n.clientWidth<n.scrollWidth-4);n.classList.toggle("more-l",n.scrollLeft>4)}'
@@ -98,90 +111,110 @@ def header(app_hash, s):
 
 
 def alt_links(path):
-    # ista stranica na oba pisma (Google prikazuje onu na pismu pretrage)
+    # ista stranica na tri verzije (Google prikazuje onu na pismu/jeziku pretrage)
     return (f'<link rel="alternate" hreflang="sr-Cyrl" href="{BASE}{path}"><link rel="alternate" hreflang="sr-Latn" href="{BASE}{path}lat/">'
-            f'<link rel="alternate" hreflang="x-default" href="{BASE}{path}">')
+            f'<link rel="alternate" hreflang="en" href="{BASE}{path}en/"><link rel="alternate" hreflang="x-default" href="{BASE}{path}">')
+
+
+def html_lang(s):
+    return {"cyr": "sr-Cyrl", "lat": "sr-Latn", "en": "en"}[s]
 
 
 def page(op, s, css, fonts, snap, map_svg, legend, okr_links):
-    # op: podaci na pismu stranice; latinični tekst šablona u ćiriličnoj verziji preslovljava JS_CYR (u main)
+    # op: podaci na pismu/jeziku stranice; latinični tekst šablona u ćiriličnoj verziji preslovljava JS_CYR (u main)
     e = H.escape
+    t = functools.partial(tr, s)
     path = f"/opstina/{op['slug']}/"
-    url = BASE + path + ("lat/" if s == "lat" else "")
+    url = BASE + path + SFX[s]
     if s == "cyr":
         title = f"Резултати избора 2026: {op['bareC']} ({op['bare']}) – по бирачким местима и селима"
-        desc = op["desc"] or \
-            f"Парламентарни избори 2026, {op['full']} ({op['okrug']}): резултати по насељима и бирачким местима."
+        desc = op["desc"] or f"Парламентарни избори 2026, {op['full']} ({op['okrug']}): резултати по насељима и бирачким местима."
+    elif s == "en":
+        title = f"2026 Serbian election results: {op['bare']} ({op['bareC']}) – by polling station and village"
+        desc = op["desc"] or f"2026 parliamentary election, {op['full']} ({op['okrug']}): results by settlement and polling station."
     else:
         title = f"Rezultati izbora 2026: {op['bare']} ({op['bareC']}) – po biračkim mestima i selima"
-        desc = op["desc"] or \
-            f"Parlamentarni izbori 2026, {op['full']} ({op['okrug']}): rezultati po naseljima i biračkim mestima."
+        desc = op["desc"] or f"Parlamentarni izbori 2026, {op['full']} ({op['okrug']}): rezultati po naseljima i biračkim mestima."
     ab = op["ab"]  # inostranstvo: države umesto naselja, bez popisa
-    unit = "Država" if ab else "Naselje"
+    unit = t("Država", "Country") if ab else t("Naselje", "Settlement")
+    hb, hp, hu, ht, hw = t("Biračkih mesta", "Polling stations"), t("Stanovnika (2022)", "Population (2022)"), t("Upisano", "Registered"), \
+        t("Izlaznost", "Turnout"), t("Prva lista", "Leading list")
     rows = [
-        f'<tr><td class="ttl" data-l="{unit}"><b>{e(x["name"])}</b></td><td class="num" data-l="Biračkih mesta">{x["n"]}</td>'
-        + ("" if ab else f'<td class="num" data-l="Stanovnika (2022)">{x["pops"]}</td>') +
-        f'<td class="num" data-l="Upisano">{x["ups"]}</td><td class="num" data-l="Izlaznost">{x["ts"]}</td>'
-        f'<td data-l="Prva lista">' + (f'<span class="sw" style="background:{x["c"]}"></span>{e(x["lst"])} {x["shs"]}' if x["lst"] else "–")
+        f'<tr><td class="ttl" data-l="{unit}"><b>{e(x["name"])}</b></td><td class="num" data-l="{hb}">{x["n"]}</td>'
+        + ("" if ab else f'<td class="num" data-l="{hp}">{x["pops"]}</td>') +
+        f'<td class="num" data-l="{hu}">{x["ups"]}</td><td class="num" data-l="{ht}">{x["ts"]}</td>'
+        f'<td data-l="{hw}">' + (f'<span class="sw" style="background:{x["c"]}"></span>{e(x["lst"])} {x["shs"]}' if x["lst"] else "–")
         + "</td></tr>" for x in op["nas"]]
-    thead = (f'<thead><tr><th>{unit}</th><th class="num">Biračkih mesta</th>{"" if ab else "<th class=num>Stanovnika (2022)</th>"}'
-             '<th class="num">Upisano</th><th class="num">Izlaznost</th><th>Prva lista</th></tr></thead>')
+    thead = (f'<thead><tr><th>{unit}</th><th class="num">{hb}</th>{"" if ab else f"<th class=num>{hp}</th>"}'
+             f'<th class="num">{hu}</th><th class="num">{ht}</th><th>{hw}</th></tr></thead>')
     # prvih 15 odmah, ostala na klik (details: bez JavaScript-a, Google vidi sva); stranica na telefonu inače ima 10.000+ px
     nas_tbl = f'<div class="tw"><table class="cards">{thead}<tbody>{"".join(rows[:15])}</tbody></table></div>'
     if len(rows) > 15:
-        nas_tbl += (f'<details class="more"><summary class="btn ghost">Prikaži sve ({len(rows)})</summary>'
+        nas_tbl += (f'<details class="more"><summary class="btn ghost">{t("Prikaži sve", "Show all")} ({len(rows)})</summary>'
                     f'<div class="tw"><table class="cards">{thead}<tbody>{"".join(rows[15:])}</tbody></table></div></details>')
     nas_tbl = f'<div class="nast">{nas_tbl}</div>'
     c = op["c23"]
-    cmp = (f'<div class="block"><h2>Poređenje sa izborima 2023.</h2><div class="tw"><table class="cards"><thead><tr><th></th>'
-           f'<th class="num">2023.</th><th class="num">2026.</th></tr></thead><tbody>'
-           f'<tr><td class="ttl" data-l=""><b>Izlaznost</b></td><td class="num" data-l="2023.">{c["t0"]} ({c["nt0"]})</td><td class="num" data-l="2026.">{c["t1"]} ({c["nt1"]})</td></tr>'
-           f'<tr><td class="ttl" data-l=""><b>Lista Aleksandra Vučića</b></td><td class="num" data-l="2023.">{c["v0"]} ({c["nv0"]})</td><td class="num" data-l="2026.">{c["v1"]} ({c["nv1"]})</td></tr>'
-           '</tbody></table></div><p class="note">U zagradi je broj glasalih, odnosno glasova za listu. Izvor za 2023: RIK, rezultati po biračkim mestima. '
-           f'Više u delu <a data-jl href="/?jezik={s}#opstina/{op["slug"]}/p2023">Poređenje sa 2023.</a></p></div>') if c else ""
-    pop = f" Po popisu 2022. ima {op['pop']} stanovnika." if op["pop"] else ""
+    cmp = (f'<div class="block"><h2>{t("Poređenje sa izborima 2023.", "Comparison with the 2023 election")}</h2><div class="tw"><table class="cards"><thead><tr><th></th>'
+           f'<th class="num">2023</th><th class="num">2026</th></tr></thead><tbody>'
+           f'<tr><td class="ttl" data-l=""><b>{ht}</b></td><td class="num" data-l="2023">{c["t0"]} ({c["nt0"]})</td><td class="num" data-l="2026">{c["t1"]} ({c["nt1"]})</td></tr>'
+           f'<tr><td class="ttl" data-l=""><b>{t("Lista Aleksandra Vučića", "Aleksandar Vučić list")}</b></td><td class="num" data-l="2023">{c["v0"]} ({c["nv0"]})</td><td class="num" data-l="2026">{c["v1"]} ({c["nv1"]})</td></tr>'
+           f'</tbody></table></div><p class="note">{t("U zagradi je broj glasalih, odnosno glasova za listu. Izvor za 2023: RIK, rezultati po biračkim mestima.", "In brackets: number of voters, or votes for the list. Source for 2023: RIK, results by polling station.")} '
+           f'{t("Više u delu", "More in")} <a data-jl href="/?jezik={s}#opstina/{op["slug"]}/p2023">{t("Poređenje sa 2023.", "Compared with 2023")}</a></p></div>') if c else ""
+    pop = (" " + t(f"Po popisu 2022. ima {op['pop']} stanovnika.", f"Population (2022 census): {op['pop']}.")) if op["pop"] else ""
     # strukturisani podaci za Google: skup podataka (izbori 2026, poređenje sa 2023, popis 2022)
     ld = json.dumps({"@context": "https://schema.org", "@type": "Dataset", "name": title, "description": desc, "url": url,
-                     "inLanguage": "sr-Cyrl" if s == "cyr" else "sr-Latn",
+                     "inLanguage": html_lang(s),
                      "keywords": [f"izbori 2026 {op['bare']}", f"rezultati izbora {op['bare']}", "rezultati po selima", "biračka mesta",
-                                  "izbori 2023", "popis stanovništva 2022"],
-                     "temporalCoverage": "2023/2026", "spatialCoverage": {"@type": "Place", "name": f"{op['full']}, Srbija"},
-                     "variableMeasured": ["izlaznost", "glasovi po izbornim listama", "izlaznost i rezultati 2023.", "broj stanovnika (popis 2022)"],
+                                  "izbori 2023", "popis stanovništva 2022"] if s != "en" else
+                                 [f"Serbia election 2026 {op['bare']}", f"{op['bare']} election results", "results by village", "polling stations",
+                                  "2023 election", "2022 census"],
+                     "temporalCoverage": "2023/2026", "spatialCoverage": {"@type": "Place", "name": f"{op['full']}, {t('Srbija', 'Serbia')}"},
+                     "variableMeasured": ["izlaznost", "glasovi po izbornim listama", "izlaznost i rezultati 2023.", "broj stanovnika (popis 2022)"] if s != "en" else
+                                         ["turnout", "votes by electoral list", "2023 turnout and results", "population (2022 census)"],
                      "isBasedOn": ["https://www.rik.parlament.gov.rs/542645/rezultati/", "https://www.stat.gov.rs/"],
                      "isPartOf": {"@type": "WebSite", "name": "izbori26.rs", "url": BASE + "/"},
                      "creator": {"@type": "Organization", "name": "izbori26.rs", "url": BASE + "/"}},
                     ensure_ascii=False).replace("<", "\\u003c")
-    app_hash = f"#opstina/{op['slug']}"
-    app = f"/?jezik={s}{app_hash}"
-    home = "/opstina/" + ("lat/" if s == "lat" else "")
+    app = f"/?jezik={s}#opstina/{op['slug']}"
+    home = "/opstina/" + SFX[s]
+    if map_svg and ab:
+        mapb = (f'<div class="block"><h2>{t("Mapa: gradovi u Evropi, ko je prvi", "Map: cities in Europe, who came first")}</h2><div class="lgd maplgd">{legend}</div><div class="mapwrap">{map_svg}</div>'
+                f'<p class="note">{t("Krug je grad sa biračkim mestima, veličina prati broj glasalih.", "Each circle is a city with polling stations; size follows the number of voters.")} '
+                f'{t("Granice", "Boundaries")}: <span class="keep">Natural Earth</span>.</p></div>')
+    elif map_svg:
+        mapb = (f'<div class="block"><h2>{t("Mapa sela: ko je prvi", "Village map: who came first")}</h2><div class="lgd maplgd">{legend}</div><div class="mapwrap">{map_svg}</div>'
+                f'<p class="note">{t("Bleđa boja znači tesniju pobedu. Granice: ©", "A paler colour means a closer win. Boundaries: ©")} <span class="keep">OpenStreetMap</span> '
+                f'{t("saradnici", "contributors")} (<span class="keep">ODbL</span>).</p></div>')
+    else:
+        mapb = ""
+    nash = (f'<div class="block"><h2>{t("Rezultati po državama", "Results by country")}</h2><p class="note">{t("Biračka mesta sabrana po državi, poređano po broju upisanih birača.", "Polling stations summed by country, sorted by registered voters.")}</p>' if ab else
+            f'<div class="block"><h2>{t("Rezultati po naseljima i popis 2022.", "Results by settlement and the 2022 census")}</h2><p class="note">{t("Biračka mesta sabrana po naselju, poređano po broju upisanih birača. Broj stanovnika: popis 2022. (RZS).", "Polling stations summed by settlement, sorted by registered voters. Population: 2022 census (RZS).")}</p>')
     body = f"""<body>
-{header(app_hash, s)}
+{header(s)}
 <main class="stp">
-<h1>Rezultati izbora 2026: {e(op['full'])}</h1>
+<h1>{t("Rezultati izbora 2026", "2026 election results")}: {e(op['full'])}</h1>
 <p class="lead">{e(op['kratko']) or e(op['full'] + ', ' + op['okrug'] + '.')}</p>
 <p class="note">{e(op['full'])}, {e(op['okrug'])}.{pop} {op['status']}</p>
-<div class="cta"><a class="btn" data-jl href="{app}">Mapa sela, biračka mesta i poređenje sa 2023. →</a><a class="btn ghost" data-jl href="/?jezik={s}#pregled">Gde ja glasam?</a></div>
-<div class="block"><h2>Rezultati svih listi</h2><p class="note">Udeo u važećim glasovima, na biračkim mestima sa unetim rezultatom.</p>
+<div class="cta"><a class="btn" data-jl href="{app}">{t("Mapa sela, biračka mesta i poređenje sa 2023. →", "Village map, polling stations and comparison with 2023 →")}</a><a class="btn ghost" data-jl href="/?jezik={s}#pregled">{t("Gde ja glasam?", "Where do I vote?")}</a></div>
+<div class="block"><h2>{t("Rezultati svih listi", "Results of all lists")}</h2><p class="note">{t("Udeo u važećim glasovima, na biračkim mestima sa unetim rezultatom.", "Share of valid votes, at polling stations with results entered.")}</p>
 <div class="dlg" style="padding:0;max-height:none;overflow:visible">{op['rows']}</div></div>
 {cmp}
-{f'<div class="block"><h2>Mapa: gradovi u Evropi, ko je prvi</h2><div class="lgd maplgd">{legend}</div><div class="mapwrap">{map_svg}</div><p class="note">Krug je grad sa biračkim mestima, veličina prati broj glasalih. Granice: <span class="keep">Natural Earth</span>.</p></div>' if map_svg and ab else
-  f'<div class="block"><h2>Mapa sela: ko je prvi</h2><div class="lgd maplgd">{legend}</div><div class="mapwrap">{map_svg}</div><p class="note">Bleđa boja znači tesniju pobedu. Granice: © <span class="keep">OpenStreetMap</span> saradnici (<span class="keep">ODbL</span>).</p></div>' if map_svg else ""}
-{'<div class="block"><h2>Rezultati po državama</h2><p class="note">Biračka mesta sabrana po državi, poređano po broju upisanih birača.</p>' if ab else
- '<div class="block"><h2>Rezultati po naseljima i popis 2022.</h2><p class="note">Biračka mesta sabrana po naselju, poređano po broju upisanih birača. Broj stanovnika: popis 2022. (RZS).</p>'}
+{mapb}
+{nash}
 {nas_tbl}</div>
-{f'<div class="block"><h2>Ukratko</h2><p>{e(op["sum"])}</p></div>' if op['sum'] else ''}
-<div class="cta"><a class="btn" data-jl href="{app}">Otvori {e(op['name'])} na sajtu →</a><a class="btn ghost" href="{home}">Sve opštine</a></div>
+{f'<div class="block"><h2>{t("Ukratko", "In brief")}</h2><p>{e(op["sum"])}</p></div>' if op['sum'] else ''}
+<div class="cta"><a class="btn" data-jl href="{app}">{t(f"Otvori {e(op['name'])} na sajtu →", f"Open {e(op['name'])} on the site →")}</a><a class="btn ghost" href="{home}">{t("Sve opštine", "All municipalities")}</a></div>
 {okr_links}
-<p class="note">Izvor: Republička izborna komisija, rezultati po biračkim mestima (unos do {e(snap)}). Privremeni, nezvanični prikaz. <a data-jl href="/?jezik={s}#metodologija">O sajtu i metodologija</a></p>
+<p class="note">{t(f"Izvor: Republička izborna komisija, rezultati po biračkim mestima (unos do {e(snap)}). Privremeni, nezvanični prikaz.", f"Source: Republic Electoral Commission (RIK), results by polling station (entered up to {e(snap)}). Provisional, unofficial presentation.")} <a data-jl href="/?jezik={s}#metodologija">{t("O sajtu i metodologija", "About and methodology")}</a></p>
 </main></body>"""
     return f"""<!doctype html>
-<html lang="sr-{'Cyrl' if s == 'cyr' else 'Latn'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="{html_lang(s)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 {head_js(s)}
 <title>{e(title)}</title>
 <meta name="description" content="{e(desc)}">
 <link rel="canonical" href="{url}">{alt_links(path)}
 <script type="application/ld+json">{ld}</script>
-<meta property="og:type" content="article"><meta property="og:site_name" content="izbori26.rs"><meta property="og:locale" content="sr_RS">
+<meta property="og:type" content="article"><meta property="og:site_name" content="izbori26.rs"><meta property="og:locale" content="{t('sr_RS', 'en_US')}">
 <meta property="og:url" content="{url}"><meta property="og:title" content="{e(title)}"><meta property="og:description" content="{e(desc)}">
 <meta property="og:image" content="{BASE}{path}og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -201,32 +234,33 @@ details.more[open] summary{{display:none}} details.more .tw thead{{display:none}
 
 
 def okr_block(op, sib, s, anchor):
-    sfx = "lat/" if s == "lat" else ""
+    sfx = SFX[s]
     links = " · ".join(f'<a href="/opstina/{o["slug"]}/{sfx}">{H.escape(o["name"])}</a>' for o in sib)
-    return (f'<div class="block"><h2>Ostale opštine: {H.escape(op["okrug"])}</h2><p>{links}</p>'
-            f'<p class="note"><a href="/opstina/{sfx}#{anchor}">Sve opštine po okruzima</a></p></div>') if sib else ""
+    return (f'<div class="block"><h2>{tr(s, "Ostale opštine", "Other municipalities")}: {H.escape(op["okrug"])}</h2><p>{links}</p>'
+            f'<p class="note"><a href="/opstina/{sfx}#{anchor}">{tr(s, "Sve opštine po okruzima", "All municipalities by district")}</a></p></div>') if sib else ""
 
 
 def index_page(groups, s, css, fonts):
-    # groups: [(okrug na latinici, okrug na pismu stranice, [op na pismu stranice])]
-    sfx = "lat/" if s == "lat" else ""
+    # groups: [(okrug na latinici, okrug na pismu/jeziku stranice, [op na pismu/jeziku stranice])]
+    sfx = SFX[s]
     lst = "".join(f'<div class="block" id="{slug(k)}"><h2>{H.escape(kn)}</h2><p>' + " · ".join(
         f'<a href="/opstina/{o["slug"]}/{sfx}">{H.escape(o["name"])}</a>' for o in v) + "</p></div>" for k, kn, v in groups)
-    if s == "cyr":
-        title, desc = ("Резултати избора 2026 по општинама – izbori26.rs",
-                       "Резултати парламентарних избора 2026. за сваку општину у Србији: листе, излазност, поређење са 2023, попис 2022, мапа села и резултати по насељима.")
-    else:
-        title, desc = ("Rezultati izbora 2026 po opštinama – izbori26.rs",
-                       "Rezultati parlamentarnih izbora 2026. za svaku opštinu u Srbiji: liste, izlaznost, poređenje sa 2023, popis 2022, mapa sela i rezultati po naseljima.")
-    headp = f"""<!doctype html><html lang="sr-{'Cyrl' if s == 'cyr' else 'Latn'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+    title, desc = {
+        "cyr": ("Резултати избора 2026 по општинама – izbori26.rs",
+                "Резултати парламентарних избора 2026. за сваку општину у Србији: листе, излазност, поређење са 2023, попис 2022, мапа села и резултати по насељима."),
+        "lat": ("Rezultati izbora 2026 po opštinama – izbori26.rs",
+                "Rezultati parlamentarnih izbora 2026. za svaku opštinu u Srbiji: liste, izlaznost, poređenje sa 2023, popis 2022, mapa sela i rezultati po naseljima."),
+        "en": ("2026 Serbian election results by municipality – izbori26.rs",
+               "Results of the 2026 parliamentary election for every municipality in Serbia: lists, turnout, comparison with 2023, 2022 census, village map and results by settlement.")}[s]
+    headp = f"""<!doctype html><html lang="{html_lang(s)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 {head_js(s)}<title>{title}</title><meta name="description" content="{desc}">
 <link rel="canonical" href="{BASE}/opstina/{sfx}">{alt_links("/opstina/")}<meta property="og:image" content="{BASE}/og.png"><link rel="icon" type="image/png" href="/ikona.png">
 {fonts}<style>{css}
 .stp{{max-width:1120px;margin:0 auto;padding:0 14px 30px}} .stp p a{{white-space:nowrap}}
 {MENU_CSS}</style></head>
 """
-    body = f"""<body>{header("#opstine", s)}
-<main class="stp"><h1>Rezultati izbora 2026 po opštinama</h1><p class="lead">Izaberi opštinu za rezultate svih listi, mapu sela i rezultate po naseljima.</p>{lst}</main></body>"""
+    body = f"""<body>{header(s)}
+<main class="stp"><h1>{tr(s, "Rezultati izbora 2026 po opštinama", "2026 election results by municipality")}</h1><p class="lead">{tr(s, "Izaberi opštinu za rezultate svih listi, mapu sela i rezultate po naseljima.", "Choose a municipality for the results of all lists, the village map and results by settlement.")}</p>{lst}</main></body>"""
     return headp, body + "</html>"
 
 
@@ -241,7 +275,7 @@ def main():
             pass
     srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(Tih, directory=str(SITE)))
     threading.Thread(target=srv.serve_forever, daemon=True).start()
-    ops = []  # (latinica, ćirilica)
+    ops = []  # (latinica, ćirilica, engleski)
     card_dir = SITE / "opstina"
     try:
         with sync_playwright() as p:
@@ -255,6 +289,7 @@ def main():
             pg.evaluate("setScript('lat')")
             pg.evaluate("loadLazy('prethodni')")  # poređenje sa 2023. za sažetak
             snap = pg.evaluate("fmtSnap()")
+            snap_en = pg.evaluate("(()=>{script='en';const s=fmtSnap();script='lat';return s})()")
             n = pg.evaluate("OP.length")
             for i in range(n):
                 pg.evaluate("script='lat'")
@@ -262,12 +297,14 @@ def main():
                 if not op["n"]:
                     continue
                 pg.evaluate(f"go('opstina/{op['slug']}')")
-                try:  # mapa sela (nema je za inostranstvo, zatvore i deo opština na Kosovu)
+                try:  # mapa sela (nema je za zatvore i deo opština na Kosovu)
                     pg.wait_for_selector("#opMap svg", timeout=3000)
                 except Exception:
                     pass
                 map_svg = pg.evaluate("(()=>{const s=document.querySelector('#opMap .mapsvg');return s?s.outerHTML:''})()")
                 legend = pg.evaluate("(()=>{const l=document.querySelector('#opMap .maplgd');return l?l.innerHTML:''})()")
+                pg.evaluate("script='en'")  # isti podaci na engleskom (nazivi latinicom)
+                ope = pg.evaluate(JS_OP, i)
                 pg.evaluate("script='cyr'")  # isti podaci, nazivi iz podataka na ćirilici
                 opc = pg.evaluate(JS_OP, i)
                 d = card_dir / op["slug"]
@@ -285,32 +322,35 @@ def main():
                   document.body.appendChild(c)}""", [opc, map_svg])
                 pg.locator("#ogcard").screenshot(path=str(d / "og.png"))
                 pg.evaluate("document.getElementById('ogcard').remove()")
-                ops.append((op, opc))
+                ops.append((op, opc, ope))
 
             # stranice; na dnu linkovi na ostale opštine iz istog okruga (lakše obilaženje za Google i posetioce)
             by = {}
-            for pair in ops:
-                by.setdefault(pair[0]["okrug"], []).append(pair)
+            for trio in ops:
+                by.setdefault(trio[0]["okrug"], []).append(trio)
             for v in by.values():
                 v.sort(key=lambda x: x[0]["name"])
-            for opl, opc in ops:
+            VER = (("lat", 0, snap), ("cyr", 1, snap), ("en", 2, snap_en))
+            for trio in ops:
+                opl = trio[0]
                 sib = [x for x in by[opl["okrug"]] if x[0] is not opl]
                 d = card_dir / opl["slug"]
-                for s, o, sb in (("lat", opl, [x[0] for x in sib]), ("cyr", opc, [x[1] for x in sib])):
-                    hd, body = page(o, s, css, fonts, snap, opl["_map"], opl["_lgd"], okr_block(o, sb, s, slug(opl["okrug"])))
+                for s, j, sn in VER:
+                    o = trio[j]
+                    hd, body = page(o, s, css, fonts, sn, opl["_map"], opl["_lgd"], okr_block(o, [x[j] for x in sib], s, slug(opl["okrug"])))
                     if s == "cyr":
                         body = "<body>" + pg.evaluate(JS_CYR, body[6:-len("</body></html>")]) + "</body></html>"
-                    out = d / "lat" if s == "lat" else d
+                    out = d / SFX[s]
                     out.mkdir(parents=True, exist_ok=True)
                     (out / "index.html").write_text(hd + body, encoding="utf-8")
 
             # spisak svih opština, po okruzima (sidro #<okrug> za linkove sa stranica opština)
-            for s, j in (("lat", 0), ("cyr", 1)):
+            for s, j, _ in VER:
                 groups = [(k, v[0][j]["okrug"], [x[j] for x in v]) for k, v in by.items()]
                 hd, body = index_page(groups, s, css, fonts)
                 if s == "cyr":
                     body = "<body>" + pg.evaluate(JS_CYR, body[6:-len("</body></html>")]) + "</body></html>"
-                out = card_dir / "lat" if s == "lat" else card_dir
+                out = card_dir / SFX[s]
                 out.mkdir(parents=True, exist_ok=True)
                 (out / "index.html").write_text(hd + body, encoding="utf-8")
             b.close()
@@ -318,12 +358,12 @@ def main():
         srv.shutdown()
 
     today = date.today().isoformat()
-    paths = ["/opstina/"] + [f"/opstina/{o['slug']}/" for o, _ in ops]
-    urls = [f"{BASE}/"] + [BASE + x + sfx for x in paths for sfx in ("", "lat/")]
+    paths = ["/opstina/"] + [f"/opstina/{o[0]['slug']}/" for o in ops]
+    urls = [f"{BASE}/"] + [BASE + x + sfx for x in paths for sfx in SFX.values()]
     (SITE / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
                                       + "".join(f"<url><loc>{u}</loc><lastmod>{today}</lastmod></url>\n" for u in urls) + "</urlset>\n", encoding="utf-8")
     (SITE / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {BASE}/sitemap.xml\n", encoding="utf-8")
-    print(f"Stranice opština: {len(ops)} (ćirilica i latinica), sitemap {len(urls)} adresa")
+    print(f"Stranice opština: {len(ops)} (ćirilica, latinica i engleski), sitemap {len(urls)} adresa")
 
 
 if __name__ == "__main__":

@@ -24,9 +24,9 @@
 <link rel="apple-touch-icon" href="https://izbori26.rs/ikona.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- font ne blokira prikaz (media=print -> all), a display=optional: bez ponovnog raspoređivanja kad font stigne kasno -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,700&family=Source+Sans+3:wght@400;600;700&display=optional" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,700&family=Source+Sans+3:wght@400;600;700&display=optional"></noscript>
+<!-- font ne blokira prikaz (media=print -> all), a display=swap: bez ponovnog raspoređivanja kad font stigne kasno -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,700&family=Source+Sans+3:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,700&family=Source+Sans+3:wght@400;600;700&display=swap"></noscript>
 <style>
 :root{
   --bg:#f2f4f8;--surface:#ffffff;--ink:#101826;--muted:#566175;--line:#d8dde6;--hover:#e8ecf4;--accent:#16294d;--focus:#2563eb;--bar-bg:#e3e7ee;
@@ -63,6 +63,11 @@ nav button:hover{color:var(--ink)}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
 .seg button{background:var(--surface);border:0;padding:5px 10px;cursor:pointer;color:var(--muted);font-weight:600}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--surface)}
+/* izbor pisma i jezika: diskretan, kao kartice menija (izabrano podebljano i podvučeno); isto i na stranicama opština */
+#lang{border:0;border-radius:0;overflow:visible;gap:2px}
+#lang button,#lang a{background:none;border:0;border-bottom:2px solid transparent;padding:4px 6px 3px;color:var(--muted);font-weight:600;font-size:.92rem;cursor:pointer;text-decoration:none;line-height:1.3}
+#lang [aria-pressed="true"]{background:none;color:var(--ink);border-bottom-color:var(--accent)}
+#lang button:hover,#lang a:hover{color:var(--ink)}
 main{max-width:1120px;margin:0 auto;padding:22px 14px 60px}
 section[hidden]{display:none}
 .block{margin-top:34px}

@@ -15,7 +15,7 @@ Važno za tačno prenošenje podataka:
 
 - [Početna: ukupni rezultati, procena mandata, pretraga „Gde ja glasam?“](https://izbori26.rs/): rezultati za celu Srbiju i po regionima
 - [Rezultati po opštinama](https://izbori26.rs/opstina/): spisak svih 191 opština sa linkovima
-- [Primer stranice opštine (Čačak)](https://izbori26.rs/opstina/grad-cacak/): rezultati svih listi, poređenje sa izborima 2023, mapa sela, rezultati po naseljima uz broj stanovnika (popis 2022); adresa je /opstina/<naziv-latinicom>/ (ćirilica), a latinica /opstina/<naziv-latinicom>/lat/
+- [Primer stranice opštine (Čačak)](https://izbori26.rs/opstina/grad-cacak/): rezultati svih listi, poređenje sa izborima 2023, mapa sela, rezultati po naseljima uz broj stanovnika (popis 2022); adresa je /opstina/<naziv-latinicom>/ (ćirilica), latinica /opstina/<naziv-latinicom>/lat/, engleski /opstina/<naziv-latinicom>/en/
 - [O sajtu i metodologija](https://izbori26.rs/#metodologija): izvor podataka, način računanja, ograničenja
 
 ## Ostalo
