@@ -35,6 +35,8 @@ jobs:
           python-version: "3.12"
       - name: Skini CSV i ažuriraj HTML
         run: python update.py
+      - name: Nova rešenja OIK o poništenju i prigovorima (ako ne uspe, osvežavanje ide dalje)
+        run: python odluke_rik.py || echo "Odluke OIK nisu osvežene"
       - name: Da li ima još neobrađenih mesta (lanac staje kad su sva uneta)
         id: stanje
         run: |
@@ -45,10 +47,10 @@ jobs:
           EOF
       - name: Sačuvaj promenu u repozitorijumu
         run: |
-          if git diff --quiet izbori2026.html; then echo "Nema promena"; exit 0; fi
+          if git diff --quiet izbori2026.html odluke_rik.json; then echo "Nema promena"; exit 0; fi
           git config user.name "izbori-bot"
           git config user.email "izbori-bot@users.noreply.github.com"
-          git add izbori2026.html zapisnici_putanje.json
+          git add izbori2026.html zapisnici_putanje.json odluke_rik.json
           git commit -m "Rezultati: $(grep -o '"snapshot":"[^"]*"' izbori2026.html | cut -d'"' -f4)"
           git pull --rebase -q && git push
       - name: Pripremi sajt
