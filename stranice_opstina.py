@@ -46,13 +46,15 @@ JS_OP = r"""i => {
   const bareT=T(o.full.replace(/^(Градска општина|Град|Општина) /,"")),Ls=k=>`${LISTS[a.rank[k]].short} ${P(a.v[a.rank[k]]/a.va)}`;
   const d0=a.va?`${bareT}, izbori 2026: ${Ls(0)}, ${Ls(1)}. Izlaznost ${P(a.turn)}${c?` (2023: ${P(c.t0)})`:""}.${popAll?` Popis 2022: ${N(popAll)} stanovnika.`:""} Poređenje sa 2023. i rezultati po selima.`:"";
   const desc=script==="cyr"?cyr(d0):d0;
+  // kratko, za vrh stranice (ceo zbirni tekst je na dnu)
+  const kratko=a.va?`${Ls(0)}, ${Ls(1)}. Izlaznost ${P(a.turn)}${c?` (2023: ${P(c.t0)})`:""}.`:"";
   // zbirni tekst: ista funkcija kao u interaktivnom prikazu (opSum u izbori2026.html)
   const bareC=o.full.replace(/^(Градска општина|Град|Општина) /,""),bare=lat(bareC); // „Чачак“ bez „Град“
   const sum=opSum(i);
   return {slug:opSlug(i),name:T(o.name),full:T(o.full),bare,bareC,okrug:T(OK[o.ok].name),status:statusLine(a),sum,sumC:cyr(sum),
     rows:listRows(a),nas:nas.map(e=>({...e,lst:e.win>=0?LISTS[e.win].short:"",c:e.win>=0?LISTS[e.win].c:"",
       shs:e.sh==null?"–":P(e.sh),ts:e.turn==null?"–":P(e.turn),ups:N(e.up),pops:e.pop?N(e.pop):"–"})),
-    pop:popAll?N(popAll):"",desc,ab:ABROAD(i),c23:c?{t0:P(c.t0),t1:P(c.t1),v0:P(c.v0),v1:P(c.v1),nt0:N(c.n.t0),nt1:N(c.n.t1),nv0:N(c.n.v0),nv1:N(c.n.v1)}:null,
+    pop:popAll?N(popAll):"",desc,kratko,ab:ABROAD(i),c23:c?{t0:P(c.t0),t1:P(c.t1),v0:P(c.v0),v1:P(c.v1),nt0:N(c.n.t0),nt1:N(c.n.t1),nv0:N(c.n.v0),nv1:N(c.n.v1)}:null,
     top:a.va?a.rank.slice(0,4).map(k=>({n:cyr(LISTS[k].short),c:LISTS[k].c,p:a.v[k]/a.va,ps:P(a.v[k]/a.va)})):[],
     turn:a.turn==null?"–":P(a.turn),nd:a.nd,n:a.n,win:a.win>=0?LISTS[a.win].short:"",
     winp:a.win>=0&&a.va?P(a.v[a.win]/a.va):""};
@@ -143,7 +145,7 @@ def page(op, s, css, fonts, snap, map_svg, legend, okr_links):
 {header(app_hash, s)}
 <main class="stp">
 <h1>Rezultati izbora 2026: {e(op['full'])}</h1>
-<p class="lead">{e(op['sum']) or e(op['full'] + ', ' + op['okrug'] + '.')}</p>
+<p class="lead">{e(op['kratko']) or e(op['full'] + ', ' + op['okrug'] + '.')}</p>
 <p class="note">{e(op['full'])}, {e(op['okrug'])}.{pop} {op['status']}</p>
 <div class="cta"><a class="btn" data-jl href="{app}">Mapa sela, biračka mesta i poređenje sa 2023. →</a><a class="btn ghost" data-jl href="/?jezik={s}#pregled">Gde ja glasam?</a></div>
 <div class="block"><h2>Rezultati svih listi</h2><p class="note">Udeo u važećim glasovima, na biračkim mestima sa unetim rezultatom.</p>
@@ -154,6 +156,7 @@ def page(op, s, css, fonts, snap, map_svg, legend, okr_links):
 {'<div class="block"><h2>Rezultati po državama</h2><p class="note">Biračka mesta sabrana po državi, poređano po broju upisanih birača.</p>' if ab else
  '<div class="block"><h2>Rezultati po naseljima i popis 2022.</h2><p class="note">Biračka mesta sabrana po naselju, poređano po broju upisanih birača. Broj stanovnika: popis 2022. (RZS).</p>'}
 <div class="tw"><table class="cards"><thead><tr><th>{unit}</th><th class="num">Biračkih mesta</th>{'' if ab else '<th class="num">Stanovnika (2022)</th>'}<th class="num">Upisano</th><th class="num">Izlaznost</th><th>Prva lista</th></tr></thead><tbody>{nas_rows}</tbody></table></div></div>
+{f'<div class="block"><h2>Ukratko</h2><p>{e(op["sum"])}</p></div>' if op['sum'] else ''}
 <div class="cta"><a class="btn" data-jl href="{app}">Otvori {e(op['name'])} na sajtu →</a><a class="btn ghost" href="{home}">Sve opštine</a></div>
 {okr_links}
 <p class="note">Izvor: Republička izborna komisija, rezultati po biračkim mestima (unos do {e(snap)}). Privremeni, nezvanični prikaz. <a data-jl href="/?jezik={s}#metodologija">O sajtu i metodologija</a></p>

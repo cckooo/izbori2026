@@ -122,6 +122,7 @@ tbody tr.click:hover{background:var(--hover)}
 .chd{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap} .chd .muted{font-size:.85rem}
 .cbar{display:flex;height:12px;border-radius:2px;overflow:hidden;background:var(--bar-bg);margin-top:4px} .cbar i{display:block;height:100%}
 #opMap circle[data-c]{cursor:pointer}
+.sumtxt{margin-top:28px} .sumtxt h3{font-size:.95rem;color:var(--muted);margin:0 0 4px} .sumtxt p{font-size:.88rem;color:var(--muted);line-height:1.55;margin:0;max-width:820px}
 /* mapa u opštini: centrirana, opis pod pokazivačem ispod nje */
 #opMap .mapwrap{flex-direction:column;align-items:center;gap:6px}
 #opMap .mapsvg{flex:none} #opMap #nmInfo{flex:none!important;width:100%;max-width:640px;text-align:center;margin:0}
@@ -558,6 +559,8 @@ function pctBar(share,color,max=1){
 /* ---------- Pregled ---------- */
 // zbirni tekst izabrane opštine (interaktivni prikaz i posebne stranice opština, stranice_opstina.py)
 // bez promene padeža naziva („u gradu Čačak“); poređenje sa 2023. kad su podaci za 2023. učitani
+// zbirni tekst na dnu Pregleda i opštine (za pretraživače i ko želi rečenicama), sitnije i sivo
+const sumBlock=h=>h?`<div class="block sumtxt"><h3>${U("Ukratko","In brief")}</h3><p>${h}</p></div>`:"";
 function opSum(i){
   const o=OP[i],a=OP_AGG[i];if(!a||!a.va)return "";
   const bare=T(o.full.replace(/^(Градска општина|Град|Општина) /,""));
@@ -628,7 +631,6 @@ function viewPregled(){
   const items=LISTS.map((l,i)=>({id:i,i,n:l.n,name:l.name,v:A.v[i],p:A.va?A.v[i]/A.va:0,ws:wonSt[i],wo:wonOp[i]}));
   $("#pregled").innerHTML=`
    <h1>${U("Parlamentarni izbori 2026: rezultati po biračkim mestima","2026 parliamentary election in Serbia: results by polling station")}</h1>
-   <p class="lead">${pregledSum(A)}</p>
    <p class="note">${U(`Podaci RIK-a do ${esc(fmtSnap())}: obrađeno je ${N(A.nd)} od ${N(A.n)} biračkih mesta (${P(A.nd/A.n)}). Rezultati su privremeni.`,
      `RIK data as of ${esc(fmtSnap())}: ${N(A.nd)} of ${N(A.n)} polling stations counted (${P(A.nd/A.n)}). Results are provisional.`)}${emptyNote}</p>
    <div class="block gde"><h2>${U("Gde ja glasam?","Where do I vote?")}</h2>
@@ -649,7 +651,8 @@ function viewPregled(){
    <div id="resTbl"></div></div>
    <div class="block"><h2>${U("Rezultati po regionima","Results by region")}</h2>
    <p class="note">${U("Prikazano je šest listi sa najviše glasova, ostale su zbirno. Klik na red otvara sve liste.","The six largest lists are shown, the rest combined. Click a row for all lists.")}</p>
-   <div id="regTbl"></div></div>`;
+   <div id="regTbl"></div></div>
+   ${sumBlock(pregledSum(A))}`;
   const gq=$("#gdeQ");gq.oninput=gdeSearch;gq.onfocus=()=>{if(!ulOk)loadUlice().catch(()=>{})}; // ulice stižu čim se klikne u polje
   dataTable($("#resTbl"),"res",cols,items,{sort:"v",dir:-1,limit:8,onRow:l=>{location.hash="lista-"+l.n}});
   const ents=REGIONS.map((g,i)=>({id:i,name:g,a:REG_AGG[i]}));
@@ -730,7 +733,7 @@ function viewOpstine(){
       const link="#opstina/"+opSlug(i)+(os==="rezultati"?"":"/"+os);
       if(cur==="opstine"&&location.hash!==link)history.replaceState(null,"",link);
       const body={
-        rezultati:()=>`${opSum(i)?`<p class="lead">${esc(opSum(i))}</p>`:""}<p class="note">${statusLine(a)} ${U("Udeo je u važećim glasovima.","Shares are of valid votes.")}</p><div class="dlg" style="padding:0;max-height:none;overflow:visible">${listRows(a)}</div><div id="opMap"></div>`,
+        rezultati:()=>`<p class="note">${statusLine(a)} ${U("Udeo je u važećim glasovima.","Shares are of valid votes.")}</p><div class="dlg" style="padding:0;max-height:none;overflow:visible">${listRows(a)}</div><div id="opMap"></div>${sumBlock(esc(opSum(i)))}`,
         naselja:()=>ABROAD(i)?`<p class="note">${U("Rezultati biračkih mesta sabrani po državi. Klik na državu otvara njena biračka mesta.","Polling station results summed by country. Click a country to see its polling stations.")}</p><div id="opNas"></div>`:`<p class="note">${U("Rezultati biračkih mesta sabrani po naselju. Klik na naselje otvara njegova biračka mesta. Broj stanovnika i punoletnih je iz Popisa 2022 (RZS); birački spisak se razlikuje (iseljeni, umrli, promene prebivališta).","Polling station results summed by settlement. Click a settlement to see its polling stations. Population and adults are from the 2022 census (RZS); the voter roll differs (emigration, deaths, changes of residence).")}</p><div id="opNas"></div>`,
         p2023:()=>op23Block(i)||`<p class="muted">${U("Podaci za 2023. se učitavaju ili nisu dostupni za ovu opštinu.","2023 data are loading or not available for this municipality.")}</p>`};
       D.innerHTML=`<div class="block" style="margin-top:20px"><h3>${esc(T(o.name))} <span class="muted" style="font-weight:400">${esc(T(OK[o.ok].name))}</span></h3>
