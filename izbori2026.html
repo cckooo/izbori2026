@@ -110,7 +110,9 @@ tbody tr.click:hover{background:var(--hover)}
 .gdehit:first-child{margin-top:8px;border-top:1px solid var(--line)}
 .gdeb{display:flex;gap:6px;flex-wrap:wrap}
 @media (max-width:720px){.gdehit{grid-template-columns:1fr}}
-.rk{display:inline-block;min-width:2.1em;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:600}
+.rk{display:inline-block;min-width:2.1em;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:600;vertical-align:top}
+/* naziv posle rednog broja ostaje u istom redu i prelama se unutar sebe (inače broj ostane sam u redu) */
+.rk+span,.rk+b{max-width:calc(100% - 2.3em);vertical-align:top}
 .bez{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:10px 0 2px;font-size:.92rem;cursor:pointer}
 .bez input{width:18px;height:18px;margin:0;accent-color:var(--accent)}
 .bez .muted{font-size:.85rem}
@@ -120,6 +122,9 @@ tbody tr.click:hover{background:var(--hover)}
 .mapins{margin:0 0 12px}
 .mapins figcaption{font-weight:600;font-size:.9rem;margin-bottom:4px}
 .mapins svg{width:100%;height:auto;border:1px solid var(--line);background:var(--surface);display:block}
+/* telefon: Beograd i Niš jedan pored drugog (inače su veći od mape Srbije), Inostranstvo i opis preko cele širine */
+@media (max-width:720px){.mapside{display:grid;grid-template-columns:1fr 1fr;gap:0 10px;max-width:none;flex-basis:100%}
+ .mapside #abIns,.mapside #mapInfo{grid-column:1/-1}}
 .maplgd{margin-top:8px}
 /* inostranstvo: rezultati po državama (traka sa udelima svih listi) */
 .clist{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:4px 22px;margin-top:8px}
@@ -127,6 +132,8 @@ tbody tr.click:hover{background:var(--hover)}
 .chd{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap} .chd .muted{font-size:.85rem}
 .cbar{display:flex;height:12px;border-radius:2px;overflow:hidden;background:var(--bar-bg);margin-top:4px} .cbar i{display:block;height:100%}
 #opMap circle[data-c]{cursor:pointer}
+@media (max-width:1100px){.grid2.w1100{grid-template-columns:minmax(0,1fr)}} /* tabela po veličini mesta ne staje u pola užeg ekrana */
+.seatt .st{display:block;font-size:.78rem;margin-left:18px}
 .sumtxt{margin-top:28px} .sumtxt h3{font-size:.95rem;color:var(--muted);margin:0 0 4px} .sumtxt p{font-size:.88rem;color:var(--muted);line-height:1.55;margin:0;max-width:none}
 /* mapa u opštini: centrirana, opis pod pokazivačem ispod nje */
 #opMap .mapwrap{flex-direction:column;align-items:center;gap:6px}
@@ -451,7 +458,8 @@ const BY_OK=OK.map((_,i)=>ROWS.filter(r=>r.ok===i));
 const REGIONS=[...new Set(OK.map(o=>o.region))];
 const BY_REG=REGIONS.map(g=>ROWS.filter(r=>OK[r.ok].region===g));
 const OP_AGG=BY_OP.map(agg), OK_AGG=BY_OK.map(agg), REG_AGG=BY_REG.map(agg);
-const state={list:TOTAL.win>=0?TOTAL.win:0,lvl:"reg",okF:"",opSearch:"",
+const state={list:TOTAL.win>=0?TOTAL.win:0,lvl:"ok", // kartica Okruzi počinje od okruga (regioni su dugme pored)
+okF:"",opSearch:"",
   m:{q:"",ok:"",op:"",nas:"",sort:"turn",dir:-1,page:0},
   tbl:{}};
 
@@ -709,7 +717,7 @@ function viewOkruzi(){
    <h2>${reg?U("Regioni","Regions"):U("Upravni okruzi","Administrative districts")}</h2>
    <p>${U("Izlaznost se računa samo na biračkim mestima sa unetim rezultatom. Prikazano je šest listi sa najviše glasova, ostale su zbirno. Klik na red otvara sve liste.","Turnout is computed only at polling stations with entered results. The six largest lists are shown, the rest combined. Click a row for all lists.")}</p>
    <div class="ctl">
-     <div class="seg" role="group" aria-label="${U("Nivo","Level")}"><button id="lvReg" aria-pressed="${reg}">${U("Regioni","Regions")}</button><button id="lvOk" aria-pressed="${!reg}">${U("Okruzi","Districts")}</button></div>
+     <div class="seg" role="group" aria-label="${U("Nivo","Level")}"><button id="lvOk" aria-pressed="${!reg}">${U("Okruzi","Districts")}</button><button id="lvReg" aria-pressed="${reg}">${U("Regioni","Regions")}</button></div>
    </div>
    <div id="okTbl"></div>`;
   $("#lvReg").onclick=()=>{state.lvl="reg";viewOkruzi()};
@@ -738,6 +746,8 @@ function viewOpstine(){
       .filter(e=>(state.okF===""||String(e.ok)===state.okF)&&(!q||String(e.id)===q));
     $("#opCount").textContent=U(`Prikazano: ${N(ents.length)} od ${N(OP.length)}`,`Shown: ${N(ents.length)} of ${N(OP.length)}`);
     dataTable($("#opTbl"),"op2",matrixCols(),ents,{sort:"name",dir:1,page:LIM(25,10),onRow:e=>{state.opSearch=String(e.id);fillOp();draw();$("#opDetail").scrollIntoView({block:"start"})}});
+    // izabrana opština: tabela bi imala samo taj jedan red, a sve piše u detaljima iznad
+    $("#opTbl").hidden=$("#opCount").hidden=state.opSearch!=="";
     const D=$("#opDetail");
     if(state.opSearch!==""){
       const i=+state.opSearch,o=OP[i],a=OP_AGG[i];
@@ -992,7 +1002,7 @@ function opTable(title,note,ents,L){
 // tabela biračkih mesta sa proizvoljnim kolonama; stavka je mesto ili {r:mesto,...}
 function bmTable(title,note,items,cols){
   const bl=U("Biračko mesto","Polling station"),zl=U("Zapisnik","Record");
-  const n=LIM(10,5);
+  const n=LIM(10,3); // na telefonu kraće (kao miniTable), ostalo na „Prikaži još“
   const body=items.map((it,i)=>{const r=it.r||it;return `<tr class="${xr(i,n)}"><td class="ttl" data-l="${bl}"><span class="rk">${i+1}.</span>${bmTitle(r)}</td>${cols.map(c=>`<td class="num" data-l="${c.l}">${c.f(it)}</td>`).join("")}<td data-l="${zl}">${pdfA(r,"PDF")}</td></tr>`}).join("");
   return `<div class="${items.length>n?"lim":""}">${title?`<h3>${title}</h3>`:""}<p class="note">${note}</p>${items.length?`<div class="tw"><table class="cards"><thead><tr><th>${bl}</th>${cols.map(c=>`<th class="num">${c.l}</th>`).join("")}<th>${zl}</th></tr></thead><tbody>${body}</tbody></table></div>${moreBtn(items.length,n)}`:`<p class="muted">${U("Nema takvih mesta.","No such stations.")}</p>`}</div>`;
 }
@@ -1197,15 +1207,16 @@ function seatsBlock(A){
   if(!A.va)return "";
   const {s,thr}=seatCalc(A);
   const rows=[...Array(NL).keys()].filter(i=>A.v[i]>0).sort((a,b)=>s[b]-s[a]||A.v[b]-A.v[a]);
-  const lab=U("Lista","List"),ml=U("Mandata","Seats"),pl=U("Udeo","Share"),st=U("Status","Status");
-  const body=rows.map((i,k)=>{const p=A.v[i]/A.va,mn=MANJINSKE.has(i),under=A.v[i]<thr;
-    return `<tr class="${xr(k,s[i]>0?99:0)}"><td class="ttl" data-l="${lab}">${sw(i)}${esc(LISTS[i].short)}</td><td class="num" data-l="${ml}"><b>${s[i]}</b></td><td class="num" data-l="${pl}">${P(p)}</td><td data-l="${st}"><span class="muted">${mn?U("manjinska","minority")+(under?" ×1,35":""):under?U("ispod cenzusa","below threshold"):""}</span></td></tr>`}).join("");
+  const lab=U("Lista","List"),ml=U("Mandata","Seats"),pl=U("Udeo","Share");
+  // status (manjinska, ispod cenzusa) sitno ispod imena liste: posebna kolona je na telefonu širila stranu
+  const body=rows.map((i,k)=>{const p=A.v[i]/A.va,mn=MANJINSKE.has(i),under=A.v[i]<thr,st=mn?U("manjinska","minority")+(under?" ×1,35":""):under?U("ispod cenzusa","below threshold"):"";
+    return `<tr class="${xr(k,s[i]>0?99:0)}"><td class="ttl" data-l="${lab}">${sw(i)}${esc(LISTS[i].short)}${st?`<span class="muted st">${st}</span>`:""}</td><td class="num" data-l="${ml}"><b>${s[i]}</b></td><td class="num" data-l="${pl}">${P(p)}</td></tr>`}).join("");
   const nOut=rows.filter(i=>!s[i]).length;
   return `<div class="block"><h2>${U("Raspodela mandata (procena)","Seat distribution (estimate)")}</h2>
     <p class="note">${U(`Procena na osnovu dosad unetih mesta: 250 mandata metodom najvećeg količnika (D'Ont). Cenzus je 3% birača koji su glasali (${N(Math.round(thr))} glasova). Liste nacionalnih manjina učestvuju u raspodeli i ispod cenzusa, a tada im se količnici uvećavaju za 35%. Status manjinske liste imaju liste 4, 5, 6, 7, 10, 13, 14, 17 i 18 (rešenja RIK-a). Zvaničnu raspodelu utvrđuje RIK posle konačnih rezultata.`,
       `Estimate from the stations counted so far: 250 seats by the highest-quotient (D'Hondt) method. The threshold is 3% of voters who voted (${N(Math.round(thr))} votes). National minority lists take part below the threshold, with quotients increased by 35%. Lists 4, 5, 6, 7, 10, 13, 14, 17 and 18 have minority status (RIK decisions). RIK sets the official distribution after the final results.`)}</p>
     <div class="seatwrap">${hemicycle(s)}
-    <div class="${nOut?"lim":""}" style="flex:1;min-width:260px"><div class="tw"><table><thead><tr><th>${lab}</th><th class="num">${ml}</th><th class="num">${pl}</th><th>${st}</th></tr></thead><tbody>${body}</tbody></table></div>${nOut?`<div class="morebar"><button type="button" class="btn ghost morebtn">${U(`Prikaži i liste bez mandata (${N(nOut)})`,`Show lists without seats (${N(nOut)})`)}</button><button type="button" class="btn ghost lessbtn" hidden>${lessLab()}</button></div>`:""}</div></div></div>`;
+    <div class="${nOut?"lim":""}" style="flex:1 1 260px;min-width:0;max-width:100%"><div class="tw"><table class="seatt"><thead><tr><th>${lab}</th><th class="num">${ml}</th><th class="num">${pl}</th></tr></thead><tbody>${body}</tbody></table></div>${nOut?`<div class="morebar"><button type="button" class="btn ghost morebtn">${U(`Prikaži i liste bez mandata (${N(nOut)})`,`Show lists without seats (${N(nOut)})`)}</button><button type="button" class="btn ghost lessbtn" hidden>${lessLab()}</button></div>`:""}</div></div></div>`;
 }
 
 /* Test poslednje cifre: kod stvarnih brojeva glasova (bar 100) svaka cifra 0–9 javlja se oko 10%.
@@ -1284,7 +1295,8 @@ function shareHist(L){
   for(const r of E)b[Math.min(49,Math.floor(r.v[L]/r.va*50))]++;
   const mx=Math.max(...b),base=TOTAL.va?TOTAL.v[L]/TOTAL.va:0;
   const top=Math.max(.1,Math.ceil(Math.max(...b.map((c,k)=>c?(k+1)/50:0))*10)/10);
-  const svg=svgPlot({w:640,h:300,x0:0,x1:top,y0:0,y1:mx,xt:[...Array(Math.round(top*10)+1).keys()].map(k=>k/10).filter((v,k,a)=>a.length<=6||k%2===0),yt:[0,Math.round(mx/2),mx],fx:fP,fy:v=>N(v),
+  // preko cele širine na računaru (na telefonu svgPlot sužava)
+  const svg=svgPlot({w:1060,h:330,x0:0,x1:top,y0:0,y1:mx,xt:[...Array(Math.round(top*10)+1).keys()].map(k=>k/10).filter((v,k,a)=>a.length<=6||k%2===0),yt:[0,Math.round(mx/2),mx],fx:fP,fy:v=>N(v),
     xl:U("Udeo liste na biračkom mestu","List share at the polling station"),yl:U("Broj mesta","Stations"),label:U("Raspodela udela po biračkim mestima","Share distribution by polling station"),
     body:(sx,sy)=>b.map((c,k)=>k/50<top?`<rect x="${sx(k/50)+.5}" y="${sy(c)}" width="${Math.max(.5,sx(1/50)-sx(0)-1)}" height="${sy(0)-sy(c)}" style="fill:${LISTS[L].c}"><title>${k*2}–${k*2+2}%: ${N(c)} ${U("mesta","stations")}</title></rect>`:"").join("")+
       `<line x1="${sx(base)}" x2="${sx(base)}" y1="${sy(0)}" y2="${sy(mx)}" style="stroke:var(--ink);stroke-dasharray:5 4"/><text x="${sx(base)+4}" y="${sy(mx)+12}" style="fill:var(--ink)">${U("Srbija","Serbia")} ${P(base)}</text>`});
@@ -1460,20 +1472,21 @@ function prevBlock(){
     <h3 style="margin-top:26px">${U("Po biračkim mestima","By polling station")}</h3>
     <p>${U(`Rezultati izbora od 17. decembra 2023. po biračkim mestima (RIK) spojeni su sa ovogodišnjim po opštini i broju biračkog mesta, kad je naziv mesta isti ili sličan ili, ako je mesto preseljeno, kad mu se broj upisanih birača razlikuje najviše 15%. Mesta kojima se broj upisanih promenio za više od 40% nisu poređena, jer su im verovatno promenjene granice ili je pod istim brojem drugo mesto; nisu poređena ni nova i prenumerisana mesta. Spojeno je ${N(M.length)} mesta sa unetim rezultatom. Na tim mestima izlaznost je ${P(t23)} → ${P(t26)}, a Vučićeva lista (broj 1 na oba izbora) ${P(s23)} → ${P(s26)} važećih glasova. Broj upisanih birača: ${N(up23)} → ${N(up26)}.`,
       `Results of the 17 December 2023 election by polling station (RIK) were matched with this year's by municipality and station number, when the station name is the same or similar or, if the station moved, when its number of registered voters differs by at most 15%. Stations whose registered voters changed by more than 40% are not compared, as their boundaries probably changed or the number now denotes another station; new and renumbered stations are not compared either. ${N(M.length)} counted stations were matched. At these stations turnout went ${P(t23)} → ${P(t26)}, and the Vučić list (number 1 in both elections) ${P(s23)} → ${P(s26)} of valid votes. Registered voters: ${N(up23)} → ${N(up26)}.`)}</p>
-    ${bmTable(U("Najveći rast izlaznosti u odnosu na 2023.","Largest turnout increase since 2023"),U(`Mesta na kojima je izlaznost porasla najviše u odnosu na promenu u celoj opštini (u zagradi); promene su u procentnim poenima. Mesta sa najmanje 100 važećih glasova na oba izbora, bez inostranstva i zatvora. `,`Stations where turnout rose the most relative to the change in the whole municipality (in brackets); changes in percentage points. Stations with at least 100 valid votes in both elections, excluding abroad and prisons. `)+CAVEAT(),topT,tCols)}
-    ${bmTable(U("Najveći rast Vučićeve liste u odnosu na 2023.","Largest Vučić list increase since 2023"),U(`Mesta na kojima je udeo Vučićeve liste porastao najviše u odnosu na promenu u celoj opštini (u zagradi). Isti uslovi kao iznad.`,`Stations where the Vučić list share rose the most relative to the change in the whole municipality (in brackets). Same conditions as above.`),topS,sCols)}
+    <div class="grid2">${bmTable(U("Najveći rast izlaznosti u odnosu na 2023.","Largest turnout increase since 2023"),U(`Mesta na kojima je izlaznost porasla najviše u odnosu na promenu u celoj opštini (u zagradi); promene su u procentnim poenima. Mesta sa najmanje 100 važećih glasova na oba izbora, bez inostranstva i zatvora. `,`Stations where turnout rose the most relative to the change in the whole municipality (in brackets); changes in percentage points. Stations with at least 100 valid votes in both elections, excluding abroad and prisons. `)+CAVEAT(),topT,tCols)}
+    ${bmTable(U("Najveći rast Vučićeve liste u odnosu na 2023.","Largest Vučić list increase since 2023"),U(`Mesta na kojima je udeo Vučićeve liste porastao najviše u odnosu na promenu u celoj opštini (u zagradi). Isti uslovi kao iznad.`,`Stations where the Vučić list share rose the most relative to the change in the whole municipality (in brackets). Same conditions as above.`),topS,sCols)}</div>
     <h3 style="margin-top:26px">${U("Isto, u opštinama sa podeljenim glasanjem","The same, in municipalities with a divided vote")}</h3><p class="note">${mixedNote()}</p>
-    ${bmTable(U("Najveći rast izlaznosti","Largest turnout increase"),"",topTx,tCols)}
-    ${bmTable(U("Najveći rast Vučićeve liste","Largest Vučić list increase"),"",topSx,sCols)}
+    <div class="grid2">${bmTable(U("Najveći rast izlaznosti","Largest turnout increase"),"",topTx,tCols)}
+    ${bmTable(U("Najveći rast Vučićeve liste","Largest Vučić list increase"),"",topSx,sCols)}</div>
     ${bmTable(U("Nagli rast broja upisanih birača","Sharp rise in registered voters"),U(`Mesta na kojima je broj upisanih birača porastao između 15% i 40% od 2023. (mesta sa najmanje 100 upisanih 2023; veći skokovi nisu poređeni, vidi iznad). Takvih mesta ima ${N(upG.length)}; prikazano je do 20. Rast može biti stvaran (nova naselja, promena granica biračkog mesta), ali je i poznat znak upisivanja birača koji tu ne žive.`,`Stations where the number of registered voters rose between 15% and 40% since 2023 (stations with at least 100 registered in 2023; larger jumps are not compared, see above). There are ${N(upG.length)} such stations; up to 20 are shown. The rise may be genuine (new housing, changed station boundaries) but is also a known sign of registering voters who do not live there.`),upG.slice(0,MORE),uCols)}</div>`;
 }
 function prevHook(){
   const okE=OK.map((o,i)=>({id:i,name:o.name,sub:o.region,c:cmp23(OP.map((p,j)=>j).filter(j=>OP[j].ok===i),OK_AGG[i])})).filter(e=>e.c&&OP.some((p,j)=>p.ok===e.id&&incOp(j)));
   const opE=OP.map((o,i)=>({id:i,name:o.name,sub:OK[o.ok].name,c:cmp23([i],OP_AGG[i])})).filter(e=>e.c&&incOp(e.id));
-  if($("#p23Ok"))dataTable($("#p23Ok"),"p23ok",cmpCols(U("Okrug","District")),okE,{sort:"dt",dir:-1,limit:LIM(12,5)});
+  if($("#p23Ok"))dataTable($("#p23Ok"),"p23ok",cmpCols(U("Okrug","District")),okE,{sort:"dt",dir:-1,limit:LIM(10,4)});
   const sc=$("#p23Sc");
-  if(sc){sc.innerHTML=scatter23(opE)+arrows23(opE);locNode(sc);$$(".pt",sc).forEach(c=>c.onclick=()=>{state.okF="";state.opSearch=c.dataset.op;go("opstine")})}
-  if($("#p23Op"))dataTable($("#p23Op"),"p23op",cmpCols(U("Opština","Municipality")),opE,{sort:"dt",dir:-1,page:LIM(25,10),onRow:e=>{state.okF="";state.opSearch=String(e.id);go("opstine")}});
+  if(sc){sc.innerHTML=`<div class="grid2">${scatter23(opE)}${arrows23(opE)}</div>`; // dva grafikona jedan pored drugog
+locNode(sc);$$(".pt",sc).forEach(c=>c.onclick=()=>{state.okF="";state.opSearch=c.dataset.op;go("opstine")})}
+  if($("#p23Op"))dataTable($("#p23Op"),"p23op",cmpCols(U("Opština","Municipality")),opE,{sort:"dt",dir:-1,page:LIM(15,6),onRow:e=>{state.okF="";state.opSearch=String(e.id);go("opstine")}});
 }
 function viewStatistika(){
   const E=ROWS.filter(r=>r.e&&r.up>0&&r.va>0&&inc(r));
@@ -1487,7 +1500,7 @@ function viewStatistika(){
   const med=(()=>{const a=E.map(r=>r.turn).sort((x,y)=>x-y);return a[Math.floor(a.length/2)]})();
   const bands=[[U("do 300","up to 300"),0,300],[U("300 do 600","300 to 600"),300,600],[U("600 do 1.000","600 to 1,000"),600,1000],[U("1.000 do 1.500","1,000 to 1,500"),1000,1500],[U("preko 1.500","over 1,500"),1500,1e9]].map(([lab,lo,hi])=>({lab,rows:ROWS.filter(r=>r.up>=lo&&r.up<hi&&inc(r))}));
   const hReg=U("Upisanih birača","Registered voters"),hSt=U("Mesta","Stations"),hTu=U("Izlaznost","Turnout"),hRes=U("Rezultat","Result"),hWin=U("Prva lista","Leading list");
-  const bandRows=bands.map(b=>{const a=agg(b.rows);return `<tr><td class="ttl" data-l="${hReg}"><b>${b.lab}</b></td><td class="num" data-l="${hSt}">${N(a.n)}</td><td class="num" data-l="${hTu}">${a.turn==null?"–":P(a.turn)}</td><td style="min-width:200px" data-l="${hRes}">${sbar(a)}</td><td data-l="${hWin}">${a.win>=0?`${sw(a.win)}${esc(LISTS[a.win].short)} <span class="muted">${P(a.v[a.win]/a.va)}</span>`:"–"}</td></tr>`}).join("");
+  const bandRows=bands.map(b=>{const a=agg(b.rows);return `<tr><td class="ttl" data-l="${hReg}"><b>${b.lab}</b></td><td class="num" data-l="${hSt}">${N(a.n)}</td><td class="num" data-l="${hTu}">${a.turn==null?"–":P(a.turn)}</td><td style="min-width:90px;width:30%" data-l="${hRes}">${sbar(a)}</td><td data-l="${hWin}" style="white-space:normal">${a.win>=0?`${sw(a.win)}${esc(shortLabel(a.win))}<br><span class="muted">${P(a.v[a.win]/a.va)}</span>`:"–"}</td></tr>`}).join(""); // kratko ime, procenat ispod: tabela je u polovini širine
   const mis=ROWS.filter(r=>r.e&&r.gl!==r.lis&&inc(r)).sort((a,b)=>Math.abs(b.lis-b.gl)-Math.abs(a.lis-a.gl)||b.gl-a.gl);
   // glasali = upisani, a u kutiji manje listića: RIK je u polje „glasali“ verovatno uneo broj upisanih
   const misUp=r=>r.gl===r.up&&r.lis<r.gl,nUp=mis.filter(misUp).length;
@@ -1525,7 +1538,7 @@ function viewStatistika(){
     {l:U("Prva lista (opština)","Leading list (municipality)"),f:e=>`${sw(e.w)}${esc(shortLabel(e.w))} <b>${P(e.p)}</b> <span class="muted">(${P(e.p0)})</span>`}];
   const SEC={};
   SEC.osnovno=()=>`
-   <div class="grid2">
+   <div class="grid2 w1100">
     <div><h3>${U("Izlaznost po biračkim mestima","Turnout by polling station")}</h3>
       <div class="hist" id="tHist">${bins.map((b,i)=>`<div style="height:${b/mx*100}%" title="${i*5}–${i*5+5}%: ${N(b)} ${U("mesta","stations")}"></div>`).join("")}</div>
       <div class="histx">${bins.map((_,i)=>`<span>${i%4===0?i*5:""}</span>`).join("")}</div>
@@ -1555,7 +1568,7 @@ function viewStatistika(){
      U(`Takvih mesta ima ${N(hiMix.length)}; prikazano je do 10. `,`There are ${N(hiMix.length)} such stations; up to 10 are shown. `)+mixedNote(),hiMix.slice(0,MORE),hiCols)}</div>
    <div class="block">${bmTable(U("Skoro jednoglasni rezultati","Near-unanimous results"),
      U(`Biračka mesta na kojima su i izlaznost i udeo liste koja je tu prva najmanje 90%. Takvih mesta ima ${N(una.length)}; prikazano je do 30. Mesta sa najmanje 50 važećih glasova. `,`Polling stations where both turnout and the share of the list that came first there are at least 90%. There are ${N(una.length)} such stations; up to 30 are shown. Stations with at least 50 valid votes. `)+CAVEAT(),una.slice(0,MORE),unaCols)}</div>`;
-  SEC.otisak=()=>fpBlock(E)+digitBlock(E)+invalidBlock(E);
+  SEC.otisak=()=>fpBlock(E)+`<div class="grid2">${digitBlock(E)}${invalidBlock(E)}</div>`; // dva manja grafikona jedan pored drugog
   SEC.zapisnici=()=>`
    <div class="block">${bmTable(U("Ispravljeni zapisnici","Corrected records"),
      korR.length?U(`Za ${N(korR.length)} biračkih mesta RIK je objavio rešenje o ispravljanju zapisnika o radu biračkog odbora (obrasci RG-7-1 do RG-7-4); rezultat na sajtu je posle ispravke. Najviše ih je u: ${korTop}. Ispravka sama po sebi nije nepravilnost, ali je dobro uporediti zapisnik i rešenje. Prikazano je do 40 mesta, prvo iz opština sa najviše ispravki.`,`For ${N(korR.length)} polling stations RIK published a decision correcting the polling board record (forms RG-7-1 to RG-7-4); the result shown is after the correction. Most are in: ${korTop}. A correction is not in itself an irregularity, but it is worth comparing the record and the decision. Up to 40 stations are shown, starting with the municipalities with the most corrections.`)
@@ -1862,7 +1875,9 @@ function viewMetodologija(){
        `Only lists with a clear successor are compared (Vučić, Dačić, SVM, Zukorlić, SDA Sandžak, Albanian lists, Russian Party); the 2023 opposition lists have no single successor, so they are in “All other lists”.`)])}
    ${sec(U("Mape","Maps"),[
      U(`Granice opština i naselja su iz <span class='keep'>OpenStreetMap</span>-a (© <span class='keep'>OpenStreetMap</span> saradnici, licenca <span class='keep'>ODbL</span>), uprošćene za prikaz. Granicu na mapi ima oko 98% naselja; ostala su siva. Gradsko naselje sa mnogo biračkih mesta je jedno polje, jer granice područja biračkih mesta nisu javne. Opština Gora je prikazana granicom današnje opštine Dragaš.`,
-       `Municipal and settlement boundaries are from OpenStreetMap (© OpenStreetMap contributors, ODbL licence), simplified for display. About 98% of settlements have a boundary; the rest are grey. An urban settlement with many polling stations is one area, as polling-station area boundaries are not public. Gora is drawn with the boundary of today's Dragaš municipality.`)])}
+       `Municipal and settlement boundaries are from OpenStreetMap (© OpenStreetMap contributors, ODbL licence), simplified for display. About 98% of settlements have a boundary; the rest are grey. An urban settlement with many polling stations is one area, as polling-station area boundaries are not public. Gora is drawn with the boundary of today's Dragaš municipality.`),
+     U(`Inostranstvo: odluka RIK-a o biračkim mestima u inostranstvu je skenirana, pa su država i grad za svako od 93 biračka mesta ručno prepisani iz nje (uz napomene, npr. koje države i gradovi glasaju na istom mestu). Na mapi je krug u centru grada, ne na tačnoj adresi; više mesta u istom gradu je jedan krug. Granice država: <span class='keep'>Natural Earth</span> (javno vlasništvo).`,
+       `Abroad: RIK's decision on polling stations abroad is a scanned document, so the country and city of each of the 93 stations were copied from it by hand (with notes, e.g. which countries and cities vote at the same station). Each circle is placed at the city centre, not the exact address; several stations in one city are one circle. Country boundaries: Natural Earth (public domain).`)])}
    ${sec(U("Privatnost","Privacy"),[
      U(`Posete se broje anonimno pomoću servisa <span class='keep'>GoatCounter</span>, bez kolačića i bez čuvanja IP adresa ili drugih podataka po kojima bi se posetilac mogao prepoznati; beleži se samo zbirno koje stranice se gledaju i odakle posetioci dolaze. Izbor pisma i nekoliko podešavanja prikaza čuvaju se samo u vašem pregledaču.`,
        `Visits are counted anonymously with GoatCounter, without cookies and without storing IP addresses or other data that could identify a visitor; only aggregate page views and referrers are recorded. Your choice of script and a few display settings are stored only in your browser.`)])}

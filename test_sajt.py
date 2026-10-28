@@ -45,7 +45,7 @@ def run(p, width, height, mobile):
         for t in TABS:
             pg.click(f'nav button[data-tab="{t}"]')
             pg.wait_for_timeout(350)
-            over[t] = pg.evaluate("document.documentElement.scrollWidth - window.innerWidth")
+            over[t] = pg.evaluate(f"document.documentElement.scrollWidth - {width}")  # ne innerWidth: na telefonu se prikaz proširi
             if lang == "cyr":
                 left = latin_leftovers(pg)
                 if left:
@@ -56,7 +56,7 @@ def run(p, width, height, mobile):
         for h in subs:
             pg.evaluate(f"go('{h}')")
             pg.wait_for_timeout(350)
-            over[h] = pg.evaluate("document.documentElement.scrollWidth - window.innerWidth")
+            over[h] = pg.evaluate(f"document.documentElement.scrollWidth - {width}")  # ne innerWidth: na telefonu se prikaz proširi
             if lang == "cyr":
                 left = latin_leftovers(pg)
                 if left:
@@ -64,7 +64,7 @@ def run(p, width, height, mobile):
         for s in pg.evaluate("OSUB.map(x => x[0])"):
             pg.evaluate(f"state.okF='';state.opSearch='0';state.osub='{s}';go('opstine');viewOpstine()")
             pg.wait_for_timeout(350)
-            over["opstina-" + s] = pg.evaluate("document.documentElement.scrollWidth - window.innerWidth")
+            over["opstina-" + s] = pg.evaluate(f"document.documentElement.scrollWidth - {width}")  # ne innerWidth: na telefonu se prikaz proširi
             if lang == "cyr":
                 left = latin_leftovers(pg)
                 if left:
@@ -83,7 +83,7 @@ def run(p, width, height, mobile):
     pg.click("#opDetail .subnav button[data-sub=naselja]")  # tabela po naseljima je u delu „Po naseljima“
     pg.wait_for_timeout(400)
     info["naselja_redova"] = pg.locator("#opNas tbody tr").count()
-    info["overflow_opstina"] = pg.evaluate("document.documentElement.scrollWidth - window.innerWidth")
+    info["overflow_opstina"] = pg.evaluate(f"document.documentElement.scrollWidth - {width}")  # ne innerWidth: na telefonu se prikaz proširi
     if SHOTS:
         pg.locator("#opDetail").screenshot(path=str(SHOTS / f"opstina_{width}.png"))
     pg.locator("#opNas tbody tr").first.click()
