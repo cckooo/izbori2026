@@ -15,6 +15,7 @@ Izlazni kod: 0 = ažurirano ili nema promena, 1 = greška (HTML ostaje netaknut)
 Koristi samo standardnu biblioteku Pythona.
 """
 import argparse
+import bisect
 import csv
 import io
 import json
@@ -30,6 +31,7 @@ URL = "https://www.rik.parlament.gov.rs/export-results/680072/2"
 # Linkovi zapisnika u CSV-u nemaju dva broja iz prave putanje (…/election_results/815/417/<hash>/…pdf),
 # pa vraćaju 404. Pravu putanju daje get_results za svako biračko mesto; čuvamo je u kešu.
 API = "https://www.rik.parlament.gov.rs/get_results/"
+URL_BASE = "https://www.rik.parlament.gov.rs/extfile/sr/election_results/"  # PDF-ovi (zapisnici, rešenja)
 HERE = Path(__file__).resolve().parent
 HTML = HERE / "izbori2026.html"
 CACHE = HERE / "zapisnici_putanje.json"
@@ -70,7 +72,45 @@ def station_paths(uid: str) -> list:
     except ValueError:
         pass
     t = t.replace("\\/", "/")
-    return re.findall(r"election_results/(\d+/\d+/[^\"'<>\n]+?\.pdf)", t)
+    # do „.pdf“ iza kog je kraj (navodnik, razmak…): ime može imati dve ekstenzije (@ПА1- РГ-7-1.pdf_a131….pdf)
+    return re.findall(r"election_results/(\d+/\d+/[^\"'<>\n]+?\.pdf)(?=[\"'<>\s\\]|$)", t)
+
+
+def head_ok(q: str) -> bool:
+    """Da li PDF postoji na RIK-u (q relativno na election_results/)."""
+    try:
+        req = urllib.request.Request(urllib.parse.quote(URL_BASE + q, safe=":/@%"), method="HEAD",
+                                     headers={"User-Agent": "Mozilla/5.0 (izbori2026 update.py)"})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return r.status == 200
+    except Exception:  # noqa: 404 i sl.
+        return False
+
+
+def guess_paths(cache: dict, paths: list, limit: int = 400) -> int:
+    """Putanje koje RIK-ov API ne vraća (npr. vrati samo zapisnik o posmatračima). Folderi u putanji su redni broj
+    postavljanja fajla (827/666, uvek po 3 cifre) i rastu zajedno sa oznakom fajla (PHP uniqid, 13 heksa cifara),
+    pa se traže između dva suseda iz keša i proveravaju na RIK-u (HEAD). Vraća broj nađenih."""
+    known = sorted((int(m.group(3), 16), int(m.group(1)) * 1000 + int(m.group(2)))
+                   for m in (re.match(r"(\d+)/(\d{3})/([0-9a-f]{13})/", v) for v in cache.values()) if m)
+    keys = [h for h, _ in known]
+    tries = found = 0
+    for p in dict.fromkeys(paths):
+        m = re.match(r"([0-9a-f]{13})/", p)
+        i = bisect.bisect(keys, int(m.group(1), 16)) if m else 0
+        if not m or i == 0 or i >= len(known) or tries >= limit:
+            continue
+        (h0, lo), (h1, hi) = known[i - 1], known[i]
+        if not 0 < hi - lo <= 60:
+            continue
+        est = lo + (hi - lo) * (int(m.group(1), 16) - h0) / ((h1 - h0) or 1)
+        for x in sorted(range(lo + 1, hi), key=lambda x: (abs(x - est), x))[:12]:
+            q = f"{x // 1000}/{x % 1000:03d}/{p}"
+            tries += 1
+            if head_ok(q):
+                cache[p], found = q, found + 1
+                break
+    return found
 
 
 def fix_links(cells: list):
@@ -93,6 +133,26 @@ def fix_links(cells: list):
                 for p in paths:
                     cache[p.split("/", 2)[2]] = p
                 done += 1
+    # RIK u CSV-u ponekad daje isti fajl sa drugim nasumičnim nastavkom imena (@ПА59_1a4a… umesto @ПА59_9ac0…);
+    # folder (uniqid) je jedinstven za postavljeni fajl, pa se poklapa po folderu i imenu pre nastavka
+    # a ponekad i sasvim drugo (staro) ime: tada se uzima jedini poznati fajl iz istog foldera
+    stem = lambda p: re.sub(r"_[0-9a-f]{32}(\.\w+)$", r"\1", p)
+    by_dir = {stem(k): v for k, v in cache.items()}
+    by_u = {}
+    for v in cache.values():
+        m = re.match(r"\d+/\d{3}/([0-9a-f]{13})/", v)
+        if m:
+            by_u.setdefault(m.group(1), set()).add(v)
+    for p in {c[k] for c, k, u in cells if bad(c[k])}:
+        v = by_dir.get(stem(p)) or (next(iter(by_u[p[:13]])) if len(by_u.get(p[:13], ())) == 1 else None)
+        if v:
+            # folderi iz keša, a ime ili iz keša ili iz CSV-a: uzima se ono koje na RIK-u postoji
+            own = v.rsplit("/", 2)[0] + "/" + p
+            for q in (v, own):
+                if head_ok(q):
+                    cache[p], done = q, done + 1
+                    break
+    done += guess_paths(cache, [c[k] for c, k, u in cells if bad(c[k])])
     for c, k, u in cells:
         if c[k] in cache:
             c[k] = cache[c[k]]
