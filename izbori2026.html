@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Izbori 2026: rezultati po biračkim mestima</title>
-<meta name="description" content="Rezultati parlamentarnih izbora u Srbiji 2026. po biračkim mestima: glasovi svih 18 lista, izlaznost, naselja i zapisnici RIK-a za 8.392 biračka mesta.">
+<title>Izbori 2026: rezultati po biračkim mestima i selima</title>
+<meta name="description" content="Rezultati parlamentarnih izbora u Srbiji 2026. za 8.392 biračka mesta: svih 18 lista, izlaznost po selima, poređenje sa izborima 2023, popis stanovništva 2022 i zapisnici RIK-a.">
 <link rel="canonical" href="https://izbori26.rs/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="izbori26.rs">
 <meta property="og:locale" content="sr_RS">
 <meta property="og:url" content="https://izbori26.rs/">
-<meta property="og:title" content="Izbori 2026: rezultati po biračkim mestima">
-<meta property="og:description" content="Parlamentarni izbori u Srbiji, 25. oktobar 2026. Rezultati svih lista, izlaznost, naselja i zapisnici RIK-a za svako biračko mesto.">
+<meta property="og:title" content="Izbori 2026: rezultati po biračkim mestima i selima">
+<meta property="og:description" content="Parlamentarni izbori u Srbiji, 25. oktobar 2026. Rezultati svih lista i izlaznost za svako biračko mesto i selo, poređenje sa 2023, popis 2022 i zapisnici RIK-a.">
 <meta property="og:image" content="https://izbori26.rs/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -728,7 +728,8 @@ function viewOpstine(){
       ncols[0].get=e=>e.key?flat(e.name):null; // "(naselje nije utvrđeno)" uvek na kraju
       // Popis 2022 (RZS): punoletni i ukupno stanovnika; za "X и Y" zbir naselja
       const sp=(STAN[o.full]||{});
-      ents2.forEach(e=>{const ps=e.key?e.key.split(/, | и /).map(n=>sp[n]):[];e.pop=ps.length&&ps.every(Boolean)?[ps.reduce((s,p)=>s+p[0],0),ps.reduce((s,p)=>s+(p[1]||0),0)]:null});
+      // manje stanovnika nego upisanih: ime naselja u odluci pokriva i deo grada (npr. Љубић u Čačku), broj se ne prikazuje
+      ents2.forEach(e=>{const ps=e.key?e.key.split(/, | и /).map(n=>sp[n]):[];e.pop=ps.length&&ps.every(Boolean)?[ps.reduce((s,p)=>s+p[0],0),ps.reduce((s,p)=>s+(p[1]||0),0)]:null;if(e.pop&&e.pop[0]<e.a.up)e.pop=null});
       ncols.splice(1,0,
         {id:"up",label:U("Upisano","Registered"),num:true,get:e=>e.a.up,render:e=>N(e.a.up)},
         {id:"pun",label:U("Punoletnih (2022)","Adults (2022)"),num:true,get:e=>e.pop?e.pop[1]:null,render:e=>e.pop&&e.pop[1]?N(e.pop[1]):"–"},
@@ -1757,7 +1758,7 @@ function show(tab,first){ // first: prvi prikaz posle učitavanja (gotov Pregled
 function go(tab){if(location.hash==="#"+tab)show(tab);else location.hash=tab}
 function chrome(){
   document.documentElement.lang={cyr:"sr-Cyrl",lat:"sr-Latn",en:"en"}[script];
-  document.title=S("Izbori 2026: rezultati po biračkim mestima","Serbia 2026 election: results by polling station");
+  document.title=S("Izbori 2026: rezultati po biračkim mestima i selima","Serbia 2026 election: results by polling station and village");
   $(".brand").textContent=U("Izbori 2026","Elections 2026");
   $(".brand").title=U("Osveži podatke i vrati se na početak","Refresh data and go to the start");
   $("#tabs").setAttribute("aria-label",U("Pregledi","Views"));
