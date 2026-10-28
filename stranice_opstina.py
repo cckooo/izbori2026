@@ -78,6 +78,7 @@ TABS = [("pregled", "Pregled", "Overview"), ("mapa", "Mapa", "Map"), ("liste", "
         ("opstine", "Opštine", "Municipalities"), ("mesta", "Biračka mesta", "Polling stations"), ("statistika", "Statistika", "Statistics")]
 MENU_CSS = """nav a{border-bottom:3px solid transparent;padding:14px 12px 11px;white-space:nowrap;color:var(--muted);font-weight:600;text-decoration:none}
 nav a[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)} nav a:hover{color:var(--ink)} .brand{text-decoration:none;color:inherit}
+.stp h1{font-size:1.4rem;line-height:1.25} .stp h2{font-size:1.05rem} /* kao na glavnom sajtu: naslov kao h2 kartice, delovi kao h3 */
 @media (max-width:720px){nav a{padding:10px 12px 9px} table.cards td[data-l="Leading list"]{grid-column:1/-1}}"""
 SAVE = """onclick="try{localStorage.setItem('izbori2026.jezik','%s')}catch(e){}\""""
 

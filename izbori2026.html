@@ -1112,11 +1112,14 @@ function viewListe(){
   const turnB=[[U("do 45%","up to 45%"),0,.45],["45–55%",.45,.55],["55–65%",.55,.65],["65–75%",.65,.75],[U("preko 75%","over 75%"),.75,9]]
     .map(([lab,lo,hi])=>band(lab,E.filter(r=>r.turn!=null&&r.turn>=lo&&r.turn<hi)));
   const opts=LISTS.map((x,i)=>`<option value="${i}" ${i===L?"selected":""}>${x.n}. ${esc(x.short)}</option>`).join("");
+  // delovi stranice liste (#lista-N-<deo>); podmeni je odmah ispod izbora (kao na Statistici), da se vidi u prvom ekranu
+  const sub=LSUB.some(x=>x[0]===state.lsub)?state.lsub:"osnovno";
   $("#liste").innerHTML=`
    <h2>${U("Profil liste","List profile")}</h2>
    <p>${U("Gde je lista najjača i najslabija, kako joj ide po okruzima, u gradovima i selima, na velikim i malim mestima. Sve se računa samo na biračkim mestima sa unetim rezultatom; udeo je u važećim glasovima.","Where the list is strongest and weakest, how it does by district, in cities and villages, at large and small stations. Only stations with entered results are used; shares are of valid votes.")}</p>
    <div class="ctl"><label>${U("Izborna lista","Electoral list")}<select id="lList">${opts}</select></label></div>
    ${bezToggle()}
+   <div class="subnav" role="group" aria-label="${U("Delovi profila liste","List profile sections")}">${LSUB.map(([k,sr,en])=>`<button type="button" data-sub="${k}" aria-current="${k===sub}">${U(sr,en)}</button>`).join("")}</div>
    <h3 class="lhead">${sw(L)}<span>${l.n}. ${esc(l.name)}</span></h3>
    ${shareBtn("lsLink")}
    <div class="facts">
@@ -1127,8 +1130,6 @@ function viewListe(){
      <div><b>${N(zero)}</b><span>${U(`mesta bez ijednog glasa (od ${N(E.length)})`,`stations with no votes (of ${N(E.length)})`)}</span></div>
    </div>
 `;
-  // delovi stranice liste (#lista-N-<deo>)
-  const sub=LSUB.some(x=>x[0]===state.lsub)?state.lsub:"osnovno";
   const SECL={osnovno:()=>`   ${shareHist(L)}
    <div class="block"><h3>${U("Po okruzima","By district")}</h3>
     <p class="note">${U(`Okruzi poređani po udelu liste. Crta je prosek Srbije (${PL(A.v[L]/A.va,L)}).`,`Districts sorted by the list’s share. The line is the Serbian average (${PL(A.v[L]/A.va,L)}).`)}</p>
@@ -1172,7 +1173,7 @@ function viewListe(){
      <p class="note">${U("Biračka mesta prema izlaznosti; u zagradi je broj mesta. Crta je prosek Srbije.","Polling stations by turnout; the number of stations is in brackets. The line is the Serbian average.")}</p>
      ${shareBars(turnB,L,U("Izlaznost","Turnout"))}</div>
    </div>`};
-  $("#liste").insertAdjacentHTML("beforeend",`<div class="subnav" role="group" aria-label="${U("Delovi profila liste","List profile sections")}">${LSUB.map(([k,sr,en])=>`<button type="button" data-sub="${k}" aria-current="${k===sub}">${U(sr,en)}</button>`).join("")}</div>`+SECL[sub]());
+  $("#liste").insertAdjacentHTML("beforeend",SECL[sub]());
   $$("#liste .subnav button").forEach(b=>b.onclick=()=>go(`lista-${L+1}`+(b.dataset.sub==="osnovno"?"":"-"+b.dataset.sub)));
   $("#lList").onchange=e=>{location.hash="lista-"+(+e.target.value+1)+(sub==="osnovno"?"":"-"+sub)};
   $("#lsLink").onclick=e=>shareLink(siteUrl(`#lista-${L+1}`+(sub==="osnovno"?"":"-"+sub)),LISTS[L].short,e.currentTarget);
