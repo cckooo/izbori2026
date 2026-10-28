@@ -173,7 +173,7 @@ def page(op, s, css, fonts, snap, map_svg, legend, okr_links):
 {fonts}
 <style>{css}
 .stp{{max-width:1120px;margin:0 auto;padding:0 14px 30px}} .stp .cta{{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}}
-.stp .mapsvg{{max-width:560px}} .stp h1{{margin-top:18px}} .stp a.btn{{text-decoration:none}}
+.stp .mapsvg{{max-width:560px}} .stp .mapwrap{{justify-content:center}} .stp h1{{margin-top:18px}} .stp a.btn{{text-decoration:none}}
 {MENU_CSS}
 </style></head>
 """, body + "</html>"

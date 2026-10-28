@@ -122,6 +122,10 @@ tbody tr.click:hover{background:var(--hover)}
 .chd{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap} .chd .muted{font-size:.85rem}
 .cbar{display:flex;height:12px;border-radius:2px;overflow:hidden;background:var(--bar-bg);margin-top:4px} .cbar i{display:block;height:100%}
 #opMap circle[data-c]{cursor:pointer}
+/* mapa u opštini: centrirana, opis pod pokazivačem ispod nje */
+#opMap .mapwrap{flex-direction:column;align-items:center;gap:6px}
+#opMap .mapsvg{flex:none} #opMap #nmInfo{flex:none!important;width:100%;max-width:640px;text-align:center;margin:0}
+.lgchk{display:inline-flex;align-items:center;gap:5px;cursor:pointer} .lgchk input{margin:0}
 @media (max-width:720px){.clist{grid-template-columns:1fr}}
 .maplgd .grad{display:inline-block;width:120px;height:10px;border-radius:2px;vertical-align:middle}
 path[data-op]{cursor:pointer}
@@ -1710,7 +1714,7 @@ function drawOpMap(i,m){
   });
 }
 /* ---------- Inostranstvo: gradovi na mapi sveta i rezultati po državama (inostranstvo.py -> INOSTR, inostranstvo.json) ---------- */
-let abroadMap=null,abroadView="evropa";
+let abroadMap=null,abroadView="evropa",abShowNe=true;
 function loadAbroad(){
   if(location.protocol==="file:")return Promise.resolve(null); // lokalni fajl: mapa je samo na objavljenom sajtu
   if(!abroadMap)abroadMap=fetch("inostranstvo.json").then(x=>x.ok?x.json():null).catch(()=>null);
@@ -1737,8 +1741,10 @@ function drawAbroad(i,m){
   const host=$("#opMap");if(!host)return;
   if(m===undefined){host.innerHTML=`<div id="abMap"></div>${abroadCountries(i)}`;bindAbroad(i);loadAbroad().then(j=>{if(state.opSearch===String(i)&&j)drawAbroad(i,j)});return}
   const box=$("#abMap");if(!box)return;
-  const vb=m.vb[abroadView],k=vb[2]/600*(abroadView==="svet"?.6:1),L=mapList,sh=a=>a.v[L]/a.va; // na mapi sveta manji krugovi (Evropa je zbijena)
-  const cs=abroadGroups(i,io=>io[0]+"|"+io[1]).filter(c=>c.io[3]>=vb[0]-50&&c.io[3]<=vb[0]+vb[2]+50&&c.io[4]>=vb[1]-50&&c.io[4]<=vb[1]+vb[3]+50);
+  // veličina krugova i natpisa u pikselima ekrana: k = jedinica mape po pikselu (svet je preko cele širine)
+  const world=abroadView==="svet",maxW=world?1100:640,vb=m.vb[abroadView],k=vb[2]/Math.min(maxW,box.clientWidth||600)*(world?.75:1),L=mapList,sh=a=>a.v[L]/a.va;
+  const all=abroadGroups(i,io=>io[0]+"|"+io[1]),nNe=all.filter(c=>!c.a.va).length;
+  const cs=all.filter(c=>(abShowNe||c.a.va)&&c.io[3]>=vb[0]-50&&c.io[3]<=vb[0]+vb[2]+50&&c.io[4]>=vb[1]-50&&c.io[4]<=vb[1]+vb[3]+50);
   const mxg=Math.max(1,...abroadGroups(i,io=>io[0]+"|"+io[1]).map(c=>c.a.gl||0));
   const nums=cs.filter(c=>c.a.va).map(c=>nasMode==="turn"?c.a.turn:nasMode==="share"?sh(c.a):null).filter(v=>v!=null),mn=Math.min(...nums),mx=Math.max(...nums);
   const fill=a=>{if(!a.va)return ["var(--surface)",1];
@@ -1751,18 +1757,24 @@ function drawAbroad(i,m){
   let legend="";
   if(nasMode==="win"){const cnt=new Map();cs.forEach(c=>{if(c.a.va)cnt.set(c.a.win,(cnt.get(c.a.win)||0)+1)});legend=[...cnt].sort((a,b)=>b[1]-a[1]).map(([w,n])=>`<span>${sw(w)}${esc(shortLabel(w))} (${N(n)})</span>`).join("")}
   else if(nums.length){const col=nasMode==="turn"?"var(--accent)":LISTS[L].c,f=nasMode==="turn"?P:x=>PL(x,L);legend=`<span>${f(mn)}</span><span class="grad" style="background:linear-gradient(90deg,color-mix(in srgb,${col} 20%,transparent),${col})"></span><span>${f(mx)}</span>`}
-  if(cs.some(c=>!c.a.va))legend+=`<span><span class="sw" style="background:var(--surface);border:1px solid var(--muted)"></span>${U("nije uneto","not counted")}</span>`;
+  if(nNe)legend+=`<label class="lgchk"><input type="checkbox" id="abNe" ${abShowNe?"checked":""}><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" style="fill:var(--surface);stroke:var(--muted)"/></svg>${U(`nije uneto (${N(nNe)})`,`not counted (${N(nNe)})`)}</label>`;
+  // svet: natpis države za gradove van Evrope (Evropa je pregusta za natpise)
+  const ev=m.vb.evropa,lbls=world?(()=>{const g=new Map();cs.filter(c=>c.io[3]<ev[0]||c.io[3]>ev[0]+ev[2]||c.io[4]<ev[1]||c.io[4]>ev[1]+ev[3]).forEach(c=>{if(!g.has(c.io[0]))g.set(c.io[0],[]);g.get(c.io[0]).push(c)});
+    return [...g].map(([d,xs])=>{const x=Math.max(...xs.map(c=>c.io[3])),y=xs.reduce((s,c)=>s+c.io[4],0)/xs.length;
+      const r=x>vb[0]+vb[2]*.85; // uz desnu ivicu natpis ide levo od tačke
+      return `<text x="${(r?Math.min(...xs.map(c=>c.io[3]))-9*k:x+9*k).toFixed(0)}" y="${(y+4*k).toFixed(0)}" text-anchor="${r?"end":"start"}" style="font-size:${(12*k).toFixed(0)}px;fill:var(--muted);paint-order:stroke;stroke:var(--surface);stroke-width:${(3*k).toFixed(0)}px">${esc(T(d))}</text>`}).join("")})():"";
   const modes=[["win","Ko je prvi","Who came first"],["share","Udeo liste","List share"],["turn","Izlaznost","Turnout"]].map(([v,sr,en])=>`<option value="${v}" ${v===nasMode?"selected":""}>${U(sr,en)}</option>`).join("");
   const views=[["evropa","Evropa","Europe"],["balkan","Region","Region"],["svet","Svet","World"]].map(([v,sr,en])=>`<option value="${v}" ${v===abroadView?"selected":""}>${U(sr,en)}</option>`).join("");
   box.innerHTML=`<h3 style="margin-top:26px">${U("Mapa: gradovi sa biračkim mestima","Map: cities with polling stations")}</h3>
     <div class="ctl"><label>${U("Oblast","Area")}<select id="abView">${views}</select></label><label>${U("Prikaz","Show")}<select id="nmMode">${modes}</select></label>${nasMode==="share"?`<label>${U("Lista","List")}<select id="nmList">${LISTS.map((l,j)=>`<option value="${j}" ${j===L?"selected":""}>${l.n}. ${esc(l.short)}</option>`).join("")}</select></label>`:""}</div>
     <div class="lgd maplgd">${legend}</div>
-    <div class="mapwrap"><svg class="mapsvg" viewBox="${vb.join(" ")}" role="img" aria-label="${U("Mapa biračkih mesta u inostranstvu","Map of polling stations abroad")}" style="max-width:640px;background:color-mix(in srgb,var(--accent) 6%,var(--surface))">
-      <path d="${m.land}" style="fill:var(--bar-bg);stroke:var(--surface);stroke-width:${(.8*k).toFixed(2)}"></path><path d="${m.home}" style="fill:var(--muted);fill-opacity:.45;stroke:var(--surface);stroke-width:${(.8*k).toFixed(2)}"></path>${circ}</svg>
+    <div class="mapwrap"><svg class="mapsvg" viewBox="${vb.join(" ")}" role="img" aria-label="${U("Mapa biračkih mesta u inostranstvu","Map of polling stations abroad")}" style="max-width:${maxW}px;background:color-mix(in srgb,var(--accent) 6%,var(--surface))">
+      <path d="${m.land}" style="fill:var(--bar-bg);stroke:var(--surface);stroke-width:${(.8*k).toFixed(2)}"></path><path d="${m.home}" style="fill:var(--muted);fill-opacity:.45;stroke:var(--surface);stroke-width:${(.8*k).toFixed(2)}"></path>${circ}${lbls}</svg>
     <p id="nmInfo" class="note" style="flex:1 1 200px;min-height:2.6em"></p></div>
     <p class="note">${U("Krug je grad sa biračkim mestima (više mesta u istom gradu je jedan krug); veličina prati broj glasalih. Koordinate su približne (centar grada). Granice: <span class='keep'>Natural Earth</span>.","Each circle is a city with polling stations (several stations in a city are one circle); size follows the number of voters. Positions are approximate (city centre). Boundaries: Natural Earth.")}</p>`;
   locNode(box);
   $("#abView").onchange=e=>{abroadView=e.target.value;drawAbroad(i,m)};
+  if($("#abNe"))$("#abNe").onchange=e=>{abShowNe=e.target.checked;drawAbroad(i,m)};
   $("#nmMode").onchange=e=>{nasMode=e.target.value;drawAbroad(i,m)};
   if($("#nmList"))$("#nmList").onchange=e=>{mapList=+e.target.value;drawAbroad(i,m)};
   $$("circle[data-c]",box).forEach(p=>{p.onmouseenter=()=>{$("#nmInfo").textContent=p.querySelector("title").textContent}});
