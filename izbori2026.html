@@ -53,6 +53,9 @@ button,select,input{font:inherit;color:inherit}
 .top-in{max-width:1120px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:0 14px}
 .brand{font-family:Literata,Georgia,serif;font-weight:700;white-space:nowrap;font-size:1rem;color:inherit;text-decoration:none}
 nav{display:flex;gap:2px;overflow-x:auto;flex:1;scrollbar-width:none}
+nav.more-r{-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent);mask-image:linear-gradient(90deg,#000 82%,transparent)}
+nav.more-l{-webkit-mask-image:linear-gradient(90deg,transparent,#000 18%);mask-image:linear-gradient(90deg,transparent,#000 18%)}
+nav.more-l.more-r{-webkit-mask-image:linear-gradient(90deg,transparent,#000 15%,#000 85%,transparent);mask-image:linear-gradient(90deg,transparent,#000 15%,#000 85%,transparent)}
 nav::-webkit-scrollbar{display:none}
 nav button{background:none;border:0;border-bottom:3px solid transparent;padding:14px 12px 11px;cursor:pointer;white-space:nowrap;color:var(--muted);font-weight:600}
 nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
@@ -66,7 +69,9 @@ section[hidden]{display:none}
 .lead{font-size:1.1rem;color:var(--ink)}
 .note{color:var(--muted);font-size:.9rem}
 .ribbon{display:flex;height:54px;border-radius:3px;overflow:hidden;margin:18px 0 6px;background:var(--bar-bg)}
-.ribbon div{display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.95rem;overflow:hidden;white-space:nowrap;min-width:0}
+.ribbon div{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.95rem;line-height:1.15;overflow:hidden;white-space:nowrap;min-width:0}
+.ribbon .rn{font-weight:600;font-size:.78rem;opacity:.95;max-width:100%;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
+.ribbon+.lgd{margin-top:4px}
 .sbar{display:flex;height:16px;border-radius:2px;overflow:hidden;background:var(--bar-bg);min-width:120px}
 .sbar i{display:block;height:100%}
 .tw{overflow-x:auto;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--surface);margin-top:8px}
@@ -466,6 +471,16 @@ function sbar(a,h){
   }
   return `<div class="sbar" style="${h?`height:${h}px`:""}">${s}</div>`;
 }
+// velika traka udela (Pregled, Biračka mesta): liste po veličini; u širem polju ime i procenat, u užem samo procenat,
+// a ispod legenda za liste čije ime ne stane u traku
+function ribbonBar(a){
+  if(!a.va)return `<div class="ribbon"></div>`;
+  const ks=a.rank.filter(i=>a.v[i]>0),w=i=>a.v[i]/a.va*100;
+  const segs=ks.map(i=>`<div style="width:${w(i)}%;background:${LISTS[i].c}" title="${esc(LISTS[i].short)}: ${P(a.v[i]/a.va)}">${w(i)>=14?`<span class="rn">${esc(shortLabel(i))}</span>`:""}${w(i)>=6?`<span>${P(a.v[i]/a.va,1)}</span>`:""}</div>`).join("");
+  const rest=ks.filter(i=>w(i)<14&&w(i)>=.5);
+  return `<div class="ribbon" role="img" aria-label="${U("Udeo listi u važećim glasovima","Share of valid votes by list")}">${segs}</div>`+
+    (rest.length?`<div class="lgd">${rest.map(i=>`<span>${sw(i)}${esc(shortLabel(i))} ${P(a.v[i]/a.va)}</span>`).join("")}</div>`:"");
+}
 function listSelect(id){
   return `<label>${U("Lista za prikaz","List shown")}<select id="${id}">${LISTS.map((l,i)=>`<option value="${i}" ${i===state.list?"selected":""}>${l.n}. ${esc(l.short)}</option>`).join("")}</select></label>`;
 }
@@ -616,7 +631,6 @@ function viewPregled(){
   const wonSt=new Array(NL).fill(0),wonOp=new Array(NL).fill(0);
   ROWS.forEach(r=>{if(r.win>=0)wonSt[r.win]++});
   OP_AGG.forEach(a=>{if(a.win>=0)wonOp[a.win]++});
-  const ribbon=A.rank.filter(i=>A.v[i]>0).map(i=>{const w=A.v[i]/A.va*100;return `<div style="width:${w}%;background:${LISTS[i].c}" title="${esc(LISTS[i].short)}: ${P(A.v[i]/A.va)}">${w>=6?P(A.v[i]/A.va,1):""}</div>`}).join("");
   const top=A.rank[0],sec=A.rank[1];
   const empty=REGIONS.map((g,i)=>[g,REG_AGG[i]]).filter(x=>x[1].n>0&&x[1].nd===0).map(x=>`${T(x[0])} (${N(x[1].n)} ${U("mesta","stations")})`);
   const emptyNote=empty.length?U(` Za ${esc(empty.join(", "))} još nema unetih rezultata, pa nisu uračunati.`,` No results have been entered yet for ${esc(empty.join(", "))}, so they are not included.`):"";
@@ -637,8 +651,8 @@ function viewPregled(){
      <p class="note">${U("Upiši ulicu, selo ili naziv biračkog mesta (npr. škole); može i više reči, npr. „Karađorđeva Čačak“.","Type a street, village or polling station name (e.g. a school); several words work too.")}</p>
      <input type="search" id="gdeQ" class="gdeq" autocomplete="off" placeholder="${U("Ulica, selo ili biračko mesto…","Street, village or polling station…")}" aria-label="${U("Pretraga biračkog mesta","Polling station search")}">
      <div id="gdeRes" aria-live="polite"></div></div>
-   <div class="ribbon" role="img" aria-label="${U("Udeo listi u važećim glasovima","Share of valid votes by list")}">${ribbon}</div>
-   <p class="note">${U("Širina odgovara udelu u važećim glasovima. Prikazane su liste koje imaju bar jedan glas; oznake su samo na većim segmentima.","Width is the share of valid votes. Lists with at least one vote are shown; labels appear only on larger segments.")}</p>
+   ${ribbonBar(A)}
+   <p class="note">${U("Širina odgovara udelu u važećim glasovima. Liste ispod pola procenta nisu u legendi; vide se u tabeli ispod.","Width is the share of valid votes. Lists under half a percent are not in the legend; see the table below.")}</p>
    <div class="facts">
      <div><b>${N(A.va)}</b><span>${U("važećih glasova","valid votes")}</span></div>
      <div><b>${N(A.nv)}</b><span>${U("nevažećih listića","invalid ballots")} (${P(A.inv)})</span></div>
@@ -860,7 +874,7 @@ function drawMesta(){
   const m=state.m,L=state.list;
   const rows=filteredStations();
   const a=agg(rows);
-  $("#mSum").innerHTML=`<p class="lead" style="margin-bottom:8px">${U(`${N(rows.length)} biračkih mesta, ${N(a.nd)} sa unetim rezultatom.`,`${N(rows.length)} polling stations, ${N(a.nd)} counted.`)} ${a.va?U(`Izlaznost ${P(a.turn)}, lista „${esc(LISTS[L].short)}“ ima ${P(a.v[L]/a.va)}.`,`Turnout ${P(a.turn)}; “${esc(LISTS[L].short)}” has ${P(a.v[L]/a.va)}.`):U("Za izabrani skup nema unetih rezultata.","No results entered for this selection.")}</p>${sbar(a,20)}`;
+  $("#mSum").innerHTML=`<p class="lead" style="margin-bottom:8px">${U(`${N(rows.length)} biračkih mesta, ${N(a.nd)} sa unetim rezultatom.`,`${N(rows.length)} polling stations, ${N(a.nd)} counted.`)} ${a.va?U(`Izlaznost ${P(a.turn)}, lista „${esc(LISTS[L].short)}“ ima ${P(a.v[L]/a.va)}.`,`Turnout ${P(a.turn)}; “${esc(LISTS[L].short)}” has ${P(a.v[L]/a.va)}.`):U("Za izabrani skup nema unetih rezultata.","No results entered for this selection.")}</p>${ribbonBar(a)}`;
   drawCharts(rows,a);
   const L0=LISTS[L];
   const cols=[
@@ -911,22 +925,21 @@ function drawCharts(rows,a){
   const ord=rows.slice().sort((x,y)=>x.op===y.op?x.n-y.n:T(OP[x.op].name).localeCompare(T(OP[y.op].name),"sr"));
   const multiOp=new Set(rows.map(r=>r.op)).size>1;
   const lbl=r=>`<span class="tag">${r.n}</span> ${multiOp?`<span class="muted">${esc(T(OP[r.op].name))},</span> `:""}${r.nsl&&!m.nas?`<b>${esc(T(r.nsl))}</b>, `:""}${esc(T(r.nm))}`;
-  const pick=`<p class="note">${U(`Izaberi opštinu, naselje ili suzi pretragu (prikazuje se do ${MAX_BARS} mesta; sada ih je ${N(rows.length)}).`,`Choose a municipality or settlement, or narrow the search (up to ${MAX_BARS} stations are shown; now ${N(rows.length)}).`)}</p>`;
+  // previše mesta za grafikone: jedna napomena umesto tri prazna dela
+  if(rows.length>MAX_BARS){host.innerHTML=`<p class="note" style="margin-top:16px">${U(`Izaberi opštinu ili naselje, ili suzi pretragu, pa se ovde pojavljuju grafikoni: rezultat po biračkom mestu, odstupanje od proseka i poređenje naselja (do ${MAX_BARS} mesta; sada ih je ${N(rows.length)}).`,`Choose a municipality or settlement, or narrow the search, to see charts here: result by polling station, deviation from the average and settlements compared (up to ${MAX_BARS} stations; now ${N(rows.length)}).`)}</p>`;return}
   let h="";
   const nb=LIM(30,12); // redova pre „Prikaži sve“
   // 1. rezultat po biračkom mestu
-  h+=`<div class="block${ord.length>nb&&rows.length<=MAX_BARS?" lim":""}"><h3>${U("Rezultat po biračkom mestu","Result by polling station")}</h3>`;
-  if(rows.length>MAX_BARS)h+=pick;
-  else h+=lgd+`<div class="bars"><div class="brow head"><span class="bl">${U("Biračko mesto","Polling station")}</span><span>${U("Udeo u važećim glasovima","Share of valid votes")}</span><span class="bv">${U("Izlaz.","Turnout")}</span></div>`+
+  h+=`<div class="block${ord.length>nb?" lim":""}"><h3>${U("Rezultat po biračkom mestu","Result by polling station")}</h3>`;
+  h+=lgd+`<div class="bars"><div class="brow head"><span class="bl">${U("Biračko mesto","Polling station")}</span><span>${U("Udeo u važećim glasovima","Share of valid votes")}</span><span class="bv">${U("Izlaz.","Turnout")}</span></div>`+
     ord.map((r,i)=>`<div class="brow${xr(i,nb)}"><span class="bl" title="${esc(T(r.nm))}">${lbl(r)}</span>${r.e&&r.va?stackBar(r.v,r.va,K):`<span class="muted">${U("nije uneto","not counted")}</span>`}<span class="bv">${r.turn==null?"–":P(r.turn)}</span></div>`).join("")+`</div>`+moreBtn(ord.length,nb);
   h+=`</div>`;
   // 2. odstupanje izabrane liste od proseka skupa
   const base=a.v[L]/a.va;
   const where=m.nas?U("naselja","settlement"):m.op!==""?U("opštine","municipality"):m.ok!==""?U("okruga","district"):U("izabranih mesta","selected stations");
   const nE=rows.filter(r=>r.e&&r.va).length;
-  h+=`<div class="block${nE>nb&&rows.length<=MAX_BARS?" lim":""}"><h3>${U(`Odstupanje od proseka ${where}`,`Deviation from the ${where} average`)}: ${sw(L)}${esc(LISTS[L].short)}</h3>`;
-  if(rows.length>MAX_BARS)h+=pick;
-  else{
+  h+=`<div class="block${nE>nb?" lim":""}"><h3>${U(`Odstupanje od proseka ${where}`,`Deviation from the ${where} average`)}: ${sw(L)}${esc(LISTS[L].short)}</h3>`;
+  {
     const E=ord.filter(r=>r.e&&r.va);
     const mx=Math.max(.05,...E.map(r=>Math.abs(r.v[L]/r.va-base)));
     h+=`<p class="note">${U(`Prosek je ${P(base)}. Desno od crte su mesta gde lista ima više od proseka, levo manje; broj je razlika u procentnim poenima. Listu menjaš u polju „Lista za prikaz“.`,`The average is ${P(base)}. Right of the line: stations where the list did better, left: worse; the number is the difference in percentage points. Change the list in “List shown”.`)}</p><div class="bars">`+
@@ -1872,10 +1885,17 @@ function show(tab,first){ // first: prvi prikaz posle učitavanja (gotov Pregled
   cur=tab;
   $$("section").forEach(s=>s.hidden=s.id!==tab);
   $$("#tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===tab));
+  // izabrana kartica u vidnom polju menija (na telefonu se meni pomera bočno)
+  const nv=$("#tabs"),sb=$(`#tabs button[data-tab="${tab}"]`);
+  if(sb&&nv.scrollWidth>nv.clientWidth)nv.scrollLeft=Math.max(0,sb.offsetLeft-nv.offsetLeft-(nv.clientWidth-sb.offsetWidth)/2);
+  navHint();
   VIEWS[tab]();
   if(!first)window.scrollTo(0,0); // pri prvom prikazu ne vraćaj na vrh: posetilac je možda već skrolovao gotov Pregled
 }
 function go(tab){if(location.hash==="#"+tab)show(tab);else location.hash=tab}
+// bledi prelaz na ivici menija dok ima još kartica levo/desno (na telefonu se ne vide sve)
+function navHint(){const n=$("#tabs");n.classList.toggle("more-r",n.scrollLeft+n.clientWidth<n.scrollWidth-4);n.classList.toggle("more-l",n.scrollLeft>4)}
+$("#tabs").addEventListener("scroll",navHint,{passive:true});window.addEventListener("resize",navHint);
 function chrome(){
   document.documentElement.lang={cyr:"sr-Cyrl",lat:"sr-Latn",en:"en"}[script];
   document.title=S("Izbori 2026: rezultati po biračkim mestima i selima","Serbia 2026 election: results by polling station and village");

@@ -89,7 +89,12 @@ def header(app_hash, s):
     # ako je pismo već sačuvano, linkovi na glavni sajt bez ?jezik= (ostaje izbor posetioca)
     return (f'<header class="top"><div class="top-in"><a class="brand" data-jl href="/?jezik={s}">Izbori 2026</a>'
             f'<nav id="tabs" aria-label="Pregledi">{nav}</nav><div class="seg keep" id="lang" role="group">{lang}</div></div></header>'
-            '<script>try{if(localStorage.getItem("izbori2026.jezik"))document.querySelectorAll("a[data-jl]").forEach(a=>a.href=a.getAttribute("href").replace(/\\?jezik=(lat|cyr)/,""))}catch(e){}</script>')
+            '<script>try{if(localStorage.getItem("izbori2026.jezik"))document.querySelectorAll("a[data-jl]").forEach(a=>a.href=a.getAttribute("href").replace(/\\?jezik=(lat|cyr)/,""))}catch(e){}'
+            # kao na glavnom sajtu: izabrana kartica u vidnom polju, bledi prelaz dok ima još kartica sa strane
+            '(function(){var n=document.getElementById("tabs"),s=n.querySelector("[aria-selected=true]");'
+            'function h(){n.classList.toggle("more-r",n.scrollLeft+n.clientWidth<n.scrollWidth-4);n.classList.toggle("more-l",n.scrollLeft>4)}'
+            'if(s&&n.scrollWidth>n.clientWidth)n.scrollLeft=s.offsetLeft-n.offsetLeft-(n.clientWidth-s.offsetWidth)/2;h();'
+            'n.addEventListener("scroll",h,{passive:true});window.addEventListener("resize",h)})()</script>')
 
 
 def alt_links(path):
