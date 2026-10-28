@@ -118,12 +118,20 @@ def page(op, s, css, fonts, snap, map_svg, legend, okr_links):
             f"Parlamentarni izbori 2026, {op['full']} ({op['okrug']}): rezultati po naseljima i biračkim mestima."
     ab = op["ab"]  # inostranstvo: države umesto naselja, bez popisa
     unit = "Država" if ab else "Naselje"
-    nas_rows = "".join(
+    rows = [
         f'<tr><td class="ttl" data-l="{unit}"><b>{e(x["name"])}</b></td><td class="num" data-l="Biračkih mesta">{x["n"]}</td>'
         + ("" if ab else f'<td class="num" data-l="Stanovnika (2022)">{x["pops"]}</td>') +
         f'<td class="num" data-l="Upisano">{x["ups"]}</td><td class="num" data-l="Izlaznost">{x["ts"]}</td>'
         f'<td data-l="Prva lista">' + (f'<span class="sw" style="background:{x["c"]}"></span>{e(x["lst"])} {x["shs"]}' if x["lst"] else "–")
-        + "</td></tr>" for x in op["nas"])
+        + "</td></tr>" for x in op["nas"]]
+    thead = (f'<thead><tr><th>{unit}</th><th class="num">Biračkih mesta</th>{"" if ab else "<th class=num>Stanovnika (2022)</th>"}'
+             '<th class="num">Upisano</th><th class="num">Izlaznost</th><th>Prva lista</th></tr></thead>')
+    # prvih 15 odmah, ostala na klik (details: bez JavaScript-a, Google vidi sva); stranica na telefonu inače ima 10.000+ px
+    nas_tbl = f'<div class="tw"><table class="cards">{thead}<tbody>{"".join(rows[:15])}</tbody></table></div>'
+    if len(rows) > 15:
+        nas_tbl += (f'<details class="more"><summary class="btn ghost">Prikaži sve ({len(rows)})</summary>'
+                    f'<div class="tw"><table class="cards">{thead}<tbody>{"".join(rows[15:])}</tbody></table></div></details>')
+    nas_tbl = f'<div class="nast">{nas_tbl}</div>'
     c = op["c23"]
     cmp = (f'<div class="block"><h2>Poređenje sa izborima 2023.</h2><div class="tw"><table class="cards"><thead><tr><th></th>'
            f'<th class="num">2023.</th><th class="num">2026.</th></tr></thead><tbody>'
@@ -160,7 +168,7 @@ def page(op, s, css, fonts, snap, map_svg, legend, okr_links):
   f'<div class="block"><h2>Mapa sela: ko je prvi</h2><div class="lgd maplgd">{legend}</div><div class="mapwrap">{map_svg}</div><p class="note">Bleđa boja znači tesniju pobedu. Granice: © <span class="keep">OpenStreetMap</span> saradnici (<span class="keep">ODbL</span>).</p></div>' if map_svg else ""}
 {'<div class="block"><h2>Rezultati po državama</h2><p class="note">Biračka mesta sabrana po državi, poređano po broju upisanih birača.</p>' if ab else
  '<div class="block"><h2>Rezultati po naseljima i popis 2022.</h2><p class="note">Biračka mesta sabrana po naselju, poređano po broju upisanih birača. Broj stanovnika: popis 2022. (RZS).</p>'}
-<div class="tw"><table class="cards"><thead><tr><th>{unit}</th><th class="num">Biračkih mesta</th>{'' if ab else '<th class="num">Stanovnika (2022)</th>'}<th class="num">Upisano</th><th class="num">Izlaznost</th><th>Prva lista</th></tr></thead><tbody>{nas_rows}</tbody></table></div></div>
+{nas_tbl}</div>
 {f'<div class="block"><h2>Ukratko</h2><p>{e(op["sum"])}</p></div>' if op['sum'] else ''}
 <div class="cta"><a class="btn" data-jl href="{app}">Otvori {e(op['name'])} na sajtu →</a><a class="btn ghost" href="{home}">Sve opštine</a></div>
 {okr_links}
@@ -181,7 +189,12 @@ def page(op, s, css, fonts, snap, map_svg, legend, okr_links):
 {fonts}
 <style>{css}
 .stp{{max-width:1120px;margin:0 auto;padding:0 14px 30px}} .stp .cta{{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}}
-.stp .mapsvg{{max-width:560px}} .stp .mapwrap{{justify-content:center}} .stp h1{{margin-top:18px}} .stp a.btn{{text-decoration:none}}
+.stp .mapsvg{{max-width:560px}} .stp .mapwrap{{justify-content:center}}
+details.more summary{{display:inline-block;margin:10px 0;cursor:pointer;list-style:none}} details.more summary::-webkit-details-marker{{display:none}}
+details.more[open] summary{{display:none}} details.more .tw thead{{display:none}}
+.nast table{{table-layout:fixed;width:100%}} /* iste širine kolona u oba dela tabele naselja */
+.nast tr>:first-child{{width:22%}} .nast tr>:last-child{{width:30%}} .nast td:last-child{{white-space:normal}}
+@media (max-width:720px){{.nast table.cards tr{{grid-template-columns:repeat(3,minmax(0,1fr))}}}} .stp h1{{margin-top:18px}} .stp a.btn{{text-decoration:none}}
 {MENU_CSS}
 </style></head>
 """, body + "</html>"

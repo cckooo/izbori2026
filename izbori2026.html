@@ -132,7 +132,9 @@ tbody tr.click:hover{background:var(--hover)}
 .chd{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap} .chd .muted{font-size:.85rem}
 .cbar{display:flex;height:12px;border-radius:2px;overflow:hidden;background:var(--bar-bg);margin-top:4px} .cbar i{display:block;height:100%}
 #opMap circle[data-c]{cursor:pointer}
-@media (max-width:1100px){.grid2.w1100{grid-template-columns:minmax(0,1fr)}} /* tabela po veličini mesta ne staje u pola užeg ekrana */
+/* parovi tabela (Statistika, Liste, Poređenje sa 2023.) ne staju u pola užeg ekrana: jedna ispod druge */
+@media (max-width:1100px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.tw th{white-space:normal;vertical-align:bottom} /* dugi naslovi kolona u dva reda, da tabela stane */
 .seatt .st{display:block;font-size:.78rem;margin-left:18px}
 .sumtxt{margin-top:28px} .sumtxt h3{font-size:.95rem;color:var(--muted);margin:0 0 4px} .sumtxt p{font-size:.88rem;color:var(--muted);line-height:1.55;margin:0;max-width:none}
 /* mapa u opštini: centrirana, opis pod pokazivačem ispod nje */
@@ -202,7 +204,7 @@ footer p{margin:.3rem 0 .6rem}
 #opSt2 th,#opSt2 td{padding-left:4px;padding-right:4px}
 #okTbl th,#okTbl td,#regTbl th,#regTbl td,#opTbl th,#opTbl td{padding-left:6px;padding-right:6px}
 td.ttl{white-space:normal}
-td.nas{white-space:normal !important;min-width:200px;max-width:360px;font-size:.9rem;line-height:1.35}
+td.nas{white-space:normal !important;min-width:160px;max-width:360px;font-size:.9rem;line-height:1.35}
 td.nas summary{cursor:pointer;list-style:none}
 td.nas summary::-webkit-details-marker{display:none}
 td.nas summary .more{color:var(--accent);font-weight:600;white-space:nowrap}
@@ -240,6 +242,26 @@ td.nas details[open] summary{display:none}
  .dlg{padding:14px 14px 18px}
  .dlg .row{grid-template-columns:minmax(0,1fr) 74px 62px}
  .dlg .row>div:nth-child(2){grid-column:1/-1;order:3}
+ /* široke tabele (sve liste po regionu, opštini, naselju): tri polja u redu, kartice upola niže */
+ .wtbl table.cards tr{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 10px}
+}
+/* tablet: široke tabele (8+ kolona: regioni, okruzi, opštine, biračka mesta) kao kartice sa četiri polja u redu */
+@media (min-width:721px) and (max-width:1050px){
+ .wtbl .msort{display:flex;gap:8px;align-items:center;margin:8px 0;max-width:420px}
+ .wtbl .msort select{flex:1;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:8px 9px}
+ .wtbl .tw{overflow:visible}
+ .wtbl table.cards,.wtbl table.cards tbody{display:block;width:100%}
+ .wtbl table.cards thead{display:none}
+ .wtbl table.cards tr{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px 14px;padding:12px;border-bottom:1px solid var(--line)}
+ .wtbl table.cards tr:last-child{border-bottom:0}
+ .wtbl table.cards td{border:0;padding:0;display:block;text-align:left;white-space:normal !important;min-width:0}
+ .wtbl table.cards td.num{text-align:left}
+ .wtbl table.cards td::before{content:attr(data-l);display:block;color:var(--muted);font-size:.78rem;line-height:1.25}
+ .wtbl table.cards td.ttl,.wtbl table.cards td.nas{grid-column:1/-1;max-width:none}
+ .wtbl table.cards td.ttl{font-size:1.02rem}
+ .wtbl table.cards td.ttl::before{content:none}
+ .wtbl table.cards td.hm{display:none}
+ .wtbl table.cards td .sbar,.wtbl table.cards td .pctbar{min-width:0}
 }
 </style>
 </head>
@@ -543,6 +565,7 @@ function dataTable(host,id,cols,items,opt={}){
   const showAll=opt.limit&&!ext&&arr.length>opt.limit?`<div class="morebar"><button type="button" class="btn ghost morebtn" data-own="1">${U(`Prikaži sve (${N(arr.length)})`,`Show all (${N(arr.length)})`)}</button><button type="button" class="btn ghost lessbtn" data-own="1">${lessLab()}</button></div>`:"";
   host.innerHTML=ms+`<div class="tw"><table class="cards"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`+pager+showAll;
   host.classList.toggle("lim",arr.length>lim);
+  host.classList.toggle("wtbl",cols.length>=8||!!opt.wide); // široka tabela: na tabletu kartice (CSS)
   const mb=$(".morebtn",host),lb=$(".lessbtn",host);
   if(mb){mb.hidden=!!st.all;lb.hidden=!st.all;
     mb.onclick=()=>{st.all=true;dataTable(host,id,cols,items,opt)};
@@ -643,8 +666,9 @@ function viewPregled(){
   const empty=REGIONS.map((g,i)=>[g,REG_AGG[i]]).filter(x=>x[1].n>0&&x[1].nd===0).map(x=>`${T(x[0])} (${N(x[1].n)} ${U("mesta","stations")})`);
   const emptyNote=empty.length?U(` Za ${esc(empty.join(", "))} još nema unetih rezultata, pa nisu uračunati.`,` No results have been entered yet for ${esc(empty.join(", "))}, so they are not included.`):"";
   const cols=[
-    {id:"n",label:U("Br.","No."),num:true,hm:true,get:l=>l.n,render:l=>l.n},
-    {id:"name",label:U("Izborna lista","Electoral list"),ttl:true,get:l=>flat(l.name),render:l=>`<span style="display:inline-block;white-space:normal;max-width:430px;vertical-align:top">${sw(l.i)}${esc(l.name)}</span>`},
+    {id:"n",label:U("Na listiću","Ballot no."),num:true,hm:true,get:l=>l.n,render:l=>l.n},
+    // kratak naziv (pun zvanični naziv je u profilu liste i u oblačiću), da red ne bude visok 3–4 reda
+    {id:"name",label:U("Izborna lista","Electoral list"),ttl:true,get:l=>flat(l.name),render:l=>`<span title="${esc(l.name)}" style="white-space:normal">${sw(l.i)}${esc(LISTS[l.i].short)}</span>`},
     {id:"v",label:U("Glasova","Votes"),num:true,get:l=>l.v,render:l=>N(l.v)},
     {id:"p",label:U("Udeo u važećim","Share of valid"),num:true,get:l=>l.p,render:l=>pctBar(l.p,LISTS[l.i].c,A.v[top]/A.va)},
     {id:"ws",label:U("Pobede, mesta","Wins, stations"),num:true,get:l=>l.ws,render:l=>N(l.ws)},
@@ -676,7 +700,7 @@ function viewPregled(){
    <div id="regTbl"></div></div>
    ${sumBlock(pregledSum(A))}`;
   const gq=$("#gdeQ");gq.oninput=gdeSearch;gq.onfocus=()=>{if(!ulOk)loadUlice().catch(()=>{})}; // ulice stižu čim se klikne u polje
-  dataTable($("#resTbl"),"res",cols,items,{sort:"v",dir:-1,limit:8,onRow:l=>{location.hash="lista-"+l.n}});
+  dataTable($("#resTbl"),"res",cols,items,{sort:"v",dir:-1,limit:8,wide:true,onRow:l=>{location.hash="lista-"+l.n}});
   const ents=REGIONS.map((g,i)=>({id:i,name:g,a:REG_AGG[i]}));
   const tl=A.rank.slice(0,6);
   const rcols=[
@@ -887,16 +911,18 @@ function drawMesta(){
   $("#mSum").innerHTML=`<p class="lead" style="margin-bottom:8px">${U(`${N(rows.length)} biračkih mesta, ${N(a.nd)} sa unetim rezultatom.`,`${N(rows.length)} polling stations, ${N(a.nd)} counted.`)} ${a.va?U(`Izlaznost ${P(a.turn)}, lista „${esc(LISTS[L].short)}“ ima ${P(a.v[L]/a.va)}.`,`Turnout ${P(a.turn)}; “${esc(LISTS[L].short)}” has ${P(a.v[L]/a.va)}.`):U("Za izabrani skup nema unetih rezultata.","No results entered for this selection.")}</p>${ribbonBar(a)}`;
   drawCharts(rows,a);
   const L0=LISTS[L];
+  // izabrana opština: bez kolone Opština i bez opštine/naselja ispred naziva (piše u filteru i koloni Naselje)
+  const one=m.op!=="";
   const cols=[
-    {id:"nm",label:U("Biračko mesto","Polling station"),ttl:true,get:r=>opRank[r.op]*1e5+r.n,render:r=>`${bmTitle(r)} <span class="tag">${r.n}</span>`},
+    {id:"nm",label:U("Biračko mesto","Polling station"),ttl:true,get:r=>opRank[r.op]*1e5+r.n,render:r=>`${one?`<b>${esc(T(r.nm))}</b>`:bmTitle(r)} <span class="tag">${r.n}</span>`},
     {id:"nsl",label:U("Naselje","Settlement"),nas:true,get:r=>r.nsl?flat(r.nsl):null,render:nslCell},
-    {id:"op",label:U("Opština","Municipality"),get:r=>flat(OP[r.op].name),render:r=>esc(T(OP[r.op].name))},
+    ...one?[]:[{id:"op",label:U("Opština","Municipality"),get:r=>flat(OP[r.op].name),render:r=>esc(T(OP[r.op].name))}],
     {id:"up",label:U("Upisano","Registered"),num:true,get:r=>r.up,render:r=>N(r.up)},
     {id:"turn",label:U("Izlaznost","Turnout"),num:true,get:r=>r.turn,render:r=>r.turn==null?notEntered():P(r.turn)},
     {id:"sel",label:U("Udeo","Share")+": "+esc(L0.short),num:true,get:r=>r.e&&r.va?r.v[L]/r.va:null,render:r=>r.e&&r.va?pctBar(r.v[L]/r.va,L0.c):"–"},
-    {id:"win",label:U("Prva lista","Leading list"),get:r=>r.win>=0?r.win:null,render:r=>r.win>=0?`${sw(r.win)}${esc(LISTS[r.win].short)}`:"–"},
+    {id:"win",label:U("Prva lista","Leading list"),get:r=>r.win>=0?r.win:null,render:r=>r.win>=0?`${sw(r.win)}${esc(shortLabel(r.win))}`:"–"},
     {id:"inv",label:U("Nevažeći","Invalid"),num:true,get:r=>r.inv,render:r=>r.inv==null?"–":P(r.inv)},
-    {id:"lnk",label:U("Zapisnik","Record"),nosort:true,get:r=>0,render:r=>pdfA(r,`${U("RIK","RIK")} (PDF)`,true)||"–"}
+    {id:"lnk",label:U("Zapisnik","Record"),nosort:true,get:r=>0,render:r=>pdfA(r,"PDF",true)||"–"}
   ];
   // kolona „Biračko mesto“ se sortira po opštini (abecedno), pa po broju mesta;
   // kad se izabere nova opština, mesta se prikazuju po broju
@@ -907,7 +933,7 @@ function drawMesta(){
   const st=state.tbl.mesta||(state.tbl.mesta={key:"turn",dir:-1});
   const col=cols.find(c=>c.id===st.key)||cols[0];
   const sorted=rows.slice().sort((x,y)=>{const p=col.get(x),q=col.get(y);if(p==null&&q==null)return 0;if(p==null)return 1;if(q==null)return -1;const c=typeof p==="string"?p.localeCompare(q,"sr"):p-q;return c*st.dir});
-  const per=LIM(50,10),pages=Math.max(1,Math.ceil(sorted.length/per));
+  const per=matchMedia("(min-width:721px) and (max-width:1050px)").matches?20:LIM(50,10),pages=Math.max(1,Math.ceil(sorted.length/per)); // tablet: kartice, pa manje po strani
   m.page=Math.min(m.page,pages-1);
   const page=sorted.slice(m.page*per,(m.page+1)*per);
   const host=$("#mTbl");
@@ -1482,11 +1508,11 @@ function prevBlock(){
 function prevHook(){
   const okE=OK.map((o,i)=>({id:i,name:o.name,sub:o.region,c:cmp23(OP.map((p,j)=>j).filter(j=>OP[j].ok===i),OK_AGG[i])})).filter(e=>e.c&&OP.some((p,j)=>p.ok===e.id&&incOp(j)));
   const opE=OP.map((o,i)=>({id:i,name:o.name,sub:OK[o.ok].name,c:cmp23([i],OP_AGG[i])})).filter(e=>e.c&&incOp(e.id));
-  if($("#p23Ok"))dataTable($("#p23Ok"),"p23ok",cmpCols(U("Okrug","District")),okE,{sort:"dt",dir:-1,limit:LIM(10,4)});
+  if($("#p23Ok"))dataTable($("#p23Ok"),"p23ok",cmpCols(U("Okrug","District")),okE,{sort:"dt",dir:-1,limit:LIM(10,4),wide:true});
   const sc=$("#p23Sc");
   if(sc){sc.innerHTML=`<div class="grid2">${scatter23(opE)}${arrows23(opE)}</div>`; // dva grafikona jedan pored drugog
 locNode(sc);$$(".pt",sc).forEach(c=>c.onclick=()=>{state.okF="";state.opSearch=c.dataset.op;go("opstine")})}
-  if($("#p23Op"))dataTable($("#p23Op"),"p23op",cmpCols(U("Opština","Municipality")),opE,{sort:"dt",dir:-1,page:LIM(15,6),onRow:e=>{state.okF="";state.opSearch=String(e.id);go("opstine")}});
+  if($("#p23Op"))dataTable($("#p23Op"),"p23op",cmpCols(U("Opština","Municipality")),opE,{sort:"dt",dir:-1,page:LIM(15,6),wide:true,onRow:e=>{state.okF="";state.opSearch=String(e.id);go("opstine")}});
 }
 function viewStatistika(){
   const E=ROWS.filter(r=>r.e&&r.up>0&&r.va>0&&inc(r));
@@ -1517,7 +1543,7 @@ function viewStatistika(){
   const korCols=[{l:hTu,f:r=>r.turn==null?"–":P(r.turn)},{l:hWin,f:r=>r.win>=0?`${sw(r.win)}${esc(shortLabel(r.win))} ${P(r.v[r.win]/r.va)}`:"–"},
     {l:U("Rešenje o ispravci","Correction decision"),f:korLinks}];
   const misCols=[
-    {l:U("Glasalo birača","Voters who voted"),f:r=>N(r.gl)+(misUp(r)?`<br><span class="muted" style="font-size:.82rem">${U("= broj upisanih, verovatno greška pri unosu u RIK-u","= registered voters, likely a RIK data-entry error")}</span>`:"")},
+    {l:U("Glasalo birača","Voters who voted"),f:r=>N(r.gl)+(misUp(r)?`<br><span class="muted" style="font-size:.82rem;white-space:normal;display:inline-block;max-width:200px">${U("= broj upisanih, verovatno greška pri unosu u RIK-u","= registered voters, likely a RIK data-entry error")}</span>`:"")},
     {l:U("Listića u kutiji","Ballots in the box"),f:r=>N(r.lis)},
     {l:U("Razlika","Difference"),f:r=>{const d=r.lis-r.gl;return `<b>${d>0?"+":"−"}${N(Math.abs(d))}</b> <span class="muted">(${P(Math.abs(d)/r.gl)})</span>`}}];
   const un=ROWS.filter(r=>!r.e);
@@ -1553,13 +1579,13 @@ function viewStatistika(){
     ${miniTable(U("Najviše nevažećih listića","Most invalid ballots"),U("Najmanje 100 listića u kutiji.","At least 100 ballots in the box.")+mixOut,by(E.filter(r=>r.lis>=100&&nm(r)),r=>r.inv,-1),U("Nevažeći","Invalid"),r=>P(r.inv))}
     ${miniTable(U("Najmanja razlika prve dve liste","Closest race between the top two"),U("Najmanje 100 važećih glasova.","At least 100 valid votes."),by(E.filter(r=>r.va>=100),r=>r.margin,1),U("Razlika","Margin"),r=>PP(r.margin))}
     ${miniTable(U("Najveća biračka mesta","Largest polling stations"),U("Po broju upisanih birača.","By number of registered voters."),by(ROWS.filter(inc),r=>r.up,-1),U("Izašlo","Voted"),r=>r.e?N(r.gl):"–")}
-    ${miniTable(U("Najubedljivija pobeda liste","Biggest wins"),U("Najmanje 100 važećih glasova; udeo prve liste.","At least 100 valid votes; share of the leading list.")+mixOut,by(E.filter(r=>r.va>=100&&nm(r)),r=>r.v[r.win]/r.va,-1),hWin,r=>`${esc(LISTS[r.win].short)} ${P(r.v[r.win]/r.va,1)}`)}
+    ${miniTable(U("Najubedljivija pobeda liste","Biggest wins"),U("Najmanje 100 važećih glasova; udeo prve liste.","At least 100 valid votes; share of the leading list.")+mixOut,by(E.filter(r=>r.va>=100&&nm(r)),r=>r.v[r.win]/r.va,-1),hWin,r=>`${esc(shortLabel(r.win))} ${P(r.v[r.win]/r.va,1)}`)}
    </div>
    <div class="block"><h3>${U("Isto, u opštinama sa podeljenim glasanjem","The same, in municipalities with a divided vote")}</h3><p class="note">${mixedNote()}</p></div>
    <div class="grid2">
     ${miniTable(U("Najmanja izlaznost","Lowest turnout"),min100,by(big.filter(r=>!nm(r)),r=>r.turn,1),hTu,r=>P(r.turn))}
     ${miniTable(U("Najviše nevažećih listića","Most invalid ballots"),U("Najmanje 100 listića u kutiji.","At least 100 ballots in the box."),by(E.filter(r=>r.lis>=100&&!nm(r)),r=>r.inv,-1),U("Nevažeći","Invalid"),r=>P(r.inv))}
-    ${miniTable(U("Najubedljivija pobeda liste","Biggest wins"),U("Najmanje 100 važećih glasova; udeo prve liste.","At least 100 valid votes; share of the leading list."),by(E.filter(r=>r.va>=100&&!nm(r)),r=>r.v[r.win]/r.va,-1),hWin,r=>`${esc(LISTS[r.win].short)} ${P(r.v[r.win]/r.va,1)}`)}
+    ${miniTable(U("Najubedljivija pobeda liste","Biggest wins"),U("Najmanje 100 važećih glasova; udeo prve liste.","At least 100 valid votes; share of the leading list."),by(E.filter(r=>r.va>=100&&!nm(r)),r=>r.v[r.win]/r.va,-1),hWin,r=>`${esc(shortLabel(r.win))} ${P(r.v[r.win]/r.va,1)}`)}
    </div>${notesBlock()}`;
   SEC.odstupanja=()=>`
    <div class="block">${bmTable(U("Neobično visoka izlaznost i udeo prve liste","Unusually high turnout and leading-list share"),
