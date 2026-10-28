@@ -448,6 +448,7 @@ for(const r of ROWS){
 }
 // objavljeni sajt: putanje zapisnika su u zapisnici.json (podeli_sajt.py, ovde 0) i stižu posle prvog prikaza
 const ZAPX=DATA.rows.some(r=>r[9]===0);
+const NE_N=ROWS.filter(r=>!r.e).length; // biračka mesta bez unetog rezultata (filter „Samo neobrađena“, linkovi na Pregledu i u opštini)
 const pdfA=(r,txt,stop)=>r.url||(ZAPX&&r.link===0)?`<a href="${r.url?esc(encodeURI(r.url)):"#"}" data-pdf="${r.id}" target="_blank" rel="noopener"${stop?` onclick="event.stopPropagation()"`:""}>${txt}</a>`:"";
 // tekst za pretragu se pravi tek pri prvoj pretrazi (ubrzava učitavanje)
 const rq=r=>r.q||(r.q=flat(r.nm+" "+OP[r.op].name+" "+OK[r.ok].name+" "+r.nsl+" "+r.ul));
@@ -697,7 +698,7 @@ function viewPregled(){
      <div><b>${N(A.va)}</b><span>${U("važećih glasova","valid votes")}</span></div>
      <div><b>${N(A.nv)}</b><span>${U("nevažećih listića","invalid ballots")} (${P(A.inv)})</span></div>
      <div><b>${N(A.upd)}</b><span>${U("upisanih birača na obrađenim mestima","registered voters at counted stations")}</span></div>
-     <div><b>${N(A.n-A.nd)}</b><span>${U("biračkih mesta bez unetog rezultata","polling stations not yet counted")}</span></div>
+     <div><b>${N(A.n-A.nd)}</b><span>${U("biračkih mesta bez unetog rezultata","polling stations not yet counted")}${A.n>A.nd?` · <a href="#mesta" id="neLnk">${U("Pogledaj koja →","See which →")}</a>`:""}</span></div>
    </div>
    ${seatsBlock(A)}
    <div class="block"><h2>${U("Rezultati po listama","Results by list")}</h2>
@@ -707,6 +708,7 @@ function viewPregled(){
    <p class="note">${U("Prikazano je šest listi sa najviše glasova, ostale su zbirno. Klik na red otvara sve liste.","The six largest lists are shown, the rest combined. Click a row for all lists.")}</p>
    <div id="regTbl"></div></div>
    ${sumBlock(pregledSum(A))}`;
+  if($("#neLnk"))$("#neLnk").onclick=e=>{e.preventDefault();openNe("")};
   const gq=$("#gdeQ");gq.oninput=gdeSearch;gq.onfocus=()=>{if(!ulOk)loadUlice().catch(()=>{})}; // ulice stižu čim se klikne u polje
   dataTable($("#resTbl"),"res",cols,items,{sort:"v",dir:-1,limit:8,wide:true,onRow:l=>{location.hash="lista-"+l.n}});
   const ents=REGIONS.map((g,i)=>({id:i,name:g,a:REG_AGG[i]}));
@@ -789,7 +791,7 @@ function viewOpstine(){
       const link="#opstina/"+opSlug(i)+(os==="rezultati"?"":"/"+os);
       if(cur==="opstine"&&location.hash!==link)history.replaceState(null,"",link);
       const body={
-        rezultati:()=>`<p class="note">${statusLine(a)} ${U("Udeo je u važećim glasovima.","Shares are of valid votes.")}</p><div class="dlg" style="padding:0;max-height:none;overflow:visible">${listRows(a)}</div><div id="opMap"></div>${sumBlock(esc(opSum(i)))}`,
+        rezultati:()=>`<p class="note">${statusLine(a)} ${a.nd<a.n?`<a href="#mesta" id="opNe">${U(`${N(a.n-a.nd)} neobrađenih →`,`${N(a.n-a.nd)} not yet counted →`)}</a> `:""}${U("Udeo je u važećim glasovima.","Shares are of valid votes.")}</p><div class="dlg" style="padding:0;max-height:none;overflow:visible">${listRows(a)}</div><div id="opMap"></div>${sumBlock(esc(opSum(i)))}`,
         naselja:()=>ABROAD(i)?`<p class="note">${U("Rezultati biračkih mesta sabrani po državi. Klik na državu otvara njena biračka mesta.","Polling station results summed by country. Click a country to see its polling stations.")}</p><div id="opNas"></div>`:`<p class="note">${U("Rezultati biračkih mesta sabrani po naselju. Klik na naselje otvara njegova biračka mesta. Broj stanovnika i punoletnih je iz Popisa 2022 (RZS); birački spisak se razlikuje (iseljeni, umrli, promene prebivališta).","Polling station results summed by settlement. Click a settlement to see its polling stations. Population and adults are from the 2022 census (RZS); the voter roll differs (emigration, deaths, changes of residence).")}</p><div id="opNas"></div>`,
         p2023:()=>op23Block(i)||`<p class="muted">${U("Podaci za 2023. se učitavaju ili nisu dostupni za ovu opštinu.","2023 data are loading or not available for this municipality.")}</p>`};
       D.innerHTML=`<div class="block" style="margin-top:20px"><h3>${esc(T(o.name))} <span class="muted" style="font-weight:400">${esc(T(OK[o.ok].name))}</span></h3>
@@ -797,6 +799,7 @@ function viewOpstine(){
         <div class="subnav" role="group" aria-label="${U("Delovi opštine","Municipality sections")}">${OSUB.map(([k,sr,en])=>`<button type="button" data-sub="${k}" aria-current="${k===os}">${k==="naselja"&&ABROAD(i)?U("Po državama","By country"):U(sr,en)}</button>`).join("")}</div>
         ${body[os]()}<p style="margin-top:12px"><button class="btn ghost" id="opSt">${U("Sva biračka mesta u opštini","All polling stations in the municipality")}</button></p></div>`;
       $$("#opDetail .subnav button").forEach(b=>b.onclick=()=>{state.osub=b.dataset.sub;const y=scrollY;draw();scrollTo(0,y)});
+      if($("#opNe"))$("#opNe").onclick=e=>{e.preventDefault();openNe(i)};
       if(os==="rezultati")ABROAD(i)?drawAbroad(i):drawOpMap(i); // mapa naselja (u inostranstvu gradova) je ispod rezultata svih listi
       $("#opSt").onclick=()=>{state.m={...state.m,q:"",ok:String(o.ok),op:String(i),page:0};go("mesta")};
       // deli se posebna stranica opštine (stranice_opstina.py): ima sliku za pregled linka i vodi na interaktivni prikaz
@@ -866,7 +869,13 @@ function filteredStations(){
   const m=state.m,q=flat(m.q.trim());
   if(q&&!ulOk)loadUlice().then(()=>{if(cur==="mesta")drawMesta()}).catch(()=>{}); // pretraga po ulicama kad stignu
   // prekidač važi samo kad nije izabran okrug ni opština (izbor Kosova ili inostranstva ih uvek prikazuje)
-  return ROWS.filter(r=>(m.ok!==""||m.op!==""||inc(r))&&(m.ok===""||String(r.ok)===m.ok)&&(m.op===""||String(r.op)===m.op)&&(!m.nas||(m.nas===NONE?!r.nsl:r.nsl===m.nas))&&(!q||rq(r).includes(q)));
+  // m.ne: samo mesta bez unetog rezultata (tada sva, i u inostranstvu)
+  return ROWS.filter(r=>(m.ne||m.ok!==""||m.op!==""||inc(r))&&(!m.ne||!r.e)&&(m.ok===""||String(r.ok)===m.ok)&&(m.op===""||String(r.op)===m.op)&&(!m.nas||(m.nas===NONE?!r.nsl:r.nsl===m.nas))&&(!q||rq(r).includes(q)));
+}
+// otvori spisak neobrađenih mesta (Pregled, opština); op: indeks opštine ili ""
+function openNe(op){
+  state.m={q:"",ok:op===""?"":String(OP[op].ok),op:op===""?"":String(op),nas:"",sort:"turn",dir:-1,page:0,ne:true};
+  state.tbl.mesta={key:"nm",dir:1};go("mesta");
 }
 function viewMesta(){
   const m=state.m;
@@ -883,6 +892,7 @@ function viewMesta(){
      <button class="btn ghost" id="mReset">${U("Poništi filtere","Clear filters")}</button>
    </div>
    ${bezToggle()}
+   ${NE_N?`<label class="bez"><input type="checkbox" id="mNe" ${m.ne?"checked":""}> ${U("Samo neobrađena biračka mesta","Only polling stations not yet counted")} <span class="muted">(${U(`${N(NE_N)} mesta bez unetog rezultata`,`${N(NE_N)} stations without results`)})</span></label>`:""}
    <div id="mSum"></div>
    <div id="mCharts"></div>
    <div class="block"><h3>${U("Spisak biračkih mesta","List of polling stations")}</h3><div id="mTbl"></div><div class="pager" id="pager"></div></div>`;
@@ -893,6 +903,8 @@ function viewMesta(){
   $("#mNas").onchange=e=>{m.nas=e.target.value;m.page=0;drawMesta()};
   $("#mList").onchange=e=>{state.list=+e.target.value;drawMesta()};
   bezHook();
+  if($("#mNe"))$("#mNe").onchange=e=>{m.ne=e.target.checked;m.page=0;if(m.ne)state.tbl.mesta={key:"nm",dir:1};drawMesta()};
+  if(m.ne)loadLazy("prethodni").then(()=>{if(cur==="mesta")drawMesta()}); // broj upisanih 2023. za neobrađena mesta
   $("#mReset").onclick=()=>{state.m={q:"",ok:"",op:"",nas:"",sort:"turn",dir:-1,page:0};sel=null;viewMesta()};
   drawMesta();
 }
@@ -925,7 +937,8 @@ function drawMesta(){
     {id:"nm",label:U("Biračko mesto","Polling station"),ttl:true,get:r=>opRank[r.op]*1e5+r.n,render:r=>`${one?`<b>${esc(T(r.nm))}</b>`:bmTitle(r)} <span class="tag">${r.n}</span>`},
     {id:"nsl",label:U("Naselje","Settlement"),nas:true,get:r=>r.nsl?flat(r.nsl):null,render:nslCell},
     ...one?[]:[{id:"op",label:U("Opština","Municipality"),get:r=>flat(OP[r.op].name),render:r=>esc(T(OP[r.op].name))}],
-    {id:"up",label:U("Upisano","Registered"),num:true,get:r=>r.up,render:r=>N(r.up)},
+    // neobrađeno mesto: RIK daje 0 upisanih, pa se prikazuje broj iz 2023. (spojena mesta), kao procena
+    {id:"up",label:U("Upisano","Registered"),num:true,get:r=>r.e?r.up:(PREV&&p23(r)?p23(r).up:null),render:r=>r.e?N(r.up):PREV&&p23(r)?`≈${N(p23(r).up)} <span class="muted">(2023)</span>`:"–"},
     {id:"turn",label:U("Izlaznost","Turnout"),num:true,get:r=>r.turn,render:r=>r.turn==null?notEntered():P(r.turn)},
     {id:"sel",label:U("Udeo","Share")+": "+esc(L0.short),num:true,get:r=>r.e&&r.va?r.v[L]/r.va:null,render:r=>r.e&&r.va?pctBar(r.v[L]/r.va,L0.c):"–"},
     {id:"win",label:U("Prva lista","Leading list"),get:r=>r.win>=0?r.win:null,render:r=>r.win>=0?`${sw(r.win)}${esc(shortLabel(r.win))}`:"–"},
