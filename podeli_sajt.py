@@ -23,7 +23,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 ARGS = [a for a in sys.argv[1:] if not a.startswith("--")]
 OUT = Path(ARGS[0] if ARGS else "_site")
 SRC = Path(ARGS[1] if len(ARGS) > 1 else Path(__file__).with_name("izbori2026.html"))
-SITE_FILES = ["izbori2026.html", "podeli_sajt.py", "prerender.py", "stranice_opstina.py", "mapa_naselja.json", "goatcounter.js", "og.png", "ikona.png"]
+SITE_FILES = ["izbori2026.html", "podeli_sajt.py", "prerender.py", "stranice_opstina.py", "mapa_naselja.json", "mapa_inostranstvo.json", "goatcounter.js", "og.png", "ikona.png"]
 BOT = "izbori-bot"
 try:
     TZ = ZoneInfo("Europe/Belgrade")
@@ -102,6 +102,9 @@ for gv in [*SRC.parent.glob("google*.html"), SRC.with_name("llms.txt")]:  # potv
 gc = SRC.with_name("goatcounter.js")  # skripta za brojanje poseta, služi se sa našeg sajta
 if gc.exists():
     (OUT / gc.name).write_bytes(gc.read_bytes())
+ino = SRC.with_name("mapa_inostranstvo.json")  # mapa sveta za Inostranstvo (inostranstvo.py), preuzima se kad se otvori
+if ino.exists():
+    (OUT / "inostranstvo.json").write_bytes(ino.read_bytes())
 nas_map = SRC.with_name("mapa_naselja.json")  # granice naselja (mapa_naselja.py): po fajl za opštinu, preuzima se kad se otvori
 if nas_map.exists():
     nd = OUT / "naselja"

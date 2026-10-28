@@ -116,6 +116,13 @@ tbody tr.click:hover{background:var(--hover)}
 .mapins figcaption{font-weight:600;font-size:.9rem;margin-bottom:4px}
 .mapins svg{width:100%;height:auto;border:1px solid var(--line);background:var(--surface);display:block}
 .maplgd{margin-top:8px}
+/* inostranstvo: rezultati po državama (traka sa udelima svih listi) */
+.clist{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:4px 22px;margin-top:8px}
+.crow{padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer;min-width:0} .crow:hover b{color:var(--accent)}
+.chd{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap} .chd .muted{font-size:.85rem}
+.cbar{display:flex;height:12px;border-radius:2px;overflow:hidden;background:var(--bar-bg);margin-top:4px} .cbar i{display:block;height:100%}
+#opMap circle[data-c]{cursor:pointer}
+@media (max-width:720px){.clist{grid-template-columns:1fr}}
 .maplgd .grad{display:inline-block;width:120px;height:10px;border-radius:2px;vertical-align:middle}
 path[data-op]{cursor:pointer}
 path[data-op]:hover{stroke:var(--ink)!important;stroke-width:1.5px}
@@ -292,7 +299,10 @@ const LISTS=[
  {n:18,name:"Majka Srbija – Gruda",short:"Majka Srbija – Gruda",c:"#7d8f2b"}
 ];
 const NL=LISTS.length;
+// biračka mesta u inostranstvu: država, grad, napomena, tačka na mapi (inostranstvo.py)
+const INOSTR={"1":["Аустралија","Мелбурн","",5074,1890],"2":["Аустралија","Сиднеј","",5292,1693],"3":["Аустрија","Беч","презимена А–Е",573,-2410],"4":["Аустрија","Беч","презимена Ж–М",573,-2410],"5":["Аустрија","Беч","презимена Н–С",573,-2410],"6":["Аустрија","Беч","презимена Т–Ш",573,-2410],"7":["Аустрија","Салцбург","",456,-2390],"8":["Аустрија","Линц","",500,-2416],"9":["Белгија","Брисел","",152,-2542],"10":["Босна и Херцеговина","Сарајево","",644,-2193],"11":["Босна и Херцеговина","Бања Лука","",602,-2238],"12":["Босна и Херцеговина","Бања Лука","",602,-2238],"13":["Босна и Херцеговина","Бања Лука","",602,-2238],"14":["Босна и Херцеговина","Мостар","",623,-2167],"15":["Босна и Херцеговина","Дрвар","",573,-2218],"16":["Босна и Херцеговина","Требиње","",642,-2136],"17":["Босна и Херцеговина","Брањево","",667,-2221],"18":["Босна и Херцеговина","Бијељина","",672,-2238],"19":["Босна и Херцеговина","Бијељина","",672,-2238],"20":["Босна и Херцеговина","Братунац","",677,-2210],"21":["Босна и Херцеговина","Вишеград","",675,-2189],"22":["Босна и Херцеговина","Добој","",633,-2236],"23":["Босна и Херцеговина","Зворник","",668,-2220],"24":["Босна и Херцеговина","Лопаре","",660,-2232],"25":["Босна и Херцеговина","Приједор","",585,-2249],"26":["Босна и Херцеговина","Рудо","",678,-2181],"27":["Босна и Херцеговина","Мркоњић Град","",598,-2221],"28":["Босна и Херцеговина","Пале","",650,-2191],"29":["Босна и Херцеговина","Власеница","",663,-2209],"30":["Босна и Херцеговина","Соколац","",658,-2197],"31":["Босна и Херцеговина","Фоча","",657,-2176],"32":["Босна и Херцеговина","Рогатица","",665,-2190],"33":["Босна и Херцеговина","Модрича","",640,-2248],"34":["Босна и Херцеговина","Градишка","",604,-2258],"35":["Босна и Херцеговина","Угљевик","",665,-2234],"36":["Босна и Херцеговина","Брчко","",658,-2244],"37":["Босна и Херцеговина","Ново Горажде","",663,-2184],"38":["Бразил","Бразилија","",-1676,790],"39":["Грчка","Атина","",831,-1899],"40":["Данска","Копенхаген","",440,-2784],"41":["Индонезија","Џакарта","и Брунеј, Филипини, Источни Тимор, Камбоџа, Малезија, Сингапур, Тајланд, Вијетнам",3740,310],"42":["Ирска","Даблин","",-224,-2670],"43":["Италија","Рим","",438,-2095],"44":["Италија","Милано","",322,-2273],"45":["Италија","Трст","",482,-2282],"46":["Јапан","Токио","",4889,-1784],"47":["Јужна Африка","Преторија","",987,1288],"48":["Канада","Отава","и Монтреал",-2650,-2271],"49":["Канада","Торонто","",-2778,-2182],"50":["Кина","Пекинг","",4074,-1995],"51":["Кипар","Никозија","",1168,-1758],"52":["Луксембург","Луксембург","",215,-2480],"53":["Малта","Малта","",507,-1795],"54":["Мађарска","Будимпешта","",666,-2375],"55":["Немачка","Берлин","",469,-2626],"56":["Немачка","Диселдорф","",237,-2562],"57":["Немачка","Минхен","",405,-2407],"58":["Немачка","Минхен","",405,-2407],"59":["Немачка","Штутгарт","",321,-2439],"60":["Немачка","Франкфурт","",304,-2506],"61":["Немачка","Франкфурт","",304,-2506],"62":["Немачка","Хамбург","",350,-2678],"63":["Нови Зеланд","Окланд","",6117,1842],"64":["Норвешка","Осло","и Исланд",376,-2996],"65":["Пољска","Варшава","",735,-2612],"66":["Португалија","Лисабон","",-320,-1936],"67":["Русија","Москва","",1317,-2788],"68":["Русија","Сочи","",1391,-2180],"69":["Северна Македонија","Скопље","",750,-2100],"70":["Северна Македонија","Куманово","",760,-2106],"71":["САД","Вашингтон","и Мајами",-2696,-1945],"72":["САД","Чикаго","",-3067,-2094],"73":["САД","Њујорк","и Бостон, Филаделфија",-2589,-2038],"74":["САД","Лос Анђелес","и Сан Франциско, Сан Дијего, Хјустон",-4147,-1701],"75":["Словенија","Љубљана","презимена А–К",508,-2302],"76":["Словенија","Љубљана","презимена Л–Ш",508,-2302],"77":["Уједињено Краљевство","Лондон","",-5,-2575],"78":["Финска","Хелсинки","",873,-3008],"79":["Француска","Париз","",82,-2443],"80":["Француска","Стразбур","",271,-2428],"81":["Холандија","Хаг","",150,-2604],"82":["Хрватска","Загреб","и Ријека",559,-2290],"83":["Хрватска","Вуковар","",665,-2268],"84":["Црна Гора","Подгорица","и Даниловград, Никшић, Плужине",674,-2122],"85":["Црна Гора","Сутоморе","и Бар, Улцињ",667,-2107],"86":["Црна Гора","Беране","и Бијело Поље, Колашин, Андријевица",695,-2142],"87":["Чешка","Праг","",505,-2504],"88":["Швајцарска","Берн","",261,-2348],"89":["Швајцарска","Цирих","",299,-2368],"90":["Шведска","Стокхолм","",632,-2966],"91":["Шведска","Малме","и Гетеборг",455,-2780],"92":["Шпанија","Мадрид","",-130,-2021],"93":["Шпанија","Мадрид","",-130,-2021]};
 const STAN=typeof STANOVNICI!=="undefined"?STANOVNICI:{}; // Popis 2022 po naselju (parse_odluke.py)
+const ABROAD=i=>OP[i].full==="Иностранство";
 const RIK_BASE="https://rik.parlament.gov.rs/extfile/sr/election_results/";
 
 /* ---------- Jezik i pismo ----------
@@ -385,6 +395,8 @@ for(const r of ROWS){
   r.inv=r.e&&r.lis>0?r.nv/r.lis:null;
   const ns=(NASELJA[OP[r.op].full]||{})[r.n]||["",""];
   r.nsl=ns[0];r.ul=typeof ns[1]==="string"?ns[1]:"";r.ulx=ns[1]===1; // 1: ulice su u ulice.json (objavljeni sajt)
+  // inostranstvo: umesto naselja država, umesto ulica grad (odluka je skenirana, INOSTR je ručno sređen)
+  const io=ABROAD(r.op)&&INOSTR[r.n];if(io){r.nsl=io[0];r.ul=io[1]+(io[2]?" ("+io[2]+")":"");r.ulx=false}
   r.url=r.link?(r.link[0]==="!"?r.link.slice(1):RIK_BASE+r.link):"";
 }
 // objavljeni sajt: putanje zapisnika su u zapisnici.json (podeli_sajt.py, ovde 0) i stižu posle prvog prikaza
@@ -556,7 +568,12 @@ function opSum(i){
     s+=Math.abs(d)>=.005?U(`, što je ${PP(Math.abs(d))} ${d>0?"više":"manje"} nego na izborima 2023. (${P(c.t0)})`,`, ${PP(Math.abs(d))} ${d>0?"higher":"lower"} than in 2023 (${P(c.t0)})`):U(", približno kao na izborima 2023.",", about the same as in 2023");
     s+=U(`. Lista Aleksandra Vučića dobila je ${P(c.v1)} glasova, prema ${P(c.v0)} na izborima 2023`,`. The Aleksandar Vučić list won ${P(c.v1)}, compared with ${P(c.v0)} in 2023`)}
   s+=".";
-  if(!/Иностранство|Заводи/.test(o.full)){
+  if(ABROAD(i)){const cs=abroadGroups(i,io=>io[0]).filter(c=>c.a.va).sort((p,q)=>q.a.gl-p.a.gl),wn=cs.filter(c=>c.a.win===a.win).length;
+    // padež posle broja: „od 32 države“, „od 21 države“, „od 25 država“; „u 21 državi“
+    const one=n=>n%10===1&&n%100!==11,dr=n=>one(n)||n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?"države":"država";
+    if(cs.length>1)s+=U(` Glasalo se u ${N(cs.length)} ${one(cs.length)?"državi":dr(cs.length)}; najviše glasalih je u državi ${T(cs[0].io[0])} (${N(cs[0].a.gl)}), a lista „${LISTS[a.win].short}“ je bila prva u ${N(wn)} od ${N(cs.length)} ${dr(cs.length)}.`,
+      ` Votes were cast in ${N(cs.length)} countries; most voters were in ${T(cs[0].io[0])} (${N(cs[0].a.gl)}), and “${LISTS[a.win].short}” came first in ${N(wn)} of ${N(cs.length)} countries.`)}
+  else if(!/Иностранство|Заводи/.test(o.full)){
     const w=new Map(),g=new Map();for(const x of BY_OP[i])if(x.e&&x.va&&x.nsl){if(!g.has(x.nsl))g.set(x.nsl,[]);g.get(x.nsl).push(x)}
     for(const rs of g.values()){const x=agg(rs);if(x.va)w.set(x.win,(w.get(x.win)||0)+1)}
     const nn=[...w.values()].reduce((t,x)=>t+x,0),ws=[...w].sort((x,y)=>y[1]-x[1]);
@@ -710,14 +727,14 @@ function viewOpstine(){
       if(cur==="opstine"&&location.hash!==link)history.replaceState(null,"",link);
       const body={
         rezultati:()=>`${opSum(i)?`<p class="lead">${esc(opSum(i))}</p>`:""}<p class="note">${statusLine(a)} ${U("Udeo je u važećim glasovima.","Shares are of valid votes.")}</p><div class="dlg" style="padding:0;max-height:none;overflow:visible">${listRows(a)}</div><div id="opMap"></div>`,
-        naselja:()=>`<p class="note">${U("Rezultati biračkih mesta sabrani po naselju. Klik na naselje otvara njegova biračka mesta. Broj stanovnika i punoletnih je iz Popisa 2022 (RZS); birački spisak se razlikuje (iseljeni, umrli, promene prebivališta).","Polling station results summed by settlement. Click a settlement to see its polling stations. Population and adults are from the 2022 census (RZS); the voter roll differs (emigration, deaths, changes of residence).")}</p><div id="opNas"></div>`,
+        naselja:()=>ABROAD(i)?`<p class="note">${U("Rezultati biračkih mesta sabrani po državi. Klik na državu otvara njena biračka mesta.","Polling station results summed by country. Click a country to see its polling stations.")}</p><div id="opNas"></div>`:`<p class="note">${U("Rezultati biračkih mesta sabrani po naselju. Klik na naselje otvara njegova biračka mesta. Broj stanovnika i punoletnih je iz Popisa 2022 (RZS); birački spisak se razlikuje (iseljeni, umrli, promene prebivališta).","Polling station results summed by settlement. Click a settlement to see its polling stations. Population and adults are from the 2022 census (RZS); the voter roll differs (emigration, deaths, changes of residence).")}</p><div id="opNas"></div>`,
         p2023:()=>op23Block(i)||`<p class="muted">${U("Podaci za 2023. se učitavaju ili nisu dostupni za ovu opštinu.","2023 data are loading or not available for this municipality.")}</p>`};
       D.innerHTML=`<div class="block" style="margin-top:20px"><h3>${esc(T(o.name))} <span class="muted" style="font-weight:400">${esc(T(OK[o.ok].name))}</span></h3>
         ${shareBtn("opLink")}
-        <div class="subnav" role="group" aria-label="${U("Delovi opštine","Municipality sections")}">${OSUB.map(([k,sr,en])=>`<button type="button" data-sub="${k}" aria-current="${k===os}">${U(sr,en)}</button>`).join("")}</div>
+        <div class="subnav" role="group" aria-label="${U("Delovi opštine","Municipality sections")}">${OSUB.map(([k,sr,en])=>`<button type="button" data-sub="${k}" aria-current="${k===os}">${k==="naselja"&&ABROAD(i)?U("Po državama","By country"):U(sr,en)}</button>`).join("")}</div>
         ${body[os]()}<p style="margin-top:12px"><button class="btn ghost" id="opSt">${U("Sva biračka mesta u opštini","All polling stations in the municipality")}</button></p></div>`;
       $$("#opDetail .subnav button").forEach(b=>b.onclick=()=>{state.osub=b.dataset.sub;const y=scrollY;draw();scrollTo(0,y)});
-      if(os==="rezultati")drawOpMap(i); // mapa naselja je ispod rezultata svih listi
+      if(os==="rezultati")ABROAD(i)?drawAbroad(i):drawOpMap(i); // mapa naselja (u inostranstvu gradova) je ispod rezultata svih listi
       $("#opSt").onclick=()=>{state.m={...state.m,q:"",ok:String(o.ok),op:String(i),page:0};go("mesta")};
       // deli se posebna stranica opštine (stranice_opstina.py): ima sliku za pregled linka i vodi na interaktivni prikaz
       $("#opLink").onclick=e=>shareLink(location.protocol==="file:"?location.href:location.origin+"/opstina/"+opSlug(i)+"/",T(o.name),e.currentTarget);
@@ -727,7 +744,7 @@ function viewOpstine(){
       for(const r of BY_OP[i]){const k=r.nsl||"";if(!groups.has(k))groups.set(k,[]);groups.get(k).push(r)}
       const ents2=[...groups].map(([k,rs],j)=>({id:j,key:k,name:k||U("(naselje nije utvrđeno)","(settlement unknown)"),
         sub:U(`${N(rs.length)} ${rs.length===1?"biračko mesto":"biračkih mesta"}`,`${N(rs.length)} polling station${rs.length===1?"":"s"}`),a:agg(rs)}));
-      const ncols=matrixCols(U("Naselje","Settlement"));
+      const ab=ABROAD(i),ncols=matrixCols(ab?U("Država","Country"):U("Naselje","Settlement"));
       ncols[0].get=e=>e.key?flat(e.name):null; // "(naselje nije utvrđeno)" uvek na kraju
       // Popis 2022 (RZS): punoletni i ukupno stanovnika; za "X и Y" zbir naselja
       const sp=(STAN[o.full]||{});
@@ -735,8 +752,8 @@ function viewOpstine(){
       ents2.forEach(e=>{const ps=e.key?e.key.split(/, | и /).map(n=>sp[n]):[];e.pop=ps.length&&ps.every(Boolean)?[ps.reduce((s,p)=>s+p[0],0),ps.reduce((s,p)=>s+(p[1]||0),0)]:null;if(e.pop&&e.pop[0]<e.a.up)e.pop=null});
       ncols.splice(1,0,
         {id:"up",label:U("Upisano","Registered"),num:true,get:e=>e.a.up,render:e=>N(e.a.up)},
-        {id:"pun",label:U("Punoletnih (2022)","Adults (2022)"),num:true,get:e=>e.pop?e.pop[1]:null,render:e=>e.pop&&e.pop[1]?N(e.pop[1]):"–"},
-        {id:"st",label:U("Stanovnika (2022)","Population (2022)"),num:true,get:e=>e.pop?e.pop[0]:null,render:e=>e.pop?N(e.pop[0]):"–"});
+        ...ab?[]:[{id:"pun",label:U("Punoletnih (2022)","Adults (2022)"),num:true,get:e=>e.pop?e.pop[1]:null,render:e=>e.pop&&e.pop[1]?N(e.pop[1]):"–"},
+        {id:"st",label:U("Stanovnika (2022)","Population (2022)"),num:true,get:e=>e.pop?e.pop[0]:null,render:e=>e.pop?N(e.pop[0]):"–"}]);
       dataTable($("#opNas"),"opnas",ncols,ents2,{sort:"name",dir:1,page:LIM(25,10),onRow:e=>{state.m={...state.m,q:"",nas:e.key||NONE,ok:String(o.ok),op:String(i),page:0};go("mesta")}});
     }else{D.innerHTML="";if(cur==="opstine"&&location.hash.startsWith("#opstina/"))history.replaceState(null,"","#opstine")}
   };
@@ -1669,6 +1686,69 @@ function drawOpMap(i,m){
     p.onclick=()=>{const n=p.dataset.n,keys=new Set(rows.map(r=>r.nsl).filter(k=>k&&k.split(/, | и /).includes(n)));
       state.m={...state.m,q:keys.size===1?"":n,nas:keys.size===1?[...keys][0]:"",ok:String(OP[i].ok),op:String(i),page:0};go("mesta")};
   });
+}
+/* ---------- Inostranstvo: gradovi na mapi sveta i rezultati po državama (inostranstvo.py -> INOSTR, inostranstvo.json) ---------- */
+let abroadMap=null,abroadView="evropa";
+function loadAbroad(){
+  if(location.protocol==="file:")return Promise.resolve(null); // lokalni fajl: mapa je samo na objavljenom sajtu
+  if(!abroadMap)abroadMap=fetch("inostranstvo.json").then(x=>x.ok?x.json():null).catch(()=>null);
+  return abroadMap;
+}
+// grupe biračkih mesta (po gradu ili državi) sa zbirom unetih
+function abroadGroups(i,key){
+  const g=new Map();
+  for(const r of BY_OP[i]){const io=INOSTR[r.n];if(!io)continue;const k=key(io);if(!g.has(k))g.set(k,{io,rs:[]});g.get(k).rs.push(r)}
+  return [...g.values()].map(x=>({...x,a:agg(x.rs.filter(r=>r.e)),ne:x.rs.filter(r=>r.e).length}));
+}
+function abroadCountries(i){
+  const cs=abroadGroups(i,io=>io[0]).sort((p,q)=>(q.a.gl||0)-(p.a.gl||0)||(q.rs.length-p.rs.length));
+  const row=c=>{const a=c.a,cities=[...new Set(c.rs.map(r=>INOSTR[r.n][1]))].map(T).join(", ");
+    const bar=a.va?a.rank.filter(k=>a.v[k]/a.va>=.005).map(k=>`<i style="width:${(a.v[k]/a.va*100).toFixed(2)}%;background:${LISTS[k].c}" title="${esc(LISTS[k].short)} ${P(a.v[k]/a.va)}"></i>`).join(""):"";
+    return `<div class="crow" data-c="${esc(c.io[0])}"><div class="chd"><b>${esc(T(c.io[0]))}</b><span class="muted">${esc(cities)}</span></div>
+      ${a.va?`<div class="cbar">${bar}</div><div class="note" style="margin:2px 0 0">${sw(a.win)}${esc(LISTS[a.win].short)} <b>${P(a.v[a.win]/a.va)}</b> · ${U("glasalo","voted")} ${N(a.gl)} · ${U("izlaznost","turnout")} ${P(a.turn)}${c.ne<c.rs.length?` · ${U(`uneto ${N(c.ne)} od ${N(c.rs.length)} bir. mesta`,`${N(c.ne)} of ${N(c.rs.length)} stations counted`)}`:""}</div>`
+        :`<div class="note" style="margin:2px 0 0">${U(`Rezultat još nije unet (${N(c.rs.length)} bir. mesta)`,`Not yet counted (${N(c.rs.length)} stations)`)}</div>`}</div>`};
+  return `<h3 style="margin-top:26px">${U("Rezultati po državama","Results by country")}</h3>
+    <p class="note">${U("Poređano po broju glasalih. Traka pokazuje udeo svih listi u važećim glasovima. Klik na državu otvara njena biračka mesta.","Sorted by number of voters. The bar shows each list's share of valid votes. Click a country to see its polling stations.")}</p>
+    <div class="clist">${cs.map(row).join("")}</div>`;
+}
+function drawAbroad(i,m){
+  const host=$("#opMap");if(!host)return;
+  if(m===undefined){host.innerHTML=`<div id="abMap"></div>${abroadCountries(i)}`;bindAbroad(i);loadAbroad().then(j=>{if(state.opSearch===String(i)&&j)drawAbroad(i,j)});return}
+  const box=$("#abMap");if(!box)return;
+  const vb=m.vb[abroadView],k=vb[2]/600*(abroadView==="svet"?.6:1),L=mapList,sh=a=>a.v[L]/a.va; // na mapi sveta manji krugovi (Evropa je zbijena)
+  const cs=abroadGroups(i,io=>io[0]+"|"+io[1]).filter(c=>c.io[3]>=vb[0]-50&&c.io[3]<=vb[0]+vb[2]+50&&c.io[4]>=vb[1]-50&&c.io[4]<=vb[1]+vb[3]+50);
+  const mxg=Math.max(1,...abroadGroups(i,io=>io[0]+"|"+io[1]).map(c=>c.a.gl||0));
+  const nums=cs.filter(c=>c.a.va).map(c=>nasMode==="turn"?c.a.turn:nasMode==="share"?sh(c.a):null).filter(v=>v!=null),mn=Math.min(...nums),mx=Math.max(...nums);
+  const fill=a=>{if(!a.va)return ["var(--surface)",1];
+    if(nasMode==="win"){const s=a.v[a.win]/a.va;return [LISTS[a.win].c,.45+.55*Math.min(1,Math.max(0,(s-.3)/.5))]}
+    const x=nasMode==="turn"?a.turn:sh(a);return [nasMode==="turn"?"var(--accent)":LISTS[L].c,.2+.8*Math.max(0,(x-mn)/((mx-mn)||1))]};
+  const tip=c=>`${T(c.io[1])} (${T(c.io[0])}): `+(!c.a.va?U("rezultat još nije unet","not yet counted"):nasMode==="win"?`${LISTS[c.a.win].short} ${P(c.a.v[c.a.win]/c.a.va)}`:nasMode==="turn"?`${U("izlaznost","turnout")} ${P(c.a.turn)}`:`${LISTS[L].short} ${PL(sh(c.a),L)}`)+
+    (c.a.va?` · ${U("glasalo","voted")} ${N(c.a.gl)}`:"")+` · ${N(c.rs.length)} ${U("bir. mesta","stations")}`;
+  const circ=cs.sort((p,q)=>(q.a.gl||0)-(p.a.gl||0)).map(c=>{const [f,o]=fill(c.a),r=(c.a.va?3+11*Math.sqrt(c.a.gl/mxg):3.5)*k;
+    return `<circle cx="${c.io[3]}" cy="${c.io[4]}" r="${r.toFixed(1)}" data-c="${esc(c.io[0])}" style="fill:${f};fill-opacity:${o.toFixed(2)};stroke:${c.a.va?"var(--surface)":"var(--muted)"};stroke-width:${(1.2*k).toFixed(2)}"><title>${esc(tip(c))}</title></circle>`}).join("");
+  let legend="";
+  if(nasMode==="win"){const cnt=new Map();cs.forEach(c=>{if(c.a.va)cnt.set(c.a.win,(cnt.get(c.a.win)||0)+1)});legend=[...cnt].sort((a,b)=>b[1]-a[1]).map(([w,n])=>`<span>${sw(w)}${esc(shortLabel(w))} (${N(n)})</span>`).join("")}
+  else if(nums.length){const col=nasMode==="turn"?"var(--accent)":LISTS[L].c,f=nasMode==="turn"?P:x=>PL(x,L);legend=`<span>${f(mn)}</span><span class="grad" style="background:linear-gradient(90deg,color-mix(in srgb,${col} 20%,transparent),${col})"></span><span>${f(mx)}</span>`}
+  if(cs.some(c=>!c.a.va))legend+=`<span><span class="sw" style="background:var(--surface);border:1px solid var(--muted)"></span>${U("nije uneto","not counted")}</span>`;
+  const modes=[["win","Ko je prvi","Who came first"],["share","Udeo liste","List share"],["turn","Izlaznost","Turnout"]].map(([v,sr,en])=>`<option value="${v}" ${v===nasMode?"selected":""}>${U(sr,en)}</option>`).join("");
+  const views=[["evropa","Evropa","Europe"],["balkan","Region","Region"],["svet","Svet","World"]].map(([v,sr,en])=>`<option value="${v}" ${v===abroadView?"selected":""}>${U(sr,en)}</option>`).join("");
+  box.innerHTML=`<h3 style="margin-top:26px">${U("Mapa: gradovi sa biračkim mestima","Map: cities with polling stations")}</h3>
+    <div class="ctl"><label>${U("Oblast","Area")}<select id="abView">${views}</select></label><label>${U("Prikaz","Show")}<select id="nmMode">${modes}</select></label>${nasMode==="share"?`<label>${U("Lista","List")}<select id="nmList">${LISTS.map((l,j)=>`<option value="${j}" ${j===L?"selected":""}>${l.n}. ${esc(l.short)}</option>`).join("")}</select></label>`:""}</div>
+    <div class="lgd maplgd">${legend}</div>
+    <div class="mapwrap"><svg class="mapsvg" viewBox="${vb.join(" ")}" role="img" aria-label="${U("Mapa biračkih mesta u inostranstvu","Map of polling stations abroad")}" style="max-width:640px;background:color-mix(in srgb,var(--accent) 6%,var(--surface))">
+      <path d="${m.land}" style="fill:var(--bar-bg);stroke:var(--surface);stroke-width:${(.8*k).toFixed(2)}"></path><path d="${m.home}" style="fill:var(--muted);fill-opacity:.45;stroke:var(--surface);stroke-width:${(.8*k).toFixed(2)}"></path>${circ}</svg>
+    <p id="nmInfo" class="note" style="flex:1 1 200px;min-height:2.6em"></p></div>
+    <p class="note">${U("Krug je grad sa biračkim mestima (više mesta u istom gradu je jedan krug); veličina prati broj glasalih. Koordinate su približne (centar grada). Granice: <span class='keep'>Natural Earth</span>.","Each circle is a city with polling stations (several stations in a city are one circle); size follows the number of voters. Positions are approximate (city centre). Boundaries: Natural Earth.")}</p>`;
+  locNode(box);
+  $("#abView").onchange=e=>{abroadView=e.target.value;drawAbroad(i,m)};
+  $("#nmMode").onchange=e=>{nasMode=e.target.value;drawAbroad(i,m)};
+  if($("#nmList"))$("#nmList").onchange=e=>{mapList=+e.target.value;drawAbroad(i,m)};
+  $$("circle[data-c]",box).forEach(p=>{p.onmouseenter=()=>{$("#nmInfo").textContent=p.querySelector("title").textContent}});
+  bindAbroad(i);
+}
+// klik na državu (na mapi ili u spisku): biračka mesta te države
+function bindAbroad(i){
+  $$("#opMap [data-c]").forEach(p=>p.onclick=()=>{state.m={...state.m,q:"",nas:p.dataset.c,ok:String(OP[i].ok),op:String(i),page:0};go("mesta")});
 }
 /* ---------- Podaci koji stižu posle prvog prikaza (objavljeni sajt, podeli_sajt.py) ---------- */
 // Na objavljenom sajtu su zapisnici, podaci za 2023. i mapa opština izdvojeni u posebne fajlove (null/0 u HTML-u),

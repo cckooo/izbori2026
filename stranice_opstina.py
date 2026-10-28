@@ -52,7 +52,7 @@ JS_OP = r"""i => {
   return {slug:opSlug(i),name:T(o.name),full:T(o.full),bare,bareC,okrug:T(OK[o.ok].name),status:statusLine(a),sum,sumC:cyr(sum),
     rows:listRows(a),nas:nas.map(e=>({...e,lst:e.win>=0?LISTS[e.win].short:"",c:e.win>=0?LISTS[e.win].c:"",
       shs:e.sh==null?"–":P(e.sh),ts:e.turn==null?"–":P(e.turn),ups:N(e.up),pops:e.pop?N(e.pop):"–"})),
-    pop:popAll?N(popAll):"",desc,c23:c?{t0:P(c.t0),t1:P(c.t1),v0:P(c.v0),v1:P(c.v1),nt0:N(c.n.t0),nt1:N(c.n.t1),nv0:N(c.n.v0),nv1:N(c.n.v1)}:null,
+    pop:popAll?N(popAll):"",desc,ab:ABROAD(i),c23:c?{t0:P(c.t0),t1:P(c.t1),v0:P(c.v0),v1:P(c.v1),nt0:N(c.n.t0),nt1:N(c.n.t1),nv0:N(c.n.v0),nv1:N(c.n.v1)}:null,
     top:a.va?a.rank.slice(0,4).map(k=>({n:cyr(LISTS[k].short),c:LISTS[k].c,p:a.v[k]/a.va,ps:P(a.v[k]/a.va)})):[],
     turn:a.turn==null?"–":P(a.turn),nd:a.nd,n:a.n,win:a.win>=0?LISTS[a.win].short:"",
     winp:a.win>=0&&a.va?P(a.v[a.win]/a.va):""};
@@ -109,9 +109,11 @@ def page(op, s, css, fonts, snap, map_svg, legend, okr_links):
         title = f"Rezultati izbora 2026: {op['bare']} ({op['bareC']}) – po biračkim mestima i selima"
         desc = op["desc"] or \
             f"Parlamentarni izbori 2026, {op['full']} ({op['okrug']}): rezultati po naseljima i biračkim mestima."
+    ab = op["ab"]  # inostranstvo: države umesto naselja, bez popisa
+    unit = "Država" if ab else "Naselje"
     nas_rows = "".join(
-        f'<tr><td class="ttl" data-l="Naselje"><b>{e(x["name"])}</b></td><td class="num" data-l="Biračkih mesta">{x["n"]}</td>'
-        f'<td class="num" data-l="Stanovnika (2022)">{x["pops"]}</td>'
+        f'<tr><td class="ttl" data-l="{unit}"><b>{e(x["name"])}</b></td><td class="num" data-l="Biračkih mesta">{x["n"]}</td>'
+        + ("" if ab else f'<td class="num" data-l="Stanovnika (2022)">{x["pops"]}</td>') +
         f'<td class="num" data-l="Upisano">{x["ups"]}</td><td class="num" data-l="Izlaznost">{x["ts"]}</td>'
         f'<td data-l="Prva lista">' + (f'<span class="sw" style="background:{x["c"]}"></span>{e(x["lst"])} {x["shs"]}' if x["lst"] else "–")
         + "</td></tr>" for x in op["nas"])
@@ -147,9 +149,11 @@ def page(op, s, css, fonts, snap, map_svg, legend, okr_links):
 <div class="block"><h2>Rezultati svih listi</h2><p class="note">Udeo u važećim glasovima, na biračkim mestima sa unetim rezultatom.</p>
 <div class="dlg" style="padding:0;max-height:none;overflow:visible">{op['rows']}</div></div>
 {cmp}
-{f'<div class="block"><h2>Mapa sela: ko je prvi</h2><div class="lgd maplgd">{legend}</div><div class="mapwrap">{map_svg}</div><p class="note">Bleđa boja znači tesniju pobedu. Granice: © <span class="keep">OpenStreetMap</span> saradnici (<span class="keep">ODbL</span>).</p></div>' if map_svg else ""}
-<div class="block"><h2>Rezultati po naseljima i popis 2022.</h2><p class="note">Biračka mesta sabrana po naselju, poređano po broju upisanih birača. Broj stanovnika: popis 2022. (RZS).</p>
-<div class="tw"><table class="cards"><thead><tr><th>Naselje</th><th class="num">Biračkih mesta</th><th class="num">Stanovnika (2022)</th><th class="num">Upisano</th><th class="num">Izlaznost</th><th>Prva lista</th></tr></thead><tbody>{nas_rows}</tbody></table></div></div>
+{f'<div class="block"><h2>Mapa: gradovi u Evropi, ko je prvi</h2><div class="lgd maplgd">{legend}</div><div class="mapwrap">{map_svg}</div><p class="note">Krug je grad sa biračkim mestima, veličina prati broj glasalih. Granice: <span class="keep">Natural Earth</span>.</p></div>' if map_svg and ab else
+  f'<div class="block"><h2>Mapa sela: ko je prvi</h2><div class="lgd maplgd">{legend}</div><div class="mapwrap">{map_svg}</div><p class="note">Bleđa boja znači tesniju pobedu. Granice: © <span class="keep">OpenStreetMap</span> saradnici (<span class="keep">ODbL</span>).</p></div>' if map_svg else ""}
+{'<div class="block"><h2>Rezultati po državama</h2><p class="note">Biračka mesta sabrana po državi, poređano po broju upisanih birača.</p>' if ab else
+ '<div class="block"><h2>Rezultati po naseljima i popis 2022.</h2><p class="note">Biračka mesta sabrana po naselju, poređano po broju upisanih birača. Broj stanovnika: popis 2022. (RZS).</p>'}
+<div class="tw"><table class="cards"><thead><tr><th>{unit}</th><th class="num">Biračkih mesta</th>{'' if ab else '<th class="num">Stanovnika (2022)</th>'}<th class="num">Upisano</th><th class="num">Izlaznost</th><th>Prva lista</th></tr></thead><tbody>{nas_rows}</tbody></table></div></div>
 <div class="cta"><a class="btn" data-jl href="{app}">Otvori {e(op['name'])} na sajtu →</a><a class="btn ghost" href="{home}">Sve opštine</a></div>
 {okr_links}
 <p class="note">Izvor: Republička izborna komisija, rezultati po biračkim mestima (unos do {e(snap)}). Privremeni, nezvanični prikaz. <a data-jl href="/?jezik={s}#metodologija">O sajtu i metodologija</a></p>
