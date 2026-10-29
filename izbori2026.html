@@ -145,6 +145,8 @@ tbody tr.click:hover{background:var(--hover)}
 .tw th{white-space:normal;vertical-align:bottom} /* dugi naslovi kolona u dva reda, da tabela stane */
 .flag{display:inline-block;font-size:.72rem;font-weight:600;padding:1px 6px;border-radius:3px;margin-left:4px;vertical-align:1px;color:#c2410c;background:color-mix(in srgb,#c2410c 14%,transparent)}
 .flag.pg{color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)} /* poništeno / ponovljeno glasanje */
+.flag.nz{background:none;border:1px dashed #c2410c;padding:0 5px} /* verovatno poništeno (nije potvrđeno rešenjem) */
+.prz{display:block;font-size:.8rem;color:var(--muted);white-space:normal;max-width:380px} /* razlog poništenja ispod naziva */
 .seatt .st{display:block;font-size:.78rem;margin-left:18px}
 .sumtxt{margin-top:28px} .sumtxt h3{font-size:.95rem;color:var(--muted);margin:0 0 4px} .sumtxt p{font-size:.88rem;color:var(--muted);line-height:1.55;margin:0;max-width:none}
 /* mapa u opštini: centrirana, opis pod pokazivačem ispod nje */
@@ -938,7 +940,7 @@ function drawMesta(){
   // izabrana opština: bez kolone Opština i bez opštine/naselja ispred naziva (piše u filteru i koloni Naselje)
   const one=m.op!=="";
   const cols=[
-    {id:"nm",label:U("Biračko mesto","Polling station"),ttl:true,get:r=>opRank[r.op]*1e5+r.n,render:r=>`${one?`<b>${esc(T(r.nm))}</b>${bmFlag(r)}`:bmTitle(r)} <span class="tag">${r.n}</span>`},
+    {id:"nm",label:U("Biračko mesto","Polling station"),ttl:true,get:r=>opRank[r.op]*1e5+r.n,render:r=>`${one?`<b>${esc(T(r.nm))}</b>${bmFlag(r)}`:bmTitle(r)} <span class="tag">${r.n}</span>${ponRazlog(r)?`<span class="prz">${esc(ponRazlog(r))}</span>`:""}`},
     {id:"nsl",label:U("Naselje","Settlement"),nas:true,get:r=>r.nsl?flat(r.nsl):null,render:nslCell},
     ...one?[]:[{id:"op",label:U("Opština","Municipality"),get:r=>flat(OP[r.op].name),render:r=>esc(T(OP[r.op].name))}],
     // neobrađeno mesto: RIK daje 0 upisanih, pa se prikazuje broj iz 2023. (spojena mesta), kao procena
@@ -1445,11 +1447,30 @@ function korLinks(r){
 // samo od dana izbora (25. 10.); raniji prigovori se odnose na pripreme (biračke odbore), ne na rezultate
 const ODL=(typeof ODLUKE!=="undefined"?ODLUKE:[]).filter(x=>x.vreme>=Date.UTC(2026,9,24,22)/1000);
 const PON_BM=new Map(ODL.filter(x=>x.t==="pon"&&x.n).map(x=>[x.o+"|"+x.n,x]));
+// verovatno poništeno: spisak 50 BM u 22 opštine sa razlozima, objavljen na društvenim mrežama 28. 10. 2026, nije
+// potvrđen rešenjem OIK na RIK-u (osim Kuršumlije); svih 50 je i 29. 10. bez rezultata. Važi samo dok rezultat nije unet.
+const PON_NZ=(()=>{const R={p3:"zapisnik nisu potpisala najmanje 3 člana biračkog odbora",vl:"u kutiji je više listića nego što je birača izašlo"},m={};
+  const a=[["Бачка Топола",[[19,"grube greške u sabiranju koje se ne mogu ispraviti"],[34,"potvrda o glasanju van biračkog mesta nije bila potpisana (više listića nego izašlih)"],[40,"potvrda o glasanju potpisana, ali birač nije bio upisan u spisak (više listića nego izašlih)"],[44,R.vl]]],
+    ["Инђија",[[20,R.p3]]],["Кањижа",[[4,"greške u zapisniku koje se nisu mogle otkloniti"]]],["Кула",[[14,R.p3]]],["Шид",[[35,"nije dostavljen izvod iz biračkog spiska"]]],
+    ["Крушевац",[[111,R.vl]]],["Лозница",[[32,R.vl+"; glasalo lice koje nije u spisku"]]],["Нови Пазар",[[81,"nema kontrolnog lista"]]],
+    ["Коцељева",[4,10,14,26,32].map(n=>[n,R.p3])],["Љиг",[[20,R.vl]]],["Трстеник",[[66,"glasala 3 lica van biračkog mesta čiji podaci ne odgovaraju spisku (više listića nego izašlih)"]]],
+    ["Ћуприја",[[16,R.p3],[21,"kontrolni list nije popunjen"]]],
+    ["Алексинац",[3,13,24,42,46,47].map(n=>[n,R.p3]).concat([[16,"grube računske greške koje se nisu mogle otkloniti"],[74,R.vl]])],
+    ["Бабушница",[[24,"kontrolni list nije potpisao prvi birač"],[26,R.p3],[36,R.p3]]],["Бојник",[[10,R.p3]]],
+    ["Владичин Хан",[17,27,35,39,40,46,47].map(n=>[n,R.p3])],["Пирот",[[33,"glasalo lice koje nije bilo u spisku"]]],
+    ["Пожаревац",[[3,R.vl+"; glasalo lice koje nije u spisku"]]],["Куршумлија",[[13,R.vl],[30,R.p3]]],
+    ["Мајданпек",[28,29,30,34,35].map(n=>[n,"nije popunjen deo zapisnika i nisu ga potpisala najmanje 3 člana"])],
+    ["Петровац на Млави",[[27,R.vl]]],["Прокупље",[[12,R.vl]]]];
+  const bare=s=>s.replace(/^(Градска општина|Град|Општина) /,"");
+  for(const [op,l] of a){const i=OP.findIndex(o=>bare(o.full)===op);if(i>=0)for(const [n,t] of l)m[i+"|"+n]=t}
+  return m})();
+const ponRazlog=r=>!r.e&&PON_NZ[r.op+"|"+r.n]||"";
 // oznaka uz mesto: glasanje poništeno (čeka ponovno) ili ponovljeno glasanje (rešenje o ispravci „– поновно гласање“)
 const ponovljeno=r=>(KOR[r.id]||[]).some(k=>/поновно/.test(k[0]));
 function bmFlag(r){
   const p=PON_BM.get(r.op+"|"+r.n);
-  if(p&&!r.e)return ` <span class="flag">${U("glasanje poništeno","vote annulled")}</span>`;
+  if(p&&!r.e)return ` <span class="flag" title="${esc(ponRazlog(r))}">${U("glasanje poništeno","vote annulled")}</span>`;
+  if(ponRazlog(r))return ` <span class="flag nz" title="${esc(ponRazlog(r))}">${U("verovatno poništeno","probably annulled")}</span>`;
   return p||ponovljeno(r)?` <span class="flag pg">${U("ponovljeno glasanje","repeat vote")}</span>`:"";
 }
 function odlBlock(){
@@ -1463,13 +1484,17 @@ function odlBlock(){
   const items=ODL.map(x=>({o:x.o,n:x.n,r:rowOf(x.o,x.n),txt:opis(x),link:x.link,v:x.vreme,ord:{pon:0,odb:1,pri:2}[x.t]}))
     .concat(ROWS.filter(ponovljeno).filter(r=>!PON_BM.has(r.op+"|"+r.n)).map(r=>{const k=(KOR[r.id]||[]).find(k=>/поновно/.test(k[0])),u=korUrl(k[1]);
       return {o:r.op,n:r.n,r,txt:U("Ponovljeno glasanje; rezultat je unet","Repeat vote; result entered"),link:u?encodeURI(u):"",v:0,ord:0}}))
-    .sort((a,b)=>a.ord-b.ord||b.v-a.v);
+    // verovatno poništeno (spisak sa mreža, bez rešenja na RIK-u); link je zapisnik biračkog odbora
+    .concat(ROWS.filter(r=>ponRazlog(r)&&!PON_BM.has(r.op+"|"+r.n)).map(r=>({o:r.op,n:r.n,r,v:0,ord:.5,pdf:r,
+      txt:`${U("Verovatno poništeno","Probably annulled")}: ${esc(ponRazlog(r))}. <span class="muted">${U("Nije potvrđeno rešenjem komisije; link je zapisnik.","Not confirmed by a commission decision; the link is the polling board record.")}</span>`})))
+    .sort((a,b)=>a.ord-b.ord||b.v-a.v||OP[a.o].name.localeCompare(OP[b.o].name)||a.n-b.n);
   if(!items.length)return "";
   const ol=U("Opština, biračko mesto","Municipality, polling station"),dl=U("Odluka","Decision"),tl=U("Objavljeno","Published"),rl=U("Rešenje","Decision");
   const body=items.map(x=>`<tr><td class="ttl" data-l="${ol}"><b>${esc(T(OP[x.o].name))}</b>${x.n?`, ${U("BM","PS")} ${x.n}`:""}${x.r?`<br><span class="muted" style="font-size:.85rem">${esc(T(x.r.nm))}</span>`:""}</td>
-    <td data-l="${dl}" style="white-space:normal">${x.txt}</td><td data-l="${tl}">${x.v?dt(x.v):"–"}</td><td data-l="${rl}">${x.link?`<a href="${esc(x.link)}" target="_blank" rel="noopener">PDF</a>`:"–"}</td></tr>`).join("");
+    <td data-l="${dl}" style="white-space:normal">${x.txt}</td><td data-l="${tl}">${x.v?dt(x.v):"–"}</td><td data-l="${rl}">${x.pdf?pdfA(x.pdf,"PDF")||"–":x.link?`<a href="${esc(x.link)}" target="_blank" rel="noopener">PDF</a>`:"–"}</td></tr>`).join(""); // pdf: zapisnik (stiže sa zapisnici.json)
   return `<div class="block"><h3>${U("Poništenja i prigovori","Annulments and objections")}</h3>
-    <p class="note">${U("Rešenja opštinskih izbornih komisija objavljena na sajtu RIK-a: poništeno glasanje na biračkom mestu, zahtevi za poništenje i prigovori, i mesta na kojima je glasanje ponovljeno. Osvežava se sa podacima.","Decisions of municipal electoral commissions published on the RIK website: annulled votes at polling stations, requests for annulment, objections, and stations where voting was repeated. Updated with the data.")}</p>
+    <p class="note">${U("Rešenja opštinskih izbornih komisija objavljena na sajtu RIK-a: poništeno glasanje na biračkom mestu, zahtevi za poništenje i prigovori, i mesta na kojima je glasanje ponovljeno. Osvežava se sa podacima.","Decisions of municipal electoral commissions published on the RIK website: annulled votes at polling stations, requests for annulment, objections, and stations where voting was repeated. Updated with the data.")}
+     ${U("„Verovatno poništeno“: mesta sa spiska poništenih glasanja (50 mesta u 22 opštine, sa razlozima) koji je objavljen na društvenim mrežama 28. 10; sva su i dalje bez rezultata, ali rešenje komisije za njih nije nađeno na RIK-u. Glasanje se na tim mestima ponavlja.","“Probably annulled”: stations from a list of annulled votes (50 stations in 22 municipalities, with reasons) published on social media on 28 Oct; all still have no result, but no commission decision for them was found on the RIK website. Voting is repeated at these stations.")}</p>
     <div class="tw"><table class="cards"><thead><tr><th>${ol}</th><th>${dl}</th><th>${tl}</th><th>${rl}</th></tr></thead><tbody>${body}</tbody></table></div></div>`;
 }
 /* ---------- Poređenje sa izborima 2023. (spoji_2023.py -> PRETHODNI) ---------- */
