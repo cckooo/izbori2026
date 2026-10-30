@@ -1,6 +1,30 @@
 {
- "do": 1793365395,
+ "do": 1793366323,
  "odluke": [
+  {
+   "o": 98,
+   "n": 54,
+   "t": "odb",
+   "naziv": "РЕШЕЊЕ О ОДБИЈАЊУ ЗАХТЕВА ЗА ПОНИШТАВАЊЕ ГЛАСАЊА НА БМ54",
+   "link": "https://www.rik.parlament.gov.rs/extfile/sr/files/additionalDocuments/818/972/Resenje%20o%20odbijanju%20zahteva%20BM54.pdf",
+   "vreme": 1793366323
+  },
+  {
+   "o": 98,
+   "n": 2,
+   "t": "odb",
+   "naziv": "РЕШЕЊЕ О ОДБИЈАЊУ ЗАХТЕВА ЗА ПОНИШТАВАЊЕ ГЛАСАЊА НА БМ02",
+   "link": "https://www.rik.parlament.gov.rs/extfile/sr/files/additionalDocuments/818/969/Resenje%20o%20odbijanju%20zahteva%20BM02.pdf",
+   "vreme": 1793366310
+  },
+  {
+   "o": 98,
+   "n": 14,
+   "t": "odb",
+   "naziv": "РЕШЕЊЕ О ОДБИЈАЊУ ЗАХТЕВА ЗА ПОНИШТАВАЊЕ ГЛАСАЊА НА БМ14",
+   "link": "https://www.rik.parlament.gov.rs/extfile/sr/files/additionalDocuments/818/966/Resenje%20o%20odbijanju%20zahteva%20BM14.pdf",
+   "vreme": 1793366296
+  },
   {
    "o": 65,
    "n": 30,
