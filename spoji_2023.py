@@ -2,8 +2,9 @@
 """
 Spaja rezultate izbora 2023. (rezultati_2023.csv, iz prethodni_2023.py) sa biračkim mestima 2026.
 i upisuje u izbori2026.html `const PRETHODNI={m, o, liste, fp};`:
-- m: {"opština":{"broj BM":[upisani, glasali, važeći, Vučić, Dačić]}} za spojena biračka mesta;
-- o: {"opština":[upisani, glasali, važeći, glasovi listi-naslednika redom kao `liste`]} za sva mesta iz 2023;
+- m: {"opština":{"broj BM":[upisani, glasali, važeći, Vučić, Dačić, nevažeći]}} za spojena biračka mesta;
+- o: {"opština":[upisani, glasali, važeći, glasovi listi-naslednika redom kao `liste`, nevažeći]} za sva mesta iz 2023;
+  udeli listi se na sajtu računaju od listića u kutiji (važeći + nevažeći), kao na sajtu RIK-a;
 - liste: indeksi listi 2026 (od 0) koje imaju naslednika iz 2023 (NASLEDNICI ispod);
 - fp: otisak prsta 2023, {"first" | indeks liste: [[polje, broj mesta], ...]}, polje = y*50 + x;
 - fpx: isto bez inostranstva, zatvora i Kosova i Metohije.
@@ -14,7 +15,7 @@ U oba slučaja broj upisanih sme da se promeni najviše 40 %: veći skok znači 
 drugo mesto pod istim brojem (opšti nazivi kao „Основна школа“ se poklapaju i kad nije isto mesto).
 Na obe liste Vučićeva lista je pod brojem 1 („Србија не сме да стане“ 2023, „Уједињена Србија“ 2026).
 
-    python spoji_2023.py [--dry-run]
+    python spoji_2023.py [--dry-run] [--html putanja]   (podrazumevano izbori2026.html u ovom folderu)
 """
 import csv
 import difflib
@@ -24,7 +25,7 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-HTML = HERE / "izbori2026.html"
+HTML = Path(sys.argv[sys.argv.index("--html") + 1]) if "--html" in sys.argv else HERE / "izbori2026.html"
 SRC = HERE / "rezultati_2023.csv"
 norm = lambda s: re.sub(r"[^0-9А-Яа-яЂђЈјЉљЊњЋћЏџA-Za-z]", "", s.upper())
 
@@ -55,7 +56,8 @@ for r in data["rows"]:
         miss["drugo mesto"] += 1
         diff.append((op, n, a["bm_naziv"], name, up0, up))
         continue
-    out.setdefault(op, {})[n] = [up0, int(a["glasali_biraci"]), int(a["vazeci_glasovi"]), int(a["lista_1"]), int(a["lista_2"])]
+    out.setdefault(op, {})[n] = [up0, int(a["glasali_biraci"]), int(a["vazeci_glasovi"]), int(a["lista_1"]), int(a["lista_2"]),
+                                int(a["nevazeci_listici"])]
 
 print("Spojeno:", sum(stat.values()), stat, "| nije spojeno:", miss)
 for d in diff[:10]:
@@ -76,14 +78,15 @@ for a in old.values():
     if op not in ops26:
         raise SystemExit(f"Opština iz 2023. ne postoji 2026: {op}")
     up, gl, va = int(a["upisani_biraci"]), int(a["glasali_biraci"]), int(a["vazeci_glasovi"])
+    nv = int(a["nevazeci_listici"])
     votes = {i: int(a.get(f"lista_{i}") or 0) for i in range(1, 31) if f"lista_{i}" in a}
     lv = [sum(votes[i] for i in NASLEDNICI[k]) for k in NASLEDNICI]
-    s = opagg.setdefault(op, [0] * (3 + len(lv)))
-    for j, x in enumerate([up, gl, va, *lv]):
+    s = opagg.setdefault(op, [0] * (4 + len(lv)))
+    for j, x in enumerate([up, gl, va, *lv, nv]):
         s[j] += x
-    if up > 0 and va > 0:  # otisak prsta 2023: isto polje 2 × 2 p.p. kao na sajtu
+    if up > 0 and va > 0:  # otisak prsta 2023: isto polje 2 × 2 p.p. kao na sajtu (udeo od listića u kutiji)
         x = min(FP_N - 1, int(min(1, gl / up) * FP_N))
-        cell = lambda v: min(FP_N - 1, int(v / va * FP_N)) * FP_N + x
+        cell = lambda v: min(FP_N - 1, int(v / (va + nv) * FP_N)) * FP_N + x
         grids = [fp] if any(b in a["region"] for b in BEZ) else [fp, fpx]
         for grid in grids:
             c = cell(max(votes.values()))
@@ -106,7 +109,7 @@ if k != 1:  # prvi put: nova linija odmah posle STANOVNICI
         raise SystemExit("Nema linije `const STANOVNICI=...;` u HTML-u")
 # ukupno za celu Srbiju 2023 (mala konstanta koja ostaje u stranici; za zbirni tekst na Pregledu)
 tot = {k: sum(int(a[c]) for a in old.values()) for k, c in
-       (("up", "upisani_biraci"), ("gl", "glasali_biraci"), ("va", "vazeci_glasovi"), ("v1", "lista_1"), ("v2", "lista_2"))}
+       (("up", "upisani_biraci"), ("gl", "glasali_biraci"), ("va", "vazeci_glasovi"), ("nv", "nevazeci_listici"), ("v1", "lista_1"), ("v2", "lista_2"))}
 line2 = "const PRETHODNI_UKUPNO=" + json.dumps(tot, separators=(",", ":")) + ";"
 html, k = re.subn(r"^const PRETHODNI_UKUPNO=.*;(?=\r?$)", lambda _: line2, html, count=1, flags=re.M)
 if k != 1:

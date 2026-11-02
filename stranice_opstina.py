@@ -47,10 +47,10 @@ JS_OP = r"""i => {
   const popAll=Object.values(sp).reduce((s,p)=>s+p[0],0);
   // manje stanovnika nego upisanih: ime naselja u odluci pokriva i deo grada (npr. Љубић u Čačku), broj se ne prikazuje
   const nas=[...g].map(([k,rs])=>{const x=agg(rs),pp=popOf(k);return {name:k?T(k):U("(naselje nije utvrđeno)","(settlement unknown)"),n:rs.length,up:x.up,pop:pp&&pp>=x.up?pp:null,
-    turn:x.turn,win:x.va?x.win:-1,sh:x.va?x.v[x.win]/x.va:null}}).sort((p,q)=>q.up-p.up);
+    turn:x.turn,win:x.va?x.win:-1,sh:x.va?x.v[x.win]/x.d:null}}).sort((p,q)=>q.up-p.up);
   const c=cmp23([i],a);
   // opis za pretragu: brojke na početku (Google prikaže ~155 znakova), pa 2023. i popis
-  const bareT=T(o.full.replace(/^(Градска општина|Град|Општина) /,"")),Ls=k=>`${LISTS[a.rank[k]].short} ${P(a.v[a.rank[k]]/a.va)}`;
+  const bareT=T(o.full.replace(/^(Градска општина|Град|Општина) /,"")),Ls=k=>`${LISTS[a.rank[k]].short} ${P(a.v[a.rank[k]]/a.d)}`;
   const t23=c?` (2023: ${P(c.t0)})`:"";
   const d0=a.va?U(`${bareT}, izbori 2026: ${Ls(0)}, ${Ls(1)}. Izlaznost ${P(a.turn)}${t23}.${popAll?` Popis 2022: ${N(popAll)} stanovnika.`:""} Poređenje sa 2023. i rezultati po selima.`,
     `${bareT}, 2026 election: ${Ls(0)}, ${Ls(1)}. Turnout ${P(a.turn)}${t23}.${popAll?` 2022 census: ${N(popAll)} residents.`:""} Comparison with 2023 and results by village.`):"";
@@ -64,9 +64,9 @@ JS_OP = r"""i => {
     rows:listRows(a),nas:nas.map(e=>({...e,lst:e.win>=0?LISTS[e.win].short:"",c:e.win>=0?LISTS[e.win].c:"",
       shs:e.sh==null?"–":P(e.sh),ts:e.turn==null?"–":P(e.turn),ups:N(e.up),pops:e.pop?N(e.pop):"–"})),
     pop:popAll?N(popAll):"",desc,kratko,ab:ABROAD(i),c23:c?{t0:P(c.t0),t1:P(c.t1),v0:P(c.v0),v1:P(c.v1),nt0:N(c.n.t0),nt1:N(c.n.t1),nv0:N(c.n.v0),nv1:N(c.n.v1)}:null,
-    top:a.va?a.rank.slice(0,4).map(k=>({n:cyr(LISTS[k].short),c:LISTS[k].c,p:a.v[k]/a.va,ps:P(a.v[k]/a.va)})):[],
+    top:a.va?a.rank.slice(0,4).map(k=>({n:cyr(LISTS[k].short),c:LISTS[k].c,p:a.v[k]/a.d,ps:P(a.v[k]/a.d)})):[],
     turn:a.turn==null?"–":P(a.turn),nd:a.nd,n:a.n,win:a.win>=0?LISTS[a.win].short:"",
-    winp:a.win>=0&&a.va?P(a.v[a.win]/a.va):""};
+    winp:a.win>=0&&a.va?P(a.v[a.win]/a.d):""};
 }"""
 # ćirilična verzija: telo stranice kroz preslovljavanje sa sajta (preskače .keep, script i style)
 JS_CYR = r"""h => {const d=document.createElement('div');d.innerHTML=h;const s=script;script='cyr';locNode(d);script=s;return d.innerHTML}"""
@@ -197,7 +197,7 @@ def page(op, s, css, fonts, snap, map_svg, legend, okr_links):
 <p class="lead">{e(op['kratko']) or e(op['full'] + ', ' + op['okrug'] + '.')}</p>
 <p class="note">{e(op['full'])}, {e(op['okrug'])}.{pop} {op['status']}</p>
 <div class="cta"><a class="btn" data-jl href="{app}">{t("Mapa sela, biračka mesta i poređenje sa 2023. →", "Village map, polling stations and comparison with 2023 →")}</a><a class="btn ghost" data-jl href="/?jezik={s}#pregled">{t("Gde ja glasam?", "Where do I vote?")}</a></div>
-<div class="block"><h2>{t("Rezultati svih listi", "Results of all lists")}</h2><p class="note">{t("Udeo u važećim glasovima, na biračkim mestima sa unetim rezultatom.", "Share of valid votes, at polling stations with results entered.")}</p>
+<div class="block"><h2>{t("Rezultati svih listi", "Results of all lists")}</h2><p class="note">{t("Udeo u listićima u kutiji (važeći i nevažeći, kao na sajtu RIK-a), na biračkim mestima sa unetim rezultatom.", "Share of ballots in the box (valid and invalid, as on the RIK site), at polling stations with results entered.")}</p>
 <div class="dlg" style="padding:0;max-height:none;overflow:visible">{op['rows']}</div></div>
 {cmp}
 {mapb}
