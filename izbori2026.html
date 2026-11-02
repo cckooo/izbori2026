@@ -156,6 +156,7 @@ tbody tr.click:hover{background:var(--hover)}
 .tw th{white-space:normal;vertical-align:bottom} /* dugi naslovi kolona u dva reda, da tabela stane */
 .flag{display:inline-block;font-size:.72rem;font-weight:600;padding:1px 6px;border-radius:3px;margin-left:4px;vertical-align:1px;color:#c2410c;background:color-mix(in srgb,#c2410c 14%,transparent)}
 .flag.pg{color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)} /* poništeno / ponovljeno glasanje */
+a.flag{text-decoration:none}a.flag:hover{text-decoration:underline}
 .flag.nz{background:none;border:1px dashed #c2410c;padding:0 5px} /* verovatno poništeno (nije potvrđeno rešenjem) */
 .prz{display:block;font-size:.8rem;color:var(--muted);white-space:normal;max-width:380px} /* razlog poništenja ispod naziva */
 .seatt .st{display:block;font-size:.78rem;margin-left:18px}
@@ -892,12 +893,33 @@ function filteredStations(){
   if(q&&!ulOk)loadUlice().then(()=>{if(cur==="mesta")drawMesta()}).catch(()=>{}); // pretraga po ulicama kad stignu
   // prekidač važi samo kad nije izabran okrug ni opština (izbor Kosova ili inostranstva ih uvek prikazuje)
   // m.ne: samo mesta bez unetog rezultata (tada sva, i u inostranstvu)
-  return ROWS.filter(r=>(m.ne||m.ok!==""||m.op!==""||inc(r))&&(!m.ne||!r.e)&&(m.ok===""||String(r.ok)===m.ok)&&(m.op===""||String(r.op)===m.op)&&(!m.nas||(m.nas===NONE?!r.nsl:r.nsl===m.nas))&&(!q||rq(r).includes(q)));
+  // m.pg: samo mesta sa ponovljenim glasanjem (PG_KEY); m.bm: jedno mesto (link sa Statistike → Ponovljeno glasanje)
+  return ROWS.filter(r=>(m.ne||m.pg||m.ok!==""||m.op!==""||inc(r))&&(!m.ne||!r.e)&&(!m.pg||PG_KEY.has(r.op+"|"+r.n))&&(m.bm==null||r.n===m.bm)&&(m.ok===""||String(r.ok)===m.ok)&&(m.op===""||String(r.op)===m.op)&&(!m.nas||(m.nas===NONE?!r.nsl:r.nsl===m.nas))&&(!q||rq(r).includes(q)));
 }
 // otvori spisak neobrađenih mesta (Pregled, opština); op: indeks opštine ili ""
 function openNe(op){
   state.m={q:"",ok:op===""?"":String(OP[op].ok),op:op===""?"":String(op),nas:"",sort:"turn",dir:-1,page:0,ne:true};
   state.tbl.mesta={key:"nm",dir:1};go("mesta");
+}
+// otvori mesta sa ponovljenim glasanjem; sa op i n samo to jedno mesto
+function openPg(op,n){
+  state.m={q:"",ok:op==null?"":String(OP[op].ok),op:op==null?"":String(op),nas:"",sort:"turn",dir:-1,page:0,pg:true,bm:n==null?null:n};
+  state.tbl.mesta={key:"nm",dir:1};go("mesta");
+}
+// poređenje 25. oktobra i ponovljenog glasanja za izabrana mesta (Biračka mesta, filter „samo ponovljena“)
+function pgCompare(rows,L){
+  const ks=new Set(rows.map(r=>r.op+"|"+r.n)),C=PG.filter(x=>ks.has(x.key)&&x.a&&x.r.e);
+  if(!C.length)return "";
+  const s1={up:0,gl:0,d:0,v:new Array(NL).fill(0)},s2=agg(C.map(x=>x.r));
+  for(const {a,r} of C){s1.up+=a.up!=null?a.up:r.up;s1.gl+=a.gl;s1.d+=a.d;a.v.forEach((x,i)=>s1.v[i]+=x)}
+  const ls=[...new Set([L,...s2.rank.slice(0,3)])].filter(i=>s1.v[i]||s2.v[i]);
+  const sm=n=>`<br><span class="muted" style="font-size:.82rem">${N(n)}</span>`;
+  const row=(lab,p0,p1,n0,n1)=>`<tr><td class="ttl" data-l="${U("Pokazatelj","Measure")}">${lab}</td><td class="num" data-l="${U("25. oktobar","25 October")}">${P(p0)}${sm(n0)}</td><td class="num" data-l="${U("Ponovljeno","Repeat")}"><b>${P(p1)}</b>${sm(n1)}</td><td class="num" data-l="${U("Promena","Change")}">${d23(p1-p0,n1-n0)}</td></tr>`;
+  const body=[row(U("Izlaznost","Turnout"),s1.gl/s1.up,s2.gl/s2.upd,s1.gl,s2.gl)].concat(ls.map(i=>row(`${sw(i)}${esc(LISTS[i].short)}`,s1.v[i]/s1.d,s2.v[i]/s2.d,s1.v[i],s2.v[i]))).join("");
+  const nx=rows.length-C.length;
+  return `<div class="block"><h3>${U(`Pre i sada: 25. oktobar i ponovljeno glasanje (${N(C.length)} ${C.length===1?"mesto":"mesta"})`,`Before and now: 25 October and the repeat vote (${N(C.length)} ${C.length===1?"station":"stations"})`)}</h3>
+    <div class="tw"><table class="cards"><thead><tr><th>${U("Pokazatelj","Measure")}</th><th class="num">${U("25. oktobar","25 October")}</th><th class="num">${U("Ponovljeno","Repeat")}</th><th class="num">${U("Promena","Change")}</th></tr></thead><tbody>${body}</tbody></table></div>
+    <p class="note">${U(`Prvo glasanje je poništeno i ne ulazi u rezultat; brojevi su prepisani iz starih zapisnika. Udeli su od listića u kutiji; ispod je broj glasova.${nx?` Bez ${N(nx)} mesta za koja prvi rezultat nije utvrđen.`:""} Više, sa izborima 2023. i uticajem na mandate:`,`The first vote was annulled and does not count; figures are copied from the old records. Shares are of ballots in the box; vote counts below.${nx?` Excludes ${N(nx)} stations with no established first result.`:""} More, with the 2023 election and the effect on seats:`)} <a href="#statistika-ponovljeno">${U("Statistika → Ponovljeno glasanje","Statistics → Repeat vote")}</a></p></div>`;
 }
 function viewMesta(){
   const m=state.m;
@@ -915,17 +937,21 @@ function viewMesta(){
    </div>
    ${bezToggle()}
    ${NE_N?`<label class="bez"><input type="checkbox" id="mNe" ${m.ne?"checked":""}> ${U("Samo neobrađena biračka mesta","Only polling stations not yet counted")} <span class="muted">(${U(`${N(NE_N)} mesta bez unetog rezultata`,`${N(NE_N)} stations without results`)})</span></label>`:""}
+   ${PG.length?`<label class="bez"><input type="checkbox" id="mPg" ${m.pg?"checked":""}> ${U("Samo mesta sa ponovljenim glasanjem","Only stations with a repeat vote")} <span class="muted">(${N(PG.length)}; ${U("pre i sada","before and now")})</span></label>`:""}
+   ${m.bm!=null&&m.op!==""?`<p class="note">${U(`Prikazano je jedno mesto: ${esc(T(OP[+m.op].name))}, biračko mesto ${m.bm}.`,`Showing one station: ${esc(T(OP[+m.op].name))}, polling station ${m.bm}.`)} <a href="#mesta" id="mAllPg">${U("Sva mesta sa ponovljenim glasanjem →","All stations with a repeat vote →")}</a></p>`:""}
    <div id="mSum"></div>
    <div id="mCharts"></div>
    <div class="block"><h3>${U("Spisak biračkih mesta","List of polling stations")}</h3><div id="mTbl"></div><div class="pager" id="pager"></div></div>`;
   fillOpOptions();
   $("#mQ").oninput=e=>{m.q=e.target.value;m.page=0;drawMesta()};
-  $("#mOk").onchange=e=>{m.ok=e.target.value;m.op="";m.nas="";m.page=0;fillOpOptions();drawMesta()};
-  $("#mOp").onchange=e=>{m.op=e.target.value;m.nas="";m.page=0;fillNasOptions();drawMesta()};
+  $("#mOk").onchange=e=>{m.ok=e.target.value;m.op="";m.nas="";m.page=0;if(m.bm!=null){m.bm=null;viewMesta();return}fillOpOptions();drawMesta()};
+  $("#mOp").onchange=e=>{m.op=e.target.value;m.nas="";m.page=0;if(m.bm!=null){m.bm=null;viewMesta();return}fillNasOptions();drawMesta()};
   $("#mNas").onchange=e=>{m.nas=e.target.value;m.page=0;drawMesta()};
   $("#mList").onchange=e=>{state.list=+e.target.value;drawMesta()};
   bezHook();
   if($("#mNe"))$("#mNe").onchange=e=>{m.ne=e.target.checked;m.page=0;if(m.ne)state.tbl.mesta={key:"nm",dir:1};drawMesta()};
+  if($("#mPg"))$("#mPg").onchange=e=>{m.pg=e.target.checked;m.bm=null;m.page=0;if(m.pg)state.tbl.mesta={key:"nm",dir:1};viewMesta()};
+  if($("#mAllPg"))$("#mAllPg").onclick=e=>{e.preventDefault();openPg()};
   if(m.ne)loadLazy("prethodni").then(()=>{if(cur==="mesta")drawMesta()}); // broj upisanih 2023. za neobrađena mesta
   $("#mReset").onclick=()=>{state.m={q:"",ok:"",op:"",nas:"",sort:"turn",dir:-1,page:0};sel=null;viewMesta()};
   drawMesta();
@@ -950,7 +976,7 @@ function drawMesta(){
   const m=state.m,L=state.list;
   const rows=filteredStations();
   const a=agg(rows);
-  $("#mSum").innerHTML=`<p class="lead" style="margin-bottom:8px">${U(`${N(rows.length)} biračkih mesta, ${N(a.nd)} sa unetim rezultatom.`,`${N(rows.length)} polling stations, ${N(a.nd)} counted.`)} ${a.va?U(`Izlaznost ${P(a.turn)}, lista „${esc(LISTS[L].short)}“ ima ${P(a.v[L]/a.d)}.`,`Turnout ${P(a.turn)}; “${esc(LISTS[L].short)}” has ${P(a.v[L]/a.d)}.`):U("Za izabrani skup nema unetih rezultata.","No results entered for this selection.")}</p>${ribbonBar(a)}`;
+  $("#mSum").innerHTML=`<p class="lead" style="margin-bottom:8px">${U(`${N(rows.length)} ${(n=>n%10===1&&n%100!==11?"biračko mesto":n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?"biračka mesta":"biračkih mesta")(rows.length)}, ${N(a.nd)} sa unetim rezultatom.`,`${N(rows.length)} polling stations, ${N(a.nd)} counted.`)} ${a.va?U(`Izlaznost ${P(a.turn)}, lista „${esc(LISTS[L].short)}“ ima ${P(a.v[L]/a.d)}.`,`Turnout ${P(a.turn)}; “${esc(LISTS[L].short)}” has ${P(a.v[L]/a.d)}.`):U("Za izabrani skup nema unetih rezultata.","No results entered for this selection.")}</p>${ribbonBar(a)}${m.pg?pgCompare(rows,L):""}`;
   drawCharts(rows,a);
   const L0=LISTS[L];
   // izabrana opština: bez kolone Opština i bez opštine/naselja ispred naziva (piše u filteru i koloni Naselje)
@@ -1492,7 +1518,9 @@ function bmFlag(r){
   const p=PON_BM.get(r.op+"|"+r.n);
   if(p&&!r.e)return ` <span class="flag" title="${esc(ponRazlog(r))}">${U("glasanje poništeno","vote annulled")}</span>`;
   if(ponRazlog(r))return ` <span class="flag nz" title="${esc(ponRazlog(r))}">${U("verovatno poništeno","probably annulled")}</span>`;
-  return p||ponovljeno(r)||PG_KEY.has(r.op+"|"+r.n)?` <span class="flag pg">${U("ponovljeno glasanje","repeat vote")}</span>`:"";
+  // mesta iz PONOVLJENO: oznaka je link na Statistika → Ponovljeno glasanje (poređenje sa prvim glasanjem)
+  if(PG_KEY.has(r.op+"|"+r.n))return ` <a class="flag pg" href="#statistika-ponovljeno" onclick="event.stopPropagation()" title="${U("Poređenje sa prvim glasanjem 25. oktobra","Compared with the first vote on 25 October")}">${U("ponovljeno glasanje","repeat vote")}</a>`;
+  return p||ponovljeno(r)?` <span class="flag pg">${U("ponovljeno glasanje","repeat vote")}</span>`:"";
 }
 function odlBlock(){
   const dt=v=>{const d=new Date(v*1000);return `${d.getDate()}. ${d.getMonth()+1}. ${U("u","at")} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`};
@@ -1634,6 +1662,8 @@ const PG_KEY=new Set(PG.map(x=>x.key));
 function pgBlock(){
   if(!PG.length)return `<p class="muted">${U("Nema podataka o ponovljenom glasanju.","No repeat-vote data.")}</p>`;
   const nOp=new Set(PG.map(x=>x.r.op)).size;
+  // naziv mesta sa linkom na karticu Biračka mesta (pgHook), bez oznake „ponovljeno glasanje“ koja vodi na ovu istu stranicu
+  const pgTitle=r=>bmTitle(r).replace(/ <a class="flag pg"[^>]*>[^<]*<\/a>/,"")+`<br><a href="#mesta" data-pgbm="${r.op}|${r.n}" style="font-size:.82rem">${U("Biračko mesto →","Polling station →")}</a>`;
   // poređenje samo na mestima sa brojevima iz oba glasanja; upisani iz ponovljenog ako u starom zapisniku nisu upisani
   const C=PG.filter(x=>x.a&&x.r.e),n0=PG.filter(x=>!x.a).length;
   const s1={up:0,gl:0,d:0,nv:0,v:new Array(NL).fill(0)},s2=agg(C.map(x=>x.r));
@@ -1687,7 +1717,7 @@ function pgBlock(){
       gainRows+=`<p>${U(`Lista „${esc(LISTS[g].short)}“ je na ovih ${N(C.length)} mesta imala ${N(s1.v[g])} ${gls(s1.v[g])} 25. oktobra, a ${N(s2.v[g])} na ponovljenom glasanju. Na ${N(z0.length)} mesta na kojima 25. oktobra nije imala nijedan glas dobila je ukupno ${N(zs)}.`,
         `“${esc(LISTS[g].short)}” had ${N(s1.v[g])} votes at these ${N(C.length)} stations on 25 October and ${N(s2.v[g])} in the repeat vote. At ${N(z0.length)} stations where it had no votes on 25 October it got ${N(zs)} in total.`)}</p>`+
         (up.length?`<div class="tw"><table class="cards"><thead><tr><th>${U("Biračko mesto","Polling station")}</th><th class="num">2023.</th><th class="num">${U("25. oktobar","25 October")}</th><th class="num">${U("Ponovljeno","Repeat")}</th><th class="num">${U("Promena","Change")}</th></tr></thead><tbody>${
-          up.map(x=>`<tr><td class="ttl" data-l="${U("Biračko mesto","Polling station")}">${bmTitle(x.r)}</td><td class="num" data-l="2023.">${x.y&&x.y.v[g]!=null?N(x.y.v[g]):`<span class="muted" title="${U("mesto nije spojeno sa 2023.","station not matched with 2023")}">–</span>`}</td><td class="num" data-l="${U("25. oktobar","25 October")}">${N(x.a.v[g])}</td><td class="num" data-l="${U("Ponovljeno","Repeat")}"><b>${N(x.r.v[g])}</b></td><td class="num" data-l="${U("Promena","Change")}">+${N(x.r.v[g]-x.a.v[g])}</td></tr>`).join("")}</tbody></table></div>`:"")}
+          up.map(x=>`<tr><td class="ttl" data-l="${U("Biračko mesto","Polling station")}">${pgTitle(x.r)}</td><td class="num" data-l="2023.">${x.y&&x.y.v[g]!=null?N(x.y.v[g]):`<span class="muted" title="${U("mesto nije spojeno sa 2023.","station not matched with 2023")}">–</span>`}</td><td class="num" data-l="${U("25. oktobar","25 October")}">${N(x.a.v[g])}</td><td class="num" data-l="${U("Ponovljeno","Repeat")}"><b>${N(x.r.v[g])}</b></td><td class="num" data-l="${U("Promena","Change")}">+${N(x.r.v[g]-x.a.v[g])}</td></tr>`).join("")}</tbody></table></div>`:"")}
   }
   const seatBlock=`<div class="block"><h3>${U("Uticaj na mandate","Effect on seats")}</h3><p>${seatTxt}</p>${gainRows}
     <p class="note">${U("Brojevi ponovljenog glasanja su kako ih RIK objavljuje; novi zapisnik biračkog odbora je link „ponovljeno“ u tabeli ispod. Procena mandata: D'Ont, 250 mandata, cenzus 3% birača koji su glasali, manjinske liste bez cenzusa uz količnik ×1,35 (vidi O sajtu i metodologija).","Repeat-vote figures are as published by RIK; the new polling board record is the “repeat” link in the table below. Seat estimate: D'Hondt, 250 seats, 3% threshold of voters who voted, minority lists exempt with a ×1.35 quotient (see About and methodology).")}</p></div>`;
@@ -1706,7 +1736,7 @@ function pgBlock(){
   const old=x=>x.z?`<a href="${esc(encodeURI(RIK_BASE+x.z))}" target="_blank" rel="noopener">${U("25. 10.","25 Oct")}</a>`:"";
   const nn=LIM(12,4);
   const body=it.map((x,k)=>{const a=x.a,r=x.r,tu1=a&&a.gl!=null?a.gl/(a.up!=null?a.up:r.up):null;
-    return `<tr class="${xr(k,nn)}"><td class="ttl" data-l="${bl}"><span class="rk">${k+1}.</span>${bmTitle(r)}</td>
+    return `<tr class="${xr(k,nn)}"><td class="ttl" data-l="${bl}"><span class="rk">${k+1}.</span>${pgTitle(r)}</td>
     <td class="num" data-l="${hT}">${y23(x,"t")}${ar(tu1,r.turn,a?a.gl:null,r.e?r.gl:null)}</td>
     ${Lsel.map(i=>`<td class="num" data-l="${esc(shortLabel(i))}">${cell(x,i)}</td>`).join("")}
     <td data-l="${hN}" style="white-space:normal;min-width:200px">${nl(x)}</td>
@@ -1718,7 +1748,8 @@ function pgBlock(){
     <div class="tw"><table class="cards"><thead><tr><th>${U("Pokazatelj","Measure")}</th><th class="num">${U("25. oktobar","25 October")}</th><th class="num">${U("Ponovljeno","Repeat")}</th><th class="num">${U("Promena","Change")}</th></tr></thead><tbody>${sumRows.join("")}</tbody></table></div>
     <p class="note">${U(`Ispod procenta je broj glasova (za izlaznost broj birača koji su glasali). Udeli su od listića u kutiji, kao na sajtu RIK-a. ${n0?`Bez ${N(n0)} mesta za koja prvi rezultat nije utvrđen (Majdanpek: zapisnike nisu potpisala najmanje tri člana odbora; Kruševac 111: glasovi listi nisu upisani). `:""}Liste ispod 1% su u „ostalim listama“.`,
       `Below each percentage is the number of votes (for turnout, voters who voted). Shares are of ballots in the box, as on the RIK site. ${n0?`Excludes ${N(n0)} stations with no established first result (Majdanpek: records not signed by at least three board members; Kruševac 111: list votes not filled in). `:""}Lists under 1% are in “other lists”.`)}</p>
-    <p>${sum}</p></div>
+    <p>${sum}</p>
+    <p><a href="#mesta" data-pgbm="all">${U("Sva ponovljena mesta na kartici Biračka mesta (filter „samo ponovljena“) →","All repeat-vote stations on the Polling stations tab →")}</a></p></div>
     ${chartBlock}
     ${seatBlock}
     <div class="block ${it.length>nn?"lim":""}"><h3>${U("Po biračkim mestima","By polling station")}</h3>
@@ -1833,6 +1864,7 @@ function viewStatistika(){
   $("#stLink").onclick=e=>{const k=STAT_SUB.find(x=>x[0]===sub);shareLink(siteUrl(sub==="osnovno"?"#statistika":"#statistika-"+sub),S("Statistika","Statistics")+": "+S(k[1],k[2]),e.currentTarget)};
   if(sub==="otisak"){fpHook(E);digHook(E)}
   if(sub==="p2023")prevHook();
+  if(sub==="ponovljeno")$$("#statistika a[data-pgbm]").forEach(a=>a.onclick=e=>{e.preventDefault();if(a.dataset.pgbm==="all"){openPg();return}const [o,n]=a.dataset.pgbm.split("|").map(Number);openPg(o,n)});
   if(sub==="otisak"||sub==="p2023")loadLazy("prethodni"); // poređenje sa 2023.
 }
 // adresa opštine u linku: latinica, mala slova, crtice (npr. grad-cacak, gradska-opstina-palilula-beograd)
