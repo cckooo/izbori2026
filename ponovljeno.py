@@ -8,7 +8,9 @@ koje je RIK objavio pre ponavljanja; putanja u koloni stari_zapisnik, relativno 
 Upisuje u izbori2026.html liniju (posle `const ODLUKE=`):
   const PONOVLJENO=[[opštinaIdx, brojBM, prvo|null, stariZapisnik, prekid, napomena], ...];
   prvo = [upisani|null, glasali, listićiUKutiji, nevažeći|null, važeći|null, [glasovi lista 1..18]]
-Prazno polje u zapisniku ostaje null (ne izmišlja se). Pokreće se ručno.
+  ... , g2023]  g2023 = [upisani, glasali, listićiUKutiji, [glasovi po listi 2026 (naslednik) ili null]] | null
+Prazno polje u zapisniku ostaje null (ne izmišlja se). 2023: rezultati_2023.csv, samo za mesta koja je spoji_2023.py
+spojio (PRETHODNI.m: isti ili sličan naziv, broj upisanih ±40 %); liste-naslednici kao u spoji_2023.py. Pokreće se ručno.
 
     python ponovljeno.py [--dry-run]
 """
@@ -27,6 +29,18 @@ data = json.loads(re.search(r"^const DATA=(.*);(?=\r?$)", html, re.M).group(1))
 ops = {o[0]: i for i, o in enumerate(data["opstine"])}
 rows = {(r[1], r[2]): r for r in data["rows"]}
 num = lambda s: int(s) if s.strip() else None
+# 2023: samo spojena mesta (PRETHODNI.m iz spoji_2023.py); liste 2026 (indeks od 0) <- liste 2023
+NASLEDNICI = {0: [1], 1: [2], 4: [6], 5: [8], 9: [9], 16: [13, 18], 6: [16]}
+prev = json.loads(re.search(r"^const PRETHODNI=(.*);(?=\r?$)", html, re.M).group(1))
+old = {(r["opstina"].strip(), r["bm_broj"].strip()): r for r in csv.DictReader(open(HERE / "rezultati_2023.csv", encoding="utf-8-sig"))}
+def g2023(op_name, bm):
+    if str(bm) not in prev["m"].get(op_name, {}):
+        return None
+    a = old[(op_name, str(bm))]
+    v = [None] * 18
+    for k, src in NASLEDNICI.items():
+        v[k] = sum(int(a[f"lista_{j}"] or 0) for j in src)
+    return [int(a["upisani_biraci"]), int(a["glasali_biraci"]), int(a["vazeci_glasovi"]) + int(a["nevazeci_listici"]), v]
 
 out, warn = [], []
 for r in csv.DictReader(open(SRC, encoding="utf-8"), delimiter=";"):
@@ -49,9 +63,9 @@ for r in csv.DictReader(open(SRC, encoding="utf-8"), delimiter=";"):
             warn.append(f"{r['opstina']} {bm}: zbir listi {sum(v)} ≠ važeći {va}")
         if va is not None and nv is not None and va + nv != prvo[2]:
             warn.append(f"{r['opstina']} {bm}: važeći + nevažeći {va + nv} ≠ listići {prvo[2]}")
-    out.append([op, bm, prvo, r["stari_zapisnik"], r["prekid"], r["napomena"]])
+    out.append([op, bm, prvo, r["stari_zapisnik"], r["prekid"], r["napomena"], g2023(r["opstina"], bm)])
 
-print(f"Mesta: {len(out)}, sa brojevima prvog glasanja: {sum(1 for x in out if x[2])}")
+print(f"Mesta: {len(out)}, sa brojevima prvog glasanja: {sum(1 for x in out if x[2])}, spojeno sa 2023: {sum(1 for x in out if x[6])}")
 for w in warn:
     print("  nesklad u zapisniku (prepisano kako piše):", w)
 if "--dry-run" in sys.argv:
